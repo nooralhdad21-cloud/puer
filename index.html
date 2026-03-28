@@ -3,43 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام مطابقة مكتب بيور العلمي</title>
+    <title>نظام مطابقة بيور العلمي</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-gray-100 min-h-screen font-['IBM_Plex_Sans_Arabic']">
+<body class="bg-gray-50 min-h-screen pb-10">
 
-    <nav class="bg-blue-800 text-white p-4 shadow-md sticky top-0 z-50">
+    <nav class="bg-blue-700 text-white p-4 shadow-lg sticky top-0 z-50">
         <div class="container mx-auto flex justify-between items-center">
-            <h1 class="text-xl font-bold italic">PURE SCIENCE</h1>
-            <span id="userBadge" class="hidden bg-blue-700 px-3 py-1 rounded-full text-sm"></span>
+            <h1 class="text-xl font-bold">بيور العلمي | المطابقة الميدانية</h1>
+            <div id="status" class="text-xs bg-blue-800 px-3 py-1 rounded-full hidden">متصل</div>
         </div>
     </nav>
 
-    <main class="container mx-auto p-4 max-w-2xl">
-        <div id="loginStep" class="glass-morphism p-8 rounded-3xl shadow-xl text-center mt-10">
-            <div class="text-5xl mb-4">🩺</div>
-            <h2 class="text-2xl font-bold mb-6 text-gray-800">تسجيل دخول الموظف</h2>
-            <input type="text" id="employeeName" placeholder="أدخل اسمك الثلاثي" class="w-full p-4 border-2 border-gray-200 rounded-2xl mb-4 text-center focus:border-blue-500 outline-none transition-all">
-            <button onclick="saveEmployee()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold shadow-lg hover:bg-blue-700 transition-all">بدء المطابقة</button>
+    <main class="container mx-auto p-4 max-w-xl">
+        <div id="step1" class="bg-white p-8 rounded-3xl shadow-sm border mt-5 text-center">
+            <div class="text-4xl mb-4">👤</div>
+            <h2 class="text-xl font-bold mb-4">تسجيل دخول الموظف</h2>
+            <input type="text" id="empName" placeholder="أدخل اسمك الثلاثي" class="w-full p-4 border-2 rounded-2xl mb-4 text-center focus:border-blue-500 outline-none">
+            <button onclick="startApp()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold shadow-md hover:bg-blue-700">دخول للنظام</button>
         </div>
 
-        <div id="uploadStep" class="hidden mt-10 text-center">
-            <div class="bg-white p-10 rounded-3xl border-4 border-dashed border-blue-200">
-                <p class="text-gray-500 font-bold mb-4">ارفع كشف الشرقاط (PDF)</p>
-                <input type="file" id="pdfFile" accept=".pdf" class="hidden">
-                <label for="pdfFile" class="bg-blue-100 text-blue-700 px-8 py-4 rounded-2xl cursor-pointer hover:bg-blue-200 transition-all font-bold inline-block">اختر ملف الكشف</label>
+        <div id="step2" class="hidden mt-5 text-center">
+            <div class="bg-blue-50 p-10 rounded-3xl border-4 border-dashed border-blue-200">
+                <p class="font-bold text-blue-800 mb-4">ارفع كشف المحافظة (PDF)</p>
+                <input type="file" id="fileInput" accept=".pdf" class="hidden">
+                <label for="fileInput" class="bg-blue-600 text-white px-10 py-4 rounded-2xl cursor-pointer font-bold inline-block shadow-lg">اختيار الملف</label>
+                <p class="text-xs text-gray-500 mt-4">سيتم استخراج المذاخر والفواتير تلقائياً</p>
             </div>
         </div>
 
-        <div id="matchStep" class="hidden mt-6">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="font-bold text-gray-700">الفواتير المكتشفة:</h3>
-                <span id="invoiceCount" class="bg-blue-600 text-white px-3 py-1 rounded-lg text-sm font-bold">0</span>
+        <div id="step3" class="hidden mt-5">
+            <div class="flex justify-between items-center mb-4 px-2">
+                <h3 class="font-bold text-gray-700">الفواتير المستخرجة:</h3>
+                <span id="counter" class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm font-bold">0</span>
             </div>
-            <div id="invoiceList" class="space-y-4"></div>
+            <div id="resultsList" class="space-y-3">
+                </div>
         </div>
     </main>
 
