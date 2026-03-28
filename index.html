@@ -3,299 +3,194 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PURE PRO - نظام المطابقة الذكي</title>
+    <title>نظام مطابقة كشوفات بيور - الشرقاط</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        body { background: #f4f7fa; font-family: 'Cairo', sans-serif; -webkit-tap-highlight-color: transparent; }
-        .invoice-drawer { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out; }
-        .invoice-drawer.open { max-height: 5000px; }
-        .check-step { appearance: none; width: 28px; height: 28px; border: 2px solid #cbd5e1; border-radius: 8px; cursor: pointer; position: relative; transition: 0.2s; background: white; flex-shrink: 0; }
-        .check-step:checked { background: #10b981; border-color: #10b981; box-shadow: 0 0 10px rgba(16,185,129,0.3); }
-        .check-step:checked::after { content: "✓"; color: white; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-weight: bold; }
-        .tab-btn { transition: all 0.3s; }
-        .tab-btn.active { background: #1e3a8a; color: white; border-color: #1e3a8a; }
-        .group-card { transition: border-color 0.3s ease; }
+        body { background: #f0f4f8; font-family: 'Cairo', sans-serif; }
+        .group-card { transition: all 0.3s ease; }
+        .invoice-details { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out; }
+        .invoice-details.open { max-height: 2000px; }
+        .check-custom { width: 28px; height: 28px; border: 2px solid #cbd5e1; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; background: white; }
+        .check-custom.checked { background: #10b981; border-color: #10b981; }
+        .check-custom.checked::after { content: "✓"; color: white; font-weight: bold; }
     </style>
 </head>
 <body class="pb-10">
 
-    <nav class="bg-blue-900 text-white p-4 sticky top-0 z-50 shadow-xl">
-        <div class="container mx-auto flex justify-between items-center px-2">
-            <h1 class="text-xl font-black italic tracking-wider">PURE <span class="text-blue-400">PRO</span></h1>
-            <button id="pdfBtn" onclick="exportPDF()" class="hidden bg-green-500 hover:bg-green-600 px-4 py-2 rounded-xl text-xs font-bold shadow-lg transition-all">تحميل التقرير</button>
+    <nav class="bg-blue-900 text-white p-4 sticky top-0 z-50 shadow-lg flex justify-between items-center">
+        <h1 class="text-xl font-black tracking-tighter italic">PURE <span class="text-blue-400">SYNC</span></h1>
+        <div id="liveStats" class="hidden flex gap-3 text-[10px] font-bold">
+            <span id="statDone" class="bg-green-600 px-3 py-1 rounded-full text-white">مكتمل: 0</span>
+            <span id="statTotal" class="bg-blue-800 px-3 py-1 rounded-full text-white">الكلي: 0</span>
         </div>
     </nav>
 
-    <main class="container mx-auto p-4 max-w-2xl">
+    <main class="container mx-auto p-4 max-w-xl">
 
-        <div id="view-login" class="bg-white p-10 rounded-[2.5rem] shadow-xl text-center border mt-10 animate-fade">
-            <div class="text-6xl mb-4">🧑‍💼</div>
-            <h2 class="text-2xl font-black text-slate-800 mb-6">نظام المطابقة الميدانية</h2>
-            <input type="text" id="userName" placeholder="الاسم الكامل للمندوب" class="w-full p-4 bg-slate-50 border-2 border-slate-200 rounded-2xl mb-6 text-center font-bold outline-none focus:border-blue-600 text-lg transition-all">
-            <button onclick="toUpload()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black text-lg shadow-lg hover:bg-blue-700 active:scale-95 transition-all">تسجيل الدخول</button>
-        </div>
-
-        <div id="view-upload" class="hidden mt-10 text-center animate-fade">
-            <div class="bg-white p-12 rounded-[2.5rem] border-4 border-dashed border-blue-200 shadow-inner">
-                <div class="text-6xl mb-6 opacity-50">📄</div>
-                <p class="font-black text-blue-900 mb-8 text-xl">ارفع كشف "الشرقاط" بصيغة PDF</p>
-                <input type="file" id="pdfInput" accept=".pdf" class="hidden">
-                <label for="pdfInput" class="bg-blue-600 text-white px-12 py-5 rounded-full cursor-pointer font-black shadow-xl hover:bg-blue-700 hover:scale-105 transition-all inline-block">اختيار الكشف</label>
+        <div id="uploadBox" class="bg-white p-8 rounded-[2.5rem] shadow-xl text-center border-4 border-white mt-10">
+            <div class="text-5xl mb-4">📈</div>
+            <h2 class="text-2xl font-black text-slate-800 mb-6">مطابقة كشف الشرقاط</h2>
+            <div class="border-4 border-dashed border-blue-100 p-10 rounded-[2rem] relative hover:bg-blue-50 transition-all cursor-pointer">
+                <input type="file" id="pdfInput" accept=".pdf" class="absolute inset-0 opacity-0 cursor-pointer">
+                <p class="text-blue-600 font-black">اضغط لرفع ملف الـ PDF</p>
+                <p class="text-xs text-slate-400 mt-2">سيعالج النظام الأسماء والتواريخ تلقائياً</p>
             </div>
         </div>
 
-        <div id="view-main" class="hidden animate-fade mt-4">
-            
-            <div class="bg-slate-900 text-white p-6 rounded-[2rem] shadow-2xl mb-6 flex justify-between items-center relative overflow-hidden">
-                <div class="relative z-10">
-                    <div class="flex items-center gap-2 mb-1">
-                        <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                        <p class="text-[10px] text-slate-400 font-bold tracking-widest uppercase">إحصائيات الإنجاز</p>
-                    </div>
-                    <h3 id="livePercent" class="text-4xl font-black italic text-white">0%</h3>
-                </div>
-                <div class="text-right relative z-10">
-                    <p id="liveCount" class="text-2xl font-black text-blue-400">0 / 0</p>
-                    <p class="text-[10px] text-slate-400 font-bold">إجمالي الفواتير</p>
-                </div>
-            </div>
-
-            <div class="flex gap-2 overflow-x-auto pb-4 no-scrollbar">
-                <button onclick="applyFilter('all')" class="tab-btn active px-6 py-3 rounded-2xl text-[11px] font-black border bg-white whitespace-nowrap shadow-sm">الكل</button>
-                <button onclick="applyFilter('pharmacy')" class="tab-btn px-6 py-3 rounded-2xl text-[11px] font-black border bg-white whitespace-nowrap shadow-sm text-slate-500">💊 صيدلية</button>
-                <button onclick="applyFilter('store')" class="tab-btn px-6 py-3 rounded-2xl text-[11px] font-black border bg-white whitespace-nowrap shadow-sm text-slate-500">🏢 مذخر</button>
-                <button onclick="applyFilter('office')" class="tab-btn px-6 py-3 rounded-2xl text-[11px] font-black border bg-white whitespace-nowrap shadow-sm text-slate-500">🏥 مستشفى/مكتب</button>
-            </div>
-
-            <input type="text" id="searchBox" onkeyup="renderUI()" placeholder="ابحث عن اسم جهة أو رقم فاتورة..." class="w-full p-5 rounded-[2rem] shadow-sm mb-6 outline-none font-bold text-sm focus:ring-2 focus:ring-blue-600 transition-all border-none text-center">
-
-            <div id="mainContainer" class="space-y-4 pb-20"></div>
+        <div id="searchBox" class="hidden mt-6">
+            <input type="text" id="searchInput" onkeyup="renderGroups()" placeholder="بحث باسم الصيدلية أو رقم الفاتورة..." class="w-full p-5 rounded-3xl shadow-sm border-none font-bold text-sm outline-none focus:ring-2 focus:ring-blue-500 transition-all">
         </div>
+
+        <div id="contentList" class="mt-6 space-y-4"></div>
 
     </main>
 
     <script>
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
         
-        let masterRecords = [];
-        let filterType = 'all';
-        let employeeName = "";
+        let rawData = [];
+        let filteredGroups = {};
 
-        // الانتقال لخطوة الرفع
-        function toUpload() {
-            employeeName = document.getElementById('userName').value.trim();
-            if (employeeName.length < 3) return alert("يرجى كتابة الاسم الكامل للمتابعة.");
-            document.getElementById('view-login').classList.add('hidden');
-            document.getElementById('view-upload').classList.remove('hidden');
+        // معالجة النصوص العربية المقطعة في ملفات بيور
+        function cleanText(text) {
+            if (!text) return "";
+            return text.replace(/[ѧ_:]/g, '').replace(/\s+/g, ' ').trim();
         }
 
-        // قراءة الـ PDF
         document.getElementById('pdfInput').addEventListener('change', async (e) => {
             const file = e.target.files[0];
-            if(!file) return;
+            if (!file) return;
+
             const reader = new FileReader();
             reader.onload = async function() {
                 const pdf = await pdfjsLib.getDocument(new Uint8Array(this.result)).promise;
-                let textLines = [];
+                let fullLines = [];
+                
                 for (let i = 1; i <= pdf.numPages; i++) {
                     const page = await pdf.getPage(i);
                     const content = await page.getTextContent();
-                    textLines = textLines.concat(content.items.map(s => s.str));
+                    fullLines = fullLines.concat(content.items.map(item => item.str));
                 }
-                extractData(textLines);
+                parsePureData(fullLines);
             };
             reader.readAsArrayBuffer(file);
         });
 
-        // استخراج البيانات وربط الفواتير بالأسماء
-        function extractData(lines) {
-            masterRecords = [];
-            let currentClientName = "جهة غير معروفة";
+        function parsePureData(lines) {
+            rawData = [];
+            let currentName = "غير محدد";
             
             for (let i = 0; i < lines.length; i++) {
                 let line = lines[i].trim();
-                
-                // البحث عن السطر الذي يحتوي على الاسم (مثل: الاسم: مذخر دار الدواء / الشرقاط)
-                if (line.includes("الاسم") || line.includes("مذخر") || line.includes("صيدلية") || line.includes("مكتب") || line.includes("مستشفى")) {
-                    let clean = line.replace(/الاسم:|الاسم/g, '').replace(/[ѧ_]/g, '').trim();
-                    if(clean.length > 3) currentClientName = clean;
+
+                // التقاط اسم الصيدلية/المذخر (كما في المربع الأزرق بالصورة)
+                if (line.includes("الاس") || line.includes("صيدلية") || line.includes("مذخر") || line.includes("مكتب")) {
+                    let nameCandidate = cleanText(line.split("تاريخ")[0]);
+                    if(nameCandidate.length > 5) currentName = nameCandidate;
                 }
 
-                // البحث عن رقم الفاتورة (6 أرقام متتالية)
+                // التقاط الفواتير (رقم مكون من 6 أرقام)
                 if (/^\d{6}$/.test(line)) {
                     let inv = {
-                        client: currentClientName,
+                        client: currentName,
                         id: line,
-                        date: lines[i+1] || "---", // التاريخ غالباً يتبع الرقم
-                        amount: "0.00",
-                        type: 'pharmacy',
+                        date: "---",
+                        price: "0.00",
                         checked: false
                     };
 
-                    // تصنيف الفلترة بناءً على اسم الجهة
-                    if (inv.client.includes("مذخر")) inv.type = 'store';
-                    else if (inv.client.includes("مكتب") || inv.client.includes("مستشفى") || inv.client.includes("مركز")) inv.type = 'office';
-
-                    // البحث عن المبلغ المالي للفاتورة (في الأسطر القليلة التالية)
-                    for (let j = 1; j <= 15; j++) {
-                        let priceCheck = (lines[i+j] || "").trim();
-                        if (/^[\d,]+\.\d{2}$/.test(priceCheck)) {
-                            inv.amount = priceCheck;
-                            break; // نأخذ أول مبلغ نصادفه (غالباً يكون قيمة الفاتورة أو المتبقي)
-                        }
+                    // البحث عن التاريخ والمبلغ في الأسطر المجاورة
+                    for (let j = -5; j <= 15; j++) {
+                        let neighbor = (lines[i+j] || "").trim();
+                        if (/^\d{2}\/\d{2}\/\d{4}$/.test(neighbor)) inv.date = neighbor;
+                        if (/^[\d,]+\.\d{2}$/.test(neighbor)) inv.price = neighbor;
                     }
-                    masterRecords.push(inv);
+                    rawData.push(inv);
                 }
             }
 
-            // الانتقال للداشبورد
-            document.getElementById('view-upload').classList.add('hidden');
-            document.getElementById('view-main').classList.remove('hidden');
-            document.getElementById('pdfBtn').classList.remove('hidden');
-            renderUI();
+            document.getElementById('uploadBox').classList.add('hidden');
+            document.getElementById('searchBox').classList.remove('hidden');
+            document.getElementById('liveStats').classList.remove('hidden');
+            renderGroups();
         }
 
-        // تطبيق الفلتر
-        function applyFilter(type) {
-            filterType = type;
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('active', 'text-white');
-                btn.classList.add('bg-white', 'text-slate-500');
-            });
-            event.target.classList.add('active', 'text-white');
-            event.target.classList.remove('bg-white', 'text-slate-500');
-            renderUI();
-        }
-
-        // رسم الواجهة وبناء المجموعات (Accordion)
-        function renderUI() {
-            const container = document.getElementById('mainContainer');
+        function renderGroups() {
+            const container = document.getElementById('contentList');
             container.innerHTML = "";
-            let searchQuery = document.getElementById('searchBox').value.toLowerCase();
+            const search = document.getElementById('searchInput').value.toLowerCase();
 
-            // 1. فلترة البيانات الأساسية أولاً
-            let filteredData = masterRecords.filter(inv => {
-                let matchType = filterType === 'all' || inv.type === filterType;
-                let matchSearch = inv.client.toLowerCase().includes(searchQuery) || inv.id.includes(searchQuery);
-                return matchType && matchSearch;
+            // تجميع الفواتير حسب العميل
+            let groups = {};
+            rawData.forEach(item => {
+                if (item.client.toLowerCase().includes(search) || item.id.includes(search)) {
+                    if (!groups[item.client]) groups[item.client] = [];
+                    groups[item.client].push(item);
+                }
             });
 
-            // 2. تجميع البيانات المفلترة حسب اسم العميل
-            let grouped = {};
-            filteredData.forEach(inv => {
-                if(!grouped[inv.client]) grouped[inv.client] = [];
-                grouped[inv.client].push(inv);
-            });
+            Object.keys(groups).forEach(name => {
+                const invoices = groups[name];
+                const doneCount = invoices.filter(v => v.checked).length;
+                const isAllDone = doneCount === invoices.length;
 
-            // 3. رسم الكروت (البطاقات)
-            if(Object.keys(grouped).length === 0) {
-                container.innerHTML = '<div class="text-center p-10 text-slate-400 font-bold">لا توجد نتائج مطابقة</div>';
-            } else {
-                Object.keys(grouped).forEach(clientName => {
-                    const invoices = grouped[clientName];
-                    const allChecked = invoices.every(v => v.checked);
-                    
-                    const groupDiv = document.createElement('div');
-                    groupDiv.className = `group-card bg-white rounded-[2rem] shadow-sm mb-4 border-2 ${allChecked ? 'border-green-500' : 'border-transparent'}`;
-                    
-                    groupDiv.innerHTML = `
-                        <div onclick="this.nextElementSibling.classList.toggle('open')" class="p-5 flex justify-between items-center cursor-pointer hover:bg-slate-50 rounded-[2rem] transition-all">
-                            <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-xl flex items-center justify-center font-black text-lg ${allChecked ? 'bg-green-100 text-green-600' : 'bg-blue-50 text-blue-600'}">
-                                    ${allChecked ? '✓' : invoices.length}
-                                </div>
-                                <div>
-                                    <h3 class="font-black text-slate-800 text-sm md:text-base">${clientName}</h3>
-                                    <p class="text-[10px] text-slate-400 font-bold mt-1">اضغط لعرض الفواتير</p>
-                                </div>
+                const card = document.createElement('div');
+                card.className = `group-card bg-white rounded-[2rem] shadow-sm overflow-hidden border-2 ${isAllDone ? 'border-green-500' : 'border-transparent'}`;
+                
+                card.innerHTML = `
+                    <div onclick="toggleDetails(this)" class="p-5 flex justify-between items-center cursor-pointer hover:bg-slate-50 transition-all">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center font-black text-blue-600 text-lg">
+                                ${invoices.length}
                             </div>
-                            <span class="text-slate-300 text-xs">▼</span>
+                            <div>
+                                <h3 class="font-black text-slate-800 text-sm">${name}</h3>
+                                <p class="text-[10px] text-slate-400 font-bold">تمت مطابقة ${doneCount} من أصل ${invoices.length}</p>
+                            </div>
                         </div>
-                        
-                        <div class="invoice-drawer bg-slate-50 rounded-b-[2rem] border-t border-slate-100">
-                            <div class="p-4 space-y-3">
-                                ${invoices.map(inv => `
-                                    <div class="bg-white p-4 rounded-2xl flex justify-between items-center shadow-sm border border-slate-100">
-                                        <div class="flex-1">
-                                            <div class="flex gap-2 items-center mb-1">
-                                                <span class="text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded font-black">#${inv.id}</span>
-                                                <span class="text-[10px] text-gray-400 font-bold">${inv.date}</span>
-                                            </div>
-                                            <p class="text-xs font-black text-slate-700">المبلغ: <span class="text-blue-600">${inv.amount}</span> دينار</p>
+                        <span class="text-slate-300 text-xs">▼</span>
+                    </div>
+                    <div class="invoice-details px-5 bg-slate-50 border-t">
+                        <div class="py-4 space-y-3">
+                            ${invoices.map(inv => `
+                                <div class="bg-white p-4 rounded-2xl flex justify-between items-center shadow-xs border border-white">
+                                    <div class="flex-1">
+                                        <div class="flex gap-2 items-center mb-1">
+                                            <span class="text-[9px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded font-black">#${inv.id}</span>
+                                            <span class="text-[9px] text-gray-400 font-bold">${inv.date}</span>
                                         </div>
-                                        <input type="checkbox" class="check-step" ${inv.checked ? 'checked' : ''} onchange="toggleCheck('${inv.id}')">
+                                        <p class="text-xs font-black text-slate-700 italic">المبلغ: ${inv.price} دينار</p>
                                     </div>
-                                `).join('')}
-                            </div>
+                                    <div onclick="toggleCheck('${inv.id}')" class="check-custom ${inv.checked ? 'checked' : ''}"></div>
+                                </div>
+                            `).join('')}
                         </div>
-                    `;
-                    container.appendChild(groupDiv);
-                });
-            }
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+
             updateStats();
         }
 
-        // تغيير حالة الفاتورة (صح/خطأ)
+        function toggleDetails(el) {
+            el.nextElementSibling.classList.toggle('open');
+        }
+
         function toggleCheck(id) {
-            const index = masterRecords.findIndex(x => x.id === id);
-            if(index !== -1) {
-                masterRecords[index].checked = !masterRecords[index].checked;
-                renderUI(); // إعادة الرسم لتحديث الألوان والإحصائيات
-            }
+            const index = rawData.findIndex(x => x.id === id);
+            rawData[index].checked = !rawData[index].checked;
+            renderGroups();
         }
 
-        // تحديث الأرقام الحية
         function updateStats() {
-            const total = masterRecords.length;
-            const done = masterRecords.filter(x => x.checked).length;
-            const percentage = total === 0 ? 0 : Math.round((done / total) * 100);
-            
-            document.getElementById('liveCount').innerText = `${done} / ${total}`;
-            document.getElementById('livePercent').innerText = percentage + "%";
-            
-            // تغيير لون النسبة إذا اكتملت
-            if(percentage === 100) {
-                document.getElementById('livePercent').classList.replace('text-blue-400', 'text-green-400');
-            } else {
-                document.getElementById('livePercent').classList.replace('text-green-400', 'text-blue-400');
-            }
-        }
-
-        // تصدير التقرير النهائي كـ PDF
-        function exportPDF() {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF('p', 'mm', 'a4');
-            
-            doc.addFont("https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.66/fonts/Roboto/Roboto-Regular.ttf", "Roboto", "normal");
-            doc.setFont("Roboto");
-            
-            doc.text(`PURE PRO - REPORT`, 105, 15, { align: "center" });
-            doc.setFontSize(10);
-            doc.text(`Rep: ${employeeName}`, 190, 25, { align: "right" });
-            doc.text(`Date: ${new Date().toLocaleDateString()}`, 190, 30, { align: "right" });
-
-            const tableData = masterRecords.map(inv => [
-                inv.checked ? "Done" : "Pending",
-                inv.amount,
-                inv.client.substring(0, 30), // اختصار الاسم إذا كان طويلاً
-                inv.id
-            ]);
-
-            doc.autoTable({
-                startY: 35,
-                head: [['Status', 'Amount', 'Client Name', 'Invoice #']],
-                body: tableData,
-                theme: 'grid',
-                headStyles: { fillColor: [30, 58, 138] },
-                styles: { font: "Roboto", halign: 'center' }
-            });
-
-            doc.save(`Pure_Report_${employeeName}.pdf`);
+            const total = rawData.length;
+            const done = rawData.filter(x => x.checked).length;
+            document.getElementById('statDone').innerText = `مكتمل: ${done}`;
+            document.getElementById('statTotal').innerText = `الكلي: ${total}`;
         }
     </script>
 </body>
