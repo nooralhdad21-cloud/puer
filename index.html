@@ -3,183 +3,178 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PurePharma | نظام مكتب بيور العلمي</title>
+    <title>نظام بيور العلمي | Pure System</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Cairo', sans-serif; background-color: #f0f4f8; }
-        .checked-row { background-color: #dcfce7 !important; text-decoration: line-through; opacity: 0.5; border-right: 6px solid #10b981; }
-        .pharmacy-card { transition: all 0.3s ease; border: 1px solid #e2e8f0; background: white; cursor: pointer; }
-        .pharmacy-card:hover { transform: translateY(-5px); border-color: #4f46e5; box-shadow: 0 15px 30px -10px rgba(79, 70, 229, 0.2); }
-        .loader-spin { border: 3px solid #f3f3f3; border-top: 3px solid #4f46e5; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        body { font-family: 'Cairo', sans-serif; background-color: #f3f4f6; }
+        .checked-row { background-color: #d1fae5 !important; text-decoration: line-through; opacity: 0.6; }
+        .client-card { transition: transform 0.2s; border: 1px solid #e5e7eb; background: white; cursor: pointer; }
+        .client-card:hover { transform: translateY(-3px); border-color: #4f46e5; shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
         @media print { .no-print { display: none !important; } }
     </style>
 </head>
-<body class="p-4 md:p-10">
+<body class="p-4 md:p-8">
 
-    <div class="max-w-7xl mx-auto">
-        <div class="bg-indigo-950 text-white p-10 rounded-[2.5rem] shadow-2xl mb-10 no-print border-b-8 border-indigo-500 relative overflow-hidden">
-            <div class="relative z-10 flex flex-col md:flex-row justify-between items-center gap-8">
-                <div class="text-center md:text-right">
-                    <h1 class="text-4xl font-black tracking-tighter italic uppercase text-indigo-100">PurePharma Pro</h1>
-                    <p class="text-indigo-400 mt-2 font-bold text-lg">نظام تدقيق كشوفات أصيل (الشرقاط وتكريت)</p>
-                </div>
-                <div class="flex flex-col items-center">
-                    <input type="file" id="pdfUpload" class="hidden" accept=".pdf">
-                    <button onclick="document.getElementById('pdfUpload').click()" class="bg-indigo-500 hover:bg-indigo-400 text-white px-12 py-5 rounded-2xl font-black shadow-xl transition-all transform hover:scale-105 active:scale-95">
-                        📂 رفع كشف PDF الجديد
-                    </button>
-                    <div id="loaderArea" class="hidden mt-4 flex items-center gap-3 bg-indigo-900/50 px-4 py-2 rounded-full">
-                        <div class="loader-spin"></div>
-                        <span class="text-xs font-bold text-indigo-200 uppercase tracking-widest">Processing PDF Data...</span>
-                    </div>
-                </div>
+    <div class="max-w-6xl mx-auto">
+        <div class="bg-indigo-950 text-white p-6 rounded-2xl shadow-lg mb-8 no-print flex flex-col md:flex-row justify-between items-center gap-4">
+            <div>
+                <h1 class="text-2xl font-black italic">PUREPHARMA PRO</h1>
+                <p class="text-indigo-300 text-xs">نظام معالجة كشوفات الشرقاط وتكريت</p>
+            </div>
+            <div class="flex flex-col items-center">
+                <input type="file" id="pdfUpload" class="hidden" accept=".pdf">
+                <button onclick="document.getElementById('pdfUpload').click()" class="bg-indigo-500 hover:bg-indigo-400 text-white px-8 py-3 rounded-xl font-bold transition-all active:scale-95 shadow-md">
+                    📂 ارفع كشف الـ PDF الآن
+                </button>
+                <div id="loadingStatus" class="hidden mt-2 text-xs font-bold animate-pulse text-indigo-400">جاري قراءة البيانات...</div>
             </div>
         </div>
 
-        <div class="mb-10 no-print flex gap-4">
-            <input type="text" id="searchBar" onkeyup="doSearch()" placeholder="ابحث باسم (صيدلية، مذخر، دكتور) أو رقم الحساب..." class="w-full p-6 rounded-3xl border-2 border-indigo-100 shadow-inner focus:border-indigo-500 outline-none font-bold text-xl transition-all">
+        <div class="mb-6 no-print">
+            <input type="text" id="searchInput" onkeyup="filterItems()" placeholder="ابحث باسم الصيدلية أو رقم الحساب..." class="w-full p-4 rounded-xl border-2 border-indigo-50 shadow-sm focus:border-indigo-500 outline-none font-bold">
         </div>
 
-        <div id="resultsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 no-print">
+        <div id="resultsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 no-print">
             </div>
 
-        <div id="billModal" class="fixed inset-0 bg-slate-900/90 hidden flex items-center justify-center p-4 z-50 backdrop-blur-md">
-            <div class="bg-white rounded-[3rem] w-full max-w-5xl max-h-[92vh] overflow-hidden shadow-2xl flex flex-col">
-                <div class="p-8 bg-slate-50 border-b flex justify-between items-center">
-                    <button onclick="closeModal()" class="bg-red-50 text-red-500 hover:bg-red-500 hover:text-white w-12 h-12 rounded-full font-bold transition-all">✕</button>
-                    <div class="flex gap-4">
-                        <button onclick="window.print()" class="bg-slate-800 text-white px-8 py-3 rounded-2xl text-sm font-black hover:bg-black transition shadow-lg">🖨️ طباعة التقرير</button>
-                        <button id="waShare" class="bg-green-600 text-white px-8 py-3 rounded-2xl text-sm font-black hover:bg-green-700 transition shadow-lg shadow-green-200">💬 إرسال واتساب</button>
+        <div id="detailModal" class="fixed inset-0 bg-black/80 hidden flex items-center justify-center p-4 z-50 backdrop-blur-sm">
+            <div class="bg-white rounded-3xl w-full max-w-4xl max-h-[90vh] overflow-hidden shadow-2xl flex flex-col">
+                <div class="p-6 border-b flex justify-between items-center bg-gray-50">
+                    <button onclick="closeModal()" class="text-gray-400 hover:text-red-500 font-bold text-2xl transition-colors">✕</button>
+                    <div class="flex gap-2">
+                        <button onclick="window.print()" class="bg-gray-800 text-white px-4 py-2 rounded-lg text-sm font-bold">طباعة</button>
+                        <button id="whatsappButton" class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-bold">واتساب</button>
                     </div>
                 </div>
-                <div id="modalBody" class="p-10 overflow-y-auto">
+                <div id="modalContent" class="p-8 overflow-y-auto">
                     </div>
             </div>
         </div>
     </div>
 
     <script>
+        // ضبط المكتبة لتجنب أي تعليق
+        const pdfjsLib = window['pdfjs-dist/build/pdf'];
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
-        let mainData = {};
 
-        // دالة إصلاح الحروف المقطعة لنظام أصيل
-        function fixText(str) {
-            return str.replace(/ѧ/g, '').replace(/([ا-ي])\s(?=[ا-ي])/g, '$1').trim();
+        let clientsData = {};
+
+        // دالة ذكية لإصلاح تقطع الحروف في ملفات "أصيل"
+        function cleanPharmacyName(text) {
+            return text.replace(/ѧ/g, '').replace(/([ا-ي])\s(?=[ا-ي])/g, '$1').trim();
         }
 
-        document.getElementById('pdfUpload').addEventListener('change', async (e) => {
-            const file = e.target.files[0];
+        document.getElementById('pdfUpload').addEventListener('change', async (event) => {
+            const file = event.target.files[0];
             if (!file) return;
 
-            document.getElementById('loaderArea').classList.remove('hidden');
-            const ab = await file.arrayBuffer();
-            const pdf = await pdfjsLib.getDocument(ab).promise;
-            mainData = {};
+            document.getElementById('loadingStatus').classList.remove('hidden');
+            const fileReader = new FileReader();
 
-            for (let i = 1; i <= pdf.numPages; i++) {
-                const page = await pdf.getPage(i);
-                const content = await page.getTextContent();
-                let rawText = content.items.map(s => s.str).join(' ');
+            fileReader.onload = async function() {
+                const typedarray = new Uint8Array(this.result);
+                const pdf = await pdfjsLib.getDocument(typedarray).promise;
+                clientsData = {};
 
-                // استخراج الحساب والاسم (نظام أصيل يضعها في ترويسة كل صفحة جديدة)
-                let idMatch = rawText.match(/(?:رقم|رق م|الحساب)[:\-\s]*(\d{2,6})/);
-                let nameMatch = rawText.match(/(?:الاسم|الاس م)[:\-\s]*(.*?)(?=رقم|رق م|الموبايل|الموباي|العن)/);
+                for (let i = 1; i <= pdf.numPages; i++) {
+                    const page = await pdf.getPage(i);
+                    const content = await page.getTextContent();
+                    const text = content.items.map(s => s.str).join(' ');
 
-                if (idMatch) {
-                    let id = idMatch[1];
-                    let name = nameMatch ? fixText(nameMatch[1]) : "جهة غير معروفة";
+                    // استخراج ID العميل والاسم من ترويسة الصفحة
+                    let idMatch = text.match(/(?:رقم|رق م|الحساب)[:\-\s]*(\d{2,6})/);
+                    let nameMatch = text.match(/(?:الاسم|الاس م)[:\-\s]*(.*?)(?=رقم|رق م|الموبايل|الموباي|العن)/);
 
-                    if (!mainData[id]) {
-                        mainData[id] = { id, name, bills: [], total: 0, p: i };
-                    }
+                    if (idMatch) {
+                        let id = idMatch[1];
+                        let name = nameMatch ? cleanPharmacyName(nameMatch[1]) : "جهة غير محددة";
 
-                    // التقاط الفواتير (رقم، تاريخ، مبلغ متبقي)
-                    let regex = /(\d{5,8})\s+(\d{4}\/\d{1,2}\/\d{1,2})\s+([\d,]+\.\d{2})/g;
-                    let m;
-                    while ((m = regex.exec(rawText)) !== null) {
-                        mainData[id].bills.push({ id: m[1], date: m[2], amount: m[3] });
-                        mainData[id].total += parseFloat(m[3].replace(/,/g, ''));
+                        if (!clientsData[id]) {
+                            clientsData[id] = { id, name, bills: [], total: 0, firstPage: i };
+                        }
+
+                        // استخراج الفواتير (رقم، تاريخ، مبلغ)
+                        // النمط المخصص لملفاتك: رقم الفاتورة ثم التاريخ ثم المبلغ
+                        let billRegex = /(\d{5,8})\s+(\d{4}\/\d{1,2}\/\d{1,2})\s+([\d,]+\.\d{2})/g;
+                        let m;
+                        while ((m = billRegex.exec(text)) !== null) {
+                            clientsData[id].bills.push({ num: m[1], date: m[2], amount: m[3] });
+                            clientsData[id].total += parseFloat(m[3].replace(/,/g, ''));
+                        }
                     }
                 }
-            }
-            renderGrid();
-            document.getElementById('loaderArea').classList.add('hidden');
+                renderGrid();
+                document.getElementById('loadingStatus').classList.add('hidden');
+            };
+            fileReader.readAsArrayBuffer(file);
         });
 
         function renderGrid() {
             const grid = document.getElementById('resultsGrid');
             grid.innerHTML = "";
-            Object.values(mainData).forEach(c => {
+            Object.values(clientsData).forEach(c => {
                 grid.innerHTML += `
-                    <div class="p-8 rounded-[2rem] pharmacy-card relative overflow-hidden" onclick="showBills('${c.id}')" data-search="${c.name} ${c.id}">
-                        <div class="flex justify-between items-start mb-6">
-                            <span class="bg-indigo-50 text-indigo-700 px-4 py-1 rounded-full text-[10px] font-black tracking-widest border border-indigo-100 italic uppercase">Account: ${c.id}</span>
-                            <span class="text-slate-300 text-[10px] font-black">P.${c.p}</span>
+                    <div class="p-6 rounded-2xl client-card shadow-sm" onclick="openModal('${c.id}')" data-search="${c.name} ${c.id}">
+                        <div class="flex justify-between items-start mb-4">
+                            <span class="bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full text-[10px] font-black italic">ID: ${c.id}</span>
+                            <span class="text-gray-300 text-[10px]">صـ ${c.firstPage}</span>
                         </div>
-                        <h3 class="text-xl font-black text-slate-800 leading-tight mb-8 text-right">${c.name}</h3>
-                        <div class="flex justify-between items-end border-t border-slate-50 pt-6">
-                            <span class="text-slate-400 text-[10px] font-black uppercase tracking-tighter">Current Balance</span>
-                            <span class="text-indigo-600 font-black text-2xl">${c.total.toLocaleString()} <small class="text-[10px] opacity-50">د.ع</small></span>
+                        <h3 class="text-lg font-black text-gray-800 leading-snug mb-4 text-right">${c.name}</h3>
+                        <div class="border-t border-gray-50 pt-3 flex justify-between items-center">
+                            <span class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Total</span>
+                            <span class="text-indigo-600 font-black text-xl">${c.total.toLocaleString()} د.ع</span>
                         </div>
                     </div>`;
             });
         }
 
-        function showBills(id) {
-            const c = mainData[id];
-            document.getElementById('billModal').classList.remove('hidden');
-            document.getElementById('waShare').onclick = () => {
-                let text = `*مكتب بيور العلمي - كشف حساب*%0A*العميل:* ${c.name}%0A*رقم الحساب:* ${c.id}%0A*المبلغ المتبقي:* ${c.total.toLocaleString()} د.ع%0A_يرجى المطابقة_`;
-                window.open(`https://wa.me/?text=${text}`, '_blank');
+        function openModal(id) {
+            const c = clientsData[id];
+            document.getElementById('detailModal').classList.remove('hidden');
+            document.getElementById('whatsappButton').onclick = () => {
+                let msg = `*مكتب بيور العلمي*%0A*كشف حساب العميل:* ${c.name}%0A*رقم الحساب:* ${c.id}%0A*الإجمالي المتبقي:* ${c.total.toLocaleString()} د.ع`;
+                window.open(`https://wa.me/?text=${msg}`, '_blank');
             };
 
-            document.getElementById('modalBody').innerHTML = `
-                <div class="text-right mb-12 border-r-8 border-indigo-500 pr-8">
-                    <h2 class="text-4xl font-black text-slate-900">${c.name}</h2>
-                    <p class="text-indigo-500 font-bold mt-2 text-xl italic tracking-wide">رقم الحساب: ${c.id}</p>
+            document.getElementById('modalContent').innerHTML = `
+                <div class="text-right mb-6">
+                    <h2 class="text-3xl font-black text-indigo-900">${c.name}</h2>
+                    <p class="text-gray-500 font-bold">رقم الحساب الفريد: ${c.id}</p>
                 </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-right">
-                        <thead>
-                            <tr class="bg-slate-50 text-slate-400 border-b-2">
-                                <th class="p-5 font-black text-xs uppercase italic">Check</th>
-                                <th class="p-5 font-black text-xs text-center uppercase italic">Invoice #</th>
-                                <th class="p-5 font-black text-xs text-center uppercase italic">Date</th>
-                                <th class="p-5 font-black text-xs text-left uppercase italic">Amount</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-50">
-                            ${c.bills.map((b, i) => `
-                                <tr id="tr-${i}" class="transition-all hover:bg-indigo-50/50">
-                                    <td class="p-5"><input type="checkbox" onchange="document.getElementById('tr-${i}').classList.toggle('checked-row', this.checked)" class="w-8 h-8 accent-indigo-600 cursor-pointer rounded-lg"></td>
-                                    <td class="p-5 font-black text-slate-700 font-mono text-center text-lg">${b.id}</td>
-                                    <td class="p-5 text-slate-400 text-center font-bold text-sm italic">${b.date}</td>
-                                    <td class="p-5 font-black text-indigo-900 text-left text-2xl">${b.amount} <small class="text-xs">د.ع</small></td>
-                                </tr>`).join('')}
-                        </tbody>
-                    </table>
-                </div>
-                <div class="mt-12 bg-indigo-950 text-white p-12 rounded-[3rem] flex justify-between items-center shadow-2xl relative overflow-hidden">
-                    <div class="relative z-10 flex flex-col">
-                        <span class="text-indigo-400 font-black text-xs uppercase tracking-[0.4em] mb-2">Total Outstanding</span>
-                        <span class="text-xl font-bold opacity-70">إجمالي المبالغ غير المسددة</span>
-                    </div>
-                    <span class="relative z-10 text-5xl font-black text-indigo-400 leading-none">${c.total.toLocaleString()} <small class="text-sm">د.ع</small></span>
+                <table class="w-full text-right border-collapse">
+                    <thead>
+                        <tr class="bg-gray-50 text-gray-500 border-b">
+                            <th class="p-4 font-black text-xs uppercase">مطابقة</th>
+                            <th class="p-4 font-black text-xs text-center uppercase">رقم الفاتورة</th>
+                            <th class="p-4 font-black text-xs text-left uppercase">المبلغ</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                        ${c.bills.map((b, i) => `
+                            <tr id="tr-${i}">
+                                <td class="p-4"><input type="checkbox" onchange="document.getElementById('tr-${i}').classList.toggle('checked-row', this.checked)" class="w-6 h-6 accent-indigo-600 cursor-pointer"></td>
+                                <td class="p-4 font-bold text-gray-700 font-mono text-center">${b.num}</td>
+                                <td class="p-4 font-black text-indigo-900 text-left text-lg">${b.amount} د.ع</td>
+                            </tr>`).join('')}
+                    </tbody>
+                </table>
+                <div class="mt-8 bg-indigo-900 text-white p-6 rounded-2xl flex justify-between items-center shadow-xl">
+                    <span class="font-bold opacity-70 italic tracking-widest">Grand Total Balance</span>
+                    <span class="text-3xl font-black">${c.total.toLocaleString()} د.ع</span>
                 </div>
             `;
         }
 
-        function doSearch() {
-            let q = document.getElementById('searchBar').value.toLowerCase();
-            document.querySelectorAll('.pharmacy-card').forEach(card => {
+        function filterItems() {
+            let q = document.getElementById('searchInput').value.toLowerCase();
+            document.querySelectorAll('.client-card').forEach(card => {
                 card.style.display = card.getAttribute('data-search').toLowerCase().includes(q) ? "block" : "none";
             });
         }
 
-        function closeModal() { document.getElementById('billModal').classList.add('hidden'); }
+        function closeModal() { document.getElementById('detailModal').classList.add('hidden'); }
     </script>
 </body>
 </html>
