@@ -31,3 +31,7 @@ body { font-family: 'Cairo', sans-serif; }
     border-right-color: #10b981;
     background-color: #f0fdf4;
 }
+body { font-family: 'Cairo', sans-serif; }
+.hidden { display: none; }
+input, button { transition: all 0.3s ease; }
+button:active { transform: scale(0.95); }
