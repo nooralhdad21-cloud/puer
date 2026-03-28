@@ -1,276 +1,94 @@
-let currentEmployee = "";
-let invoiceData = []; // قاعدة البيانات المؤقتة
-let matchedInvoices = []; // الفواتير التي تمت مطابقتها
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
 
-// 1. حفظ هوية الموظف
+let employee = "";
+let extractedData = [];
+
 function saveEmployee() {
     const name = document.getElementById('employeeName').value;
-    if (name.length < 3) return alert("يرجى إدخال اسمك الثلاثي بشكل صحيح");
-    
-    currentEmployee = name;
-    document.getElementById('userBadge').innerText = "المسؤول: " + name;
+    if (name.length < 5) return alert("يرجى إدخال اسمك الكامل");
+    employee = name;
+    document.getElementById('userBadge').innerText = "الموظف: " + name;
     document.getElementById('userBadge').classList.remove('hidden');
     document.getElementById('loginStep').classList.add('hidden');
     document.getElementById('uploadStep').classList.remove('hidden');
 }
 
-// 2. معالجة ملف Excel
-document.getElementById('excelFile').addEventListener('change', function(e) {
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        const data = new Uint8Array(e.target.result);
-        const workbook = XLSX.read(data, { type: 'array' });
-        const sheetName = workbook.SheetNames[0];
-        const worksheet = workbook.Sheets[sheetName];
-        
-        // تحويل البيانات لـ JSON
-        invoiceData = XLSX.utils.sheet_to_json(worksheet);
-        displayVendors();
-        document.getElementById('uploadStep').classList.add('hidden');
-        document.getElementById('matchStep').classList.remove('hidden');
-    };
-    reader.readAsArrayBuffer(e.target.files[0]);
-});
-
-// 3. عرض المذاخر المستخرجة من الملف
-function displayVendors() {
-    const list = document.getElementById('vendorList');
-    list.innerHTML = "";
-    
-    // استخراج أسماء المذاخر الفريدة (نفترض اسم العمود 'المذخر' أو 'العميل')
-    const vendors = [...new Set(invoiceData.map(item => item['اسم المذخر'] || item['العميل'] || "مذخر مجهول"))];
-    
-    vendors.forEach(vendor => {
-        const count = invoiceData.filter(i => (i['اسم المذخر'] || i['العميل']) === vendor).length;
-        const div = document.createElement('div');
-        div.className = "vendor-card bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex justify-between items-center cursor-pointer";
-        div.innerHTML = `
-            <div>
-                <h3 class="font-bold text-slate-800">${vendor}</h3>
-                <p class="text-xs text-slate-500">${count} فواتير في الكشف</p>
-            </div>
-            <span class="bg-blue-50 text-blue-600 p-2 rounded-lg text-sm font-bold">بدء المطابقة</span>
-        `;
-        div.onclick = () => startMatching(vendor);
-        list.appendChild(div);
-    });
-}
-
-// 4. وضع المطابقة المباشر
-function startMatching(vendorName) {
-    const vInvoices = invoiceData.filter(i => (i['اسم المذخر'] || i['العميل']) === vendorName);
-    const list = document.getElementById('vendorList');
-    list.innerHTML = `<button onclick="displayVendors()" class="text-blue-600 text-sm mb-2 font-bold underline">← العودة للقائمة</button>
-                      <h2 class="text-lg font-bold mb-4">مطابقة فواتير: ${vendorName}</h2>`;
-    
-    vInvoices.forEach(inv => {
-        const invId = inv['رقم الفاتورة'] || "000";
-        const div = document.createElement('div');
-        div.className = "bg-white p-4 rounded-xl border-2 border-slate-100 mb-3 shadow-sm";
-        div.innerHTML = `
-            <div class="flex justify-between items-start mb-2">
-                <div>
-                    <span class="text-xs text-slate-400">رقم الفاتورة</span>
-                    <p class="font-bold text-lg">#${invId}</p>
-                </div>
-                <div class="text-left">
-                    <span class="text-xs text-slate-400">المبلغ</span>
-                    <p class="font-bold text-blue-700">${inv['المبلغ'] || '0'} د.ع</p>
-                </div>
-            </div>
-            <textarea placeholder="أضف ملاحظات (نقص، تضرر، إلخ)..." id="note-${invId}" class="w-full text-sm p-2 bg-slate-50 border rounded-lg mb-2 outline-none"></textarea>
-            <button onclick="confirmInvoice('${invId}', '${vendorName}', this)" class="w-full bg-slate-800 text-white py-2 rounded-lg text-sm font-bold transition-all">تأكيد وصول الفاتورة</button>
-        `;
-        list.appendChild(div);
-    });
-}
-
-// 5. تأكيد فاتورة محددة
-function confirmInvoice(id, vendor, btn) {
-    const note = document.getElementById(`note-${id}`).value;
-    matchedInvoices.push({
-        'رقم الفاتورة': id,
-        'المذخر': vendor,
-        'ملاحظات': note,
-        'تاريخ المطابقة': new Date().toLocaleString('ar-IQ'),
-        'المسؤول': currentEmployee
-    });
-    
-    const card = btn.parentElement;
-    card.classList.add('matched-anim', 'bg-green-50', 'border-green-200');
-    btn.className = "w-full bg-green-600 text-white py-2 rounded-lg text-sm font-bold";
-    btn.innerText = "✓ تم المطابقة";
-    btn.disabled = true;
-    
-    document.getElementById('reportActions').classList.remove('hidden');
-}
-
-// 6. سحب التقارير (Excel & PDF)
-function exportToExcel() {
-    const ws = XLSX.utils.json_to_sheet(matchedInvoices);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "مطابقة بيور");
-    XLSX.writeFile(wb, `تقرير_بيور_${currentEmployee}.xlsx`);
-}
-
-function exportToPDF() {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF('p', 'pt');
-    doc.addFont('Arial', 'normal'); 
-    
-    doc.text(`تقرير مطابقة مكتب بيور العلمي`, 40, 40);
-    doc.text(`اسم الموظف المسؤول: ${currentEmployee}`, 40, 60);
-    
-    const headers = [['رقم الفاتورة', 'المذخر', 'ملاحظات', 'تاريخ الاستلام']];
-    const data = matchedInvoices.map(i => [i['رقم الفاتورة'], i['المذخر'], i['ملاحظات'], i['تاريخ المطابقة']]);
-    
-    doc.autoTable({
-        head: headers,
-        body: data,
-        startY: 80,
-        styles: { font: 'Arial', halign: 'right' },
-        headStyles: { fillColor: [30, 58, 138] }
-    });
-    
-    doc.save(`تقرير_بيور_${currentEmployee}.pdf`);
-}
-// المتغيرات العالمية
-let currentEmployee = "";
-let invoiceData = []; 
-let matchedInvoices = []; 
-
-// دالة حفظ الموظف والدخول
-function saveEmployee() {
-    const nameInput = document.getElementById('employeeName');
-    const name = nameInput.value.trim();
-
-    if (name.length < 3) {
-        alert("يرجى إدخال اسمك الثلاثي بشكل صحيح لبدء العمل.");
-        return;
-    }
-
-    // حفظ الاسم وتحديث الواجهة
-    currentEmployee = name;
-    
-    // إخفاء مرحلة تسجيل الدخول وإظهار مرحلة رفع الملفات
-    document.getElementById('loginStep').classList.add('hidden');
-    document.getElementById('uploadStep').classList.remove('hidden');
-    
-    // إظهار اسم الموظف في الأعلى (اختياري)
-    const badge = document.getElementById('userBadge');
-    if(badge) {
-        badge.innerText = "المسؤول: " + name;
-        badge.classList.remove('hidden');
-    }
-
-    console.log("تم تسجيل دخول الموظف: " + name);
-}
-
-// دالة معالجة رفع ملف الإكسل
-// سنضعها هنا لضمان عدم حدوث خطأ عند رفع الملف لاحقاً
-document.addEventListener('DOMContentLoaded', () => {
-    const fileInput = document.getElementById('excelFile');
-    if(fileInput) {
-        fileInput.addEventListener('change', handleFileUpload);
-    }
-});
-
-function handleFileUpload(e) {
-    const file = e.target.files[0];
-    const reader = new FileReader();
-    
-    reader.onload = function(e) {
-        const data = new Uint8Array(e.target.result);
-        const workbook = XLSX.read(data, { type: 'array' });
-        const firstSheet = workbook.SheetNames[0];
-        const worksheet = workbook.Sheets[firstSheet];
-        
-        invoiceData = XLSX.utils.sheet_to_json(worksheet);
-        alert("تم تحميل " + invoiceData.length + " فاتورة بنجاح.");
-        
-        // إظهار مرحلة المطابقة
-        document.getElementById('uploadStep').classList.add('hidden');
-        document.getElementById('matchStep').classList.remove('hidden');
-        displayVendors();
-    };
-    reader.readAsArrayBuffer(file);
-}
-let currentEmployee = "";
-let invoiceData = [];
-pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
-
-function saveEmployee() {
-    const name = document.getElementById('employeeName').value.trim();
-    if (name.length < 3) return alert("يرجى كتابة اسمك");
-    currentEmployee = name;
-    document.getElementById('loginStep').classList.add('hidden');
-    document.getElementById('uploadStep').classList.remove('hidden');
-}
-
-document.getElementById('mainFile').addEventListener('change', async function(e) {
+document.getElementById('pdfFile').addEventListener('change', async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    if (file.type === "application/pdf") {
-        await processPDF(file);
-    } else {
-        alert("يرجى رفع ملف بصيغة PDF حالياً لتوافق الكشف");
-    }
+    const reader = new FileReader();
+    reader.onload = async function() {
+        const typedarray = new Uint8Array(this.result);
+        const pdf = await pdfjsLib.getDocument(typedarray).promise;
+        let fullText = "";
+
+        for (let i = 1; i <= pdf.numPages; i++) {
+            const page = await pdf.getPage(i);
+            const textContent = await page.getTextContent();
+            fullText += textContent.items.map(s => s.str).join(' ');
+        }
+        
+        parsePureData(fullText);
+    };
+    reader.readAsArrayBuffer(file);
 });
 
-async function processPDF(file) {
-    const arrayBuffer = await file.arrayBuffer();
-    const pdf = await pdfjsLib.getDocument(arrayBuffer).promise;
-    let fullText = "";
+function parsePureData(text) {
+    extractedData = [];
+    // تعبير برمجى متطور للبحث عن: رقم الفاتورة (6 أرقام) والمبالغ
+    const invoicePattern = /(\d{5,6})\s+([\u0600-\u06FF\s\/]+)\s+([\d,]+\.\d{2})/g;
+    let match;
 
-    for (let i = 1; i <= pdf.numPages; i++) {
-        const page = await pdf.getPage(i);
-        const content = await page.getTextContent();
-        fullText += content.items.map(item => item.str).join(" ");
-    }
-
-    // استخراج البيانات باستخدام "الذكاء البرمجي" بناءً على شكل كشف بيور
-    // نبحث عن أرقام الفواتير (6 أرقام غالباً) والمبالغ
-    const lines = fullText.split(" ");
-    invoiceData = [];
-    
-    // محرك بحث بسيط داخل النص المستخرج لترتيبه كفواتير
-    const invoiceRegex = /(\d{5,6})/g; // يبحث عن أرقام الفواتير
-    const matches = fullText.match(invoiceRegex);
-
-    if (matches) {
-        matches.forEach(id => {
-            invoiceData.push({
-                "رقم الفاتورة": id,
-                "العميل": "صيدلية/مذخر من الكشف",
-                "المبلغ": "راجع الكشف المطبوع"
-            });
+    while ((match = invoicePattern.exec(text)) !== null) {
+        extractedData.push({
+            id: match[1],
+            client: match[2].trim().substring(0, 30), // اسم الصيدلية
+            amount: match[3] // المبلغ
         });
-        
-        alert("تم التعرف على " + invoiceData.length + " فاتورة من ملف الـ PDF");
-        document.getElementById('uploadStep').classList.add('hidden');
-        document.getElementById('matchStep').classList.remove('hidden');
-        displayVendors();
-    } else {
-        alert("لم نتمكن من قراءة أرقام الفواتير، تأكد من وضوح الملف");
     }
+
+    if (extractedData.length === 0) {
+        // محاولة بديلة إذا كان التنسيق مختلف
+        const backupPattern = /(\d{5,6})/g;
+        const simpleMatches = text.match(backupPattern);
+        if(simpleMatches) {
+            simpleMatches.forEach(id => {
+                extractedData.push({ id: id, client: "غير محدد", amount: "---" });
+            });
+        }
+    }
+
+    renderList();
 }
 
-function displayVendors() {
-    const list = document.getElementById('vendorList');
-    list.innerHTML = `<h2 class="font-bold text-blue-900 mb-2">الفواتير المستخرجة للمطابقة:</h2>`;
-    
-    invoiceData.forEach(inv => {
-        const div = document.createElement('div');
-        div.className = "bg-white p-4 rounded-xl border-r-4 border-blue-500 shadow-sm flex justify-between items-center";
-        div.innerHTML = `
+function renderList() {
+    const list = document.getElementById('invoiceList');
+    document.getElementById('invoiceCount').innerText = extractedData.length;
+    list.innerHTML = "";
+
+    extractedData.forEach((item, index) => {
+        const card = document.createElement('div');
+        card.className = "bg-white p-5 rounded-2xl shadow-sm border invoice-card flex justify-between items-center";
+        card.innerHTML = `
             <div>
-                <span class="text-xs text-slate-400">رقم الفاتورة</span>
-                <p class="font-bold">#${inv['رقم الفاتورة']}</p>
+                <p class="text-xs text-blue-600 font-bold mb-1">فاتورة #${item.id}</p>
+                <h4 class="font-bold text-gray-800">${item.client}</h4>
+                <p class="text-sm text-gray-500">المبلغ: ${item.amount} د.ع</p>
             </div>
-            <button onclick="this.innerText='✅ تم'; this.className='bg-green-100 text-green-700 px-4 py-2 rounded-lg font-bold';" 
-                    class="bg-blue-50 text-blue-700 px-4 py-2 rounded-lg font-bold">تأكيد الاستلام</button>
+            <button onclick="markDone(this)" class="bg-blue-600 text-white px-5 py-2 rounded-xl text-sm font-bold shadow-md active:scale-95 transition-all">تأكيد</button>
         `;
-        list.appendChild(div);
+        list.appendChild(card);
     });
+
+    document.getElementById('uploadStep').classList.add('hidden');
+    document.getElementById('matchStep').classList.remove('hidden');
+}
+
+function markDone(btn) {
+    const card = btn.parentElement;
+    card.classList.add('matched');
+    btn.innerText = "✅ تم";
+    btn.disabled = true;
+    btn.className = "bg-green-100 text-green-700 px-5 py-2 rounded-xl text-sm font-bold";
 }
