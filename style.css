@@ -1,37 +1,24 @@
-body { font-family: 'Cairo', sans-serif; }
-.hidden { display: none; }
-
-.invoice-card {
-    background: white;
-    padding: 15px;
-    border-radius: 20px;
-    border-right: 5px solid #2563eb;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    animation: slideUp 0.3s ease;
+body {
+    font-family: 'Cairo', sans-serif;
+    -webkit-tap-highlight-color: transparent;
 }
 
-@keyframes slideUp {
+.hidden { display: none; }
+
+.animate-fade {
+    animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
     from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
 }
 
-.btn-check {
-    background: #f1f5f9;
-    color: #1e40af;
-    padding: 8px 15px;
-    border-radius: 12px;
-    font-weight: bold;
-    font-size: 14px;
+/* تحسين شكل السكرول */
+::-webkit-scrollbar {
+    width: 4px;
 }
-
-.done {
-    border-right-color: #10b981;
-    background-color: #f0fdf4;
+::-webkit-scrollbar-thumb {
+    background: #2563eb;
+    border-radius: 10px;
 }
-body { font-family: 'Cairo', sans-serif; }
-.hidden { display: none; }
-input, button { transition: all 0.3s ease; }
-button:active { transform: scale(0.95); }
