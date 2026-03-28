@@ -1,17 +1,22 @@
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
 
-let invoices = [];
+let appData = [];
 
-function login() {
-    const name = document.getElementById('empName').value;
-    if (name.length < 3) return alert("يرجى كتابة الاسم الثلاثي");
-    document.getElementById('userName').innerText = "المندوب: " + name;
-    document.getElementById('userName').classList.remove('hidden');
+// وظيفة الدخول
+function handleLogin() {
+    const name = document.getElementById('empNameInput').value;
+    if (name.trim().length < 3) {
+        alert("يرجى إدخال اسمك الكامل");
+        return;
+    }
+    document.getElementById('badge').innerText = "المندوب: " + name;
+    document.getElementById('badge').classList.remove('hidden');
     document.getElementById('loginSection').classList.add('hidden');
     document.getElementById('uploadSection').classList.remove('hidden');
 }
 
-document.getElementById('pdfFile').addEventListener('change', async (e) => {
+// قراءة ملف الـ PDF
+document.getElementById('pdfFileInput').addEventListener('change', async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
@@ -19,58 +24,68 @@ document.getElementById('pdfFile').addEventListener('change', async (e) => {
     reader.onload = async function() {
         const typedarray = new Uint8Array(this.result);
         const pdf = await pdfjsLib.getDocument(typedarray).promise;
-        let extractedText = "";
+        let allLines = [];
 
         for (let i = 1; i <= pdf.numPages; i++) {
             const page = await pdf.getPage(i);
             const content = await page.getTextContent();
-            // دمج النص مع الحفاظ على المسافات لتمييز الأعمدة
-            extractedText += content.items.map(item => item.str).join('  ');
+            // استخراج النصوص مع دمجها بشكل سطر سطر
+            const strings = content.items.map(item => item.str);
+            allLines = allLines.concat(strings);
         }
-        parseData(extractedText);
+        processKashfData(allLines);
     };
     reader.readAsArrayBuffer(file);
 });
 
-function parseData(text) {
-    invoices = [];
-    // تعبير برمجي للبحث عن (رقم الفاتورة 5-6 أرقام) متبوع بنصوص وأرقام المبالغ
-    const lines = text.split(/(\d{5,6})/); 
+// تحليل بيانات كشف بيور العلمي
+function processKashfData(lines) {
+    appData = [];
     
-    for (let i = 1; i < lines.length; i += 2) {
-        let id = lines[i]; // رقم الفاتورة
-        let details = lines[i + 1] || ""; // النص الذي يتبع الرقم
+    for (let i = 0; i < lines.length; i++) {
+        let text = lines[i].trim();
         
-        // استخراج المبلغ (رقم يحتوي على فاصلة ونقطة)
-        let amountMatch = details.match(/[\d,]+\.\d{2}/);
-        let amount = amountMatch ? amountMatch[0] : "راجع الكشف";
-        
-        // استخراج الاسم (أول كلمات عربية تظهر)
-        let nameMatch = details.match(/[\u0600-\u06FF\s\/]+/);
-        let name = nameMatch ? nameMatch[0].trim().substring(0, 40) : "صيدلية غير محددة";
+        // البحث عن رقم الفاتورة (6 أرقام غالباً)
+        if (/^\d{5,6}$/.test(text)) {
+            let id = text;
+            let pharmacy = "غير محدد";
+            let amount = "0.00";
 
-        invoices.push({ id, name, amount });
+            // البحث الذكي عن الاسم والسعر في العناصر المجاورة (قبل وبعد الرقم)
+            for(let j = 1; j <= 8; j++) {
+                let prev = lines[i-j] || "";
+                let next = lines[i+j] || "";
+
+                // البحث عن المبلغ (رقم بفاصلة عشرية)
+                if(/[\d,]+\.\d{2}/.test(prev) && amount === "0.00") amount = prev;
+                if(/[\d,]+\.\d{2}/.test(next) && amount === "0.00") amount = next;
+
+                // البحث عن اسم الصيدلية (نص عربي طويل)
+                if(/[\u0600-\u06FF]/.test(prev) && pharmacy === "غير محدد" && prev.length > 5) pharmacy = prev;
+                if(/[\u0600-\u06FF]/.test(next) && pharmacy === "غير محدد" && next.length > 5) pharmacy = next;
+            }
+
+            appData.push({ id, pharmacy, amount });
+        }
     }
-    renderUI();
+    renderCards();
 }
 
-function renderUI() {
+function renderCards() {
     const container = document.getElementById('invoiceContainer');
-    document.getElementById('totalCount').innerText = invoices.length;
+    document.getElementById('counter').innerText = appData.length;
     container.innerHTML = "";
 
-    invoices.forEach(inv => {
+    appData.forEach(item => {
         const card = document.createElement('div');
-        card.className = "bg-white p-5 rounded-2xl shadow-sm border-r-8 border-blue-600 flex justify-between items-center transition-all";
+        card.className = "bg-white p-5 rounded-3xl shadow-sm border-r-[10px] border-blue-600 flex justify-between items-center transition-all duration-300";
         card.innerHTML = `
-            <div class="flex-1 px-2">
-                <p class="text-[10px] text-blue-500 font-bold mb-1">تذكرة # ${inv.id}</p>
-                <h4 class="font-bold text-gray-800 text-sm leading-relaxed mb-2">${inv.name}</h4>
-                <div class="flex items-center gap-2">
-                    <span class="text-[11px] bg-blue-50 text-blue-700 px-2 py-1 rounded-md font-bold">المتبقي: ${inv.amount}</span>
-                </div>
+            <div class="flex-1">
+                <p class="text-[10px] text-blue-500 font-bold uppercase tracking-widest">رقم الفاتورة: #${item.id}</p>
+                <h4 class="font-bold text-gray-800 text-sm my-1">${item.pharmacy}</h4>
+                <p class="text-blue-700 font-bold text-xs bg-blue-50 inline-block px-2 py-1 rounded-lg">المبلغ: ${item.amount} د.ع</p>
             </div>
-            <button onclick="markDone(this)" class="bg-gray-50 text-blue-600 border border-blue-100 px-5 py-3 rounded-xl text-xs font-bold shadow-sm active:scale-90 transition-all">تأكيد</button>
+            <button onclick="confirmItem(this)" class="bg-blue-600 text-white px-6 py-3 rounded-2xl text-xs font-bold shadow-md active:scale-90 transition-all">تأكيد</button>
         `;
         container.appendChild(card);
     });
@@ -79,10 +94,10 @@ function renderUI() {
     document.getElementById('listSection').classList.remove('hidden');
 }
 
-function markDone(btn) {
-    btn.innerText = "✅ تم الاستلام";
-    btn.className = "bg-green-100 text-green-700 px-4 py-3 rounded-xl text-xs font-bold border border-green-200 shadow-inner";
+function confirmItem(btn) {
+    btn.innerText = "✅ تم المطابقة";
+    btn.className = "bg-green-100 text-green-700 px-4 py-3 rounded-2xl text-xs font-bold border border-green-200";
     btn.parentElement.classList.replace('border-blue-600', 'border-green-500');
-    btn.parentElement.style.opacity = "0.7";
+    btn.parentElement.classList.add('opacity-60');
     btn.disabled = true;
 }
