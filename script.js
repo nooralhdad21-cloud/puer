@@ -195,3 +195,82 @@ function handleFileUpload(e) {
     };
     reader.readAsArrayBuffer(file);
 }
+let currentEmployee = "";
+let invoiceData = [];
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
+
+function saveEmployee() {
+    const name = document.getElementById('employeeName').value.trim();
+    if (name.length < 3) return alert("يرجى كتابة اسمك");
+    currentEmployee = name;
+    document.getElementById('loginStep').classList.add('hidden');
+    document.getElementById('uploadStep').classList.remove('hidden');
+}
+
+document.getElementById('mainFile').addEventListener('change', async function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (file.type === "application/pdf") {
+        await processPDF(file);
+    } else {
+        alert("يرجى رفع ملف بصيغة PDF حالياً لتوافق الكشف");
+    }
+});
+
+async function processPDF(file) {
+    const arrayBuffer = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument(arrayBuffer).promise;
+    let fullText = "";
+
+    for (let i = 1; i <= pdf.numPages; i++) {
+        const page = await pdf.getPage(i);
+        const content = await page.getTextContent();
+        fullText += content.items.map(item => item.str).join(" ");
+    }
+
+    // استخراج البيانات باستخدام "الذكاء البرمجي" بناءً على شكل كشف بيور
+    // نبحث عن أرقام الفواتير (6 أرقام غالباً) والمبالغ
+    const lines = fullText.split(" ");
+    invoiceData = [];
+    
+    // محرك بحث بسيط داخل النص المستخرج لترتيبه كفواتير
+    const invoiceRegex = /(\d{5,6})/g; // يبحث عن أرقام الفواتير
+    const matches = fullText.match(invoiceRegex);
+
+    if (matches) {
+        matches.forEach(id => {
+            invoiceData.push({
+                "رقم الفاتورة": id,
+                "العميل": "صيدلية/مذخر من الكشف",
+                "المبلغ": "راجع الكشف المطبوع"
+            });
+        });
+        
+        alert("تم التعرف على " + invoiceData.length + " فاتورة من ملف الـ PDF");
+        document.getElementById('uploadStep').classList.add('hidden');
+        document.getElementById('matchStep').classList.remove('hidden');
+        displayVendors();
+    } else {
+        alert("لم نتمكن من قراءة أرقام الفواتير، تأكد من وضوح الملف");
+    }
+}
+
+function displayVendors() {
+    const list = document.getElementById('vendorList');
+    list.innerHTML = `<h2 class="font-bold text-blue-900 mb-2">الفواتير المستخرجة للمطابقة:</h2>`;
+    
+    invoiceData.forEach(inv => {
+        const div = document.createElement('div');
+        div.className = "bg-white p-4 rounded-xl border-r-4 border-blue-500 shadow-sm flex justify-between items-center";
+        div.innerHTML = `
+            <div>
+                <span class="text-xs text-slate-400">رقم الفاتورة</span>
+                <p class="font-bold">#${inv['رقم الفاتورة']}</p>
+            </div>
+            <button onclick="this.innerText='✅ تم'; this.className='bg-green-100 text-green-700 px-4 py-2 rounded-lg font-bold';" 
+                    class="bg-blue-50 text-blue-700 px-4 py-2 rounded-lg font-bold">تأكيد الاستلام</button>
+        `;
+        list.appendChild(div);
+    });
+}
