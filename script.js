@@ -1,85 +1,87 @@
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
 
-let empName = "";
-let dataList = [];
+let data = [];
 
-// 1. تسجيل الدخول
-function startApp() {
+function login() {
     const name = document.getElementById('empName').value;
-    if (name.length < 3) return alert("يرجى إدخال اسمك");
-    empName = name;
-    document.getElementById('step1').classList.add('hidden');
-    document.getElementById('step2').classList.remove('hidden');
-    document.getElementById('status').innerText = "الموظف: " + name;
-    document.getElementById('status').classList.remove('hidden');
+    if (name.length < 3) return alert("يرجى كتابة الاسم");
+    document.getElementById('userName').innerText = name;
+    document.getElementById('userName').classList.remove('hidden');
+    document.getElementById('loginSection').classList.add('hidden');
+    document.getElementById('uploadSection').classList.remove('hidden');
 }
 
-// 2. قراءة ملف PDF
-document.getElementById('fileInput').addEventListener('change', async (e) => {
+document.getElementById('pdfFile').addEventListener('change', async (e) => {
     const file = e.target.files[0];
-    if (!file) return;
-
     const reader = new FileReader();
     reader.onload = async function() {
         const typedarray = new Uint8Array(this.result);
         const pdf = await pdfjsLib.getDocument(typedarray).promise;
-        let text = "";
+        let allText = [];
 
-        // قراءة كافة الصفحات
         for (let i = 1; i <= pdf.numPages; i++) {
             const page = await pdf.getPage(i);
             const content = await page.getTextContent();
-            text += content.items.map(s => s.str).join(' ');
+            // ترتيب النصوص حسب موقعها في الصفحة لضمان قراءة السطر بشكل صحيح
+            const strings = content.items.map(item => item.str);
+            allText = allText.concat(strings);
         }
-        
-        extractInvoices(text);
+        processPureData(allText);
     };
     reader.readAsArrayBuffer(file);
 });
 
-// 3. استخراج البيانات (رقم الفاتورة واسم المذخر)
-function extractInvoices(text) {
-    dataList = [];
-    // البحث عن أرقام الفواتير المكونة من 5 أو 6 أرقام
-    const regex = /(\d{5,6})/g;
-    const matches = text.match(regex);
+function processPureData(textArray) {
+    data = [];
+    // تعبير برمجى للبحث عن رقم الفاتورة المكون من 6 أرقام
+    for (let i = 0; i < textArray.length; i++) {
+        let str = textArray[i].trim();
+        if (/^\d{5,6}$/.test(str)) { // إذا وجدنا رقم فاتورة
+            // نبحث في النصوص المجاورة عن اسم الصيدلية والمبلغ
+            // في كشوفات بيور غالباً الاسم يكون قبل أو بعد الرقم بمسافة بسيطة
+            let invoiceId = str;
+            let pharmacyName = textArray[i - 1] || "غير محدد";
+            let amount = textArray[i - 2] || "0.00";
 
-    if (matches) {
-        // تنظيف المكرر وتحويلها لقائمة
-        const uniqueInvoices = [...new Set(matches)];
-        uniqueInvoices.forEach(id => {
-            dataList.push({ id: id, status: 'انتظار' });
-        });
-        showResults();
-    } else {
-        alert("لم يتم العثور على فواتير في الملف، تأكد أنه ملف كشف صحيح.");
+            // تنظيف البيانات
+            if (pharmacyName.length < 3) pharmacyName = textArray[i + 1];
+
+            data.push({
+                id: invoiceId,
+                name: pharmacyName,
+                price: amount
+            });
+        }
     }
+    renderInvoices();
 }
 
-// 4. عرض النتائج
-function showResults() {
-    document.getElementById('step2').classList.add('hidden');
-    document.getElementById('step3').classList.remove('hidden');
-    const listDiv = document.getElementById('resultsList');
-    document.getElementById('counter').innerText = dataList.length;
-    
-    listDiv.innerHTML = "";
-    dataList.forEach(item => {
+function renderInvoices() {
+    const container = document.getElementById('invoiceContainer');
+    document.getElementById('totalCount').innerText = data.length;
+    container.innerHTML = "";
+
+    data.forEach(item => {
         const div = document.createElement('div');
-        div.className = "invoice-card";
+        div.className = "bg-white p-5 rounded-2xl shadow-sm border-r-8 border-blue-600 flex justify-between items-center";
         div.innerHTML = `
-            <div>
-                <p class="text-xs text-gray-400">رقم الفاتورة</p>
-                <p class="font-bold text-lg">#${item.id}</p>
+            <div class="flex-1">
+                <p class="text-[10px] text-gray-400 font-bold mb-1">رقم الفاتورة: #${item.id}</p>
+                <h4 class="font-bold text-gray-800 text-sm mb-1">${item.name}</h4>
+                <p class="text-blue-700 font-bold text-xs">المبلغ: ${item.price} د.ع</p>
             </div>
-            <button onclick="confirmInv(this)" class="btn-check">تأكيد الاستلام</button>
+            <button onclick="done(this)" class="bg-gray-100 text-blue-900 px-4 py-2 rounded-xl text-xs font-bold shadow-sm">تأكيد</button>
         `;
-        listDiv.appendChild(div);
+        container.appendChild(div);
     });
+
+    document.getElementById('uploadSection').classList.add('hidden');
+    document.getElementById('listSection').classList.remove('hidden');
 }
 
-function confirmInv(btn) {
+function done(btn) {
     btn.innerText = "✅ تم";
-    btn.parentElement.classList.add('done');
+    btn.className = "bg-green-100 text-green-700 px-4 py-2 rounded-xl text-xs font-bold";
+    btn.parentElement.classList.replace('border-blue-600', 'border-green-500');
     btn.disabled = true;
 }
