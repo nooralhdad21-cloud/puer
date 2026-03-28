@@ -3,198 +3,178 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام بيور برو للمطابقة والتقارير</title>
+    <title>نظام بيور برو - الإصدار المتكامل</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+    
     <style>
         body { background-color: #f4f7fe; font-family: 'Cairo', sans-serif; -webkit-tap-highlight-color: transparent; }
         .hidden { display: none; }
-        .card-active { border: 2px solid #2563eb; background-color: #eff6ff; }
-        input[type="checkbox"] { appearance: none; width: 30px; height: 30px; border: 2px solid #cbd5e1; border-radius: 8px; cursor: pointer; position: relative; transition: 0.3s; background: white; }
+        .animate-fade { animation: fadeIn 0.4s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* تصميم زر المطابقة */
+        input[type="checkbox"] { 
+            appearance: none; -webkit-appearance: none; 
+            width: 32px; height: 32px; 
+            border: 2px solid #cbd5e1; border-radius: 10px; 
+            cursor: pointer; position: relative; transition: 0.3s; background: white; 
+        }
         input[type="checkbox"]:checked { background-color: #10b981; border-color: #10b981; }
-        input[type="checkbox"]:checked::after { content: "✓"; color: white; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-weight: bold; }
+        input[type="checkbox"]:checked::after { 
+            content: "✓"; color: white; position: absolute; 
+            top: 50%; left: 50%; transform: translate(-50%, -50%); 
+            font-weight: bold; font-size: 18px;
+        }
+
+        .tab-btn { transition: all 0.3s; border-bottom: 4px solid transparent; }
+        .tab-active { border-bottom-color: #1e3a8a; color: #1e3a8a; background-color: #eff6ff; }
     </style>
 </head>
 <body>
 
-    <nav class="bg-blue-900 text-white p-4 shadow-lg sticky top-0 z-50">
-        <div class="container mx-auto flex justify-between items-center px-4">
-            <h1 class="text-xl font-black uppercase tracking-tighter">Pure <span class="text-blue-400">Science</span></h1>
-            <button id="printBtn" onclick="generatePDF()" class="hidden bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-xl text-xs font-bold transition-all animate-bounce">طباعة التقرير PDF</button>
+    <nav class="bg-blue-900 text-white p-4 shadow-xl sticky top-0 z-50">
+        <div class="container mx-auto flex justify-between items-center px-2">
+            <h1 class="text-xl font-black italic tracking-tighter uppercase">Pure <span class="text-blue-400">Pro</span></h1>
+            <button id="pdfBtn" onclick="generateReport()" class="hidden bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-lg">حفظ التقرير PDF</button>
         </div>
     </nav>
 
     <main class="container mx-auto p-4 max-w-2xl">
 
-        <div id="loginSection" class="bg-white p-8 rounded-[2rem] shadow-xl mt-10 text-center border animate-fade">
-            <div class="text-5xl mb-4">🔐</div>
-            <h2 class="text-xl font-bold mb-6">نظام متابعة الفواتير</h2>
-            <input type="text" id="repName" placeholder="اسم المندوب المسؤول" class="w-full p-4 bg-gray-50 border-2 rounded-2xl mb-4 text-center focus:border-blue-600 outline-none font-bold">
-            <button onclick="login()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold shadow-lg active:scale-95 transition-all">بدء العمل</button>
+        <div id="loginStep" class="bg-white p-8 rounded-[2.5rem] shadow-xl mt-10 text-center animate-fade border border-white">
+            <div class="text-6xl mb-4">🚀</div>
+            <h2 class="text-2xl font-black text-slate-800 mb-6">نظام متابعة المندوبين</h2>
+            <input type="text" id="repName" placeholder="أدخل اسمك الكامل" class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl mb-4 text-center focus:border-blue-600 outline-none font-bold text-lg">
+            <button onclick="goToUpload()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black text-lg shadow-xl hover:bg-blue-700 active:scale-95 transition-all">فتح الداشبورد</button>
         </div>
 
-        <div id="uploadSection" class="hidden mt-10 text-center">
-            <div class="bg-white p-12 rounded-[2.5rem] border-4 border-dashed border-blue-100">
-                <p class="font-bold text-blue-900 mb-6">يرجى رفع كشف PDF (الشرقاط)</p>
-                <input type="file" id="fileInput" accept=".pdf" class="hidden">
-                <label for="fileInput" class="bg-blue-600 text-white px-10 py-4 rounded-2xl cursor-pointer font-bold shadow-lg inline-block hover:bg-blue-700">اختيار الكشف</label>
+        <div id="uploadStep" class="hidden mt-10 text-center animate-fade">
+            <div class="bg-white p-12 rounded-[3rem] border-4 border-dashed border-blue-100 shadow-inner">
+                <div class="text-5xl mb-4 opacity-40">📄</div>
+                <p class="font-bold text-slate-700 mb-8 text-lg">ارفع كشف "الشرقاط" PDF</p>
+                <input type="file" id="pdfInput" accept=".pdf" class="hidden">
+                <label for="pdfInput" class="bg-blue-600 text-white px-12 py-5 rounded-3xl cursor-pointer font-black shadow-xl hover:bg-blue-700 transition-all inline-block">اختيار الملف</label>
             </div>
         </div>
 
-        <div id="filterSection" class="hidden mt-6 space-y-4">
-            <div class="flex gap-2">
-                <button onclick="filterType('all')" class="flex-1 bg-white p-3 rounded-xl shadow-sm font-bold text-xs border-b-4 border-blue-600">الكل</button>
-                <button onclick="filterType('pharmacy')" class="flex-1 bg-white p-3 rounded-xl shadow-sm font-bold text-xs border-b-4 border-gray-200">💊 صيدلية</button>
-                <button onclick="filterType('store')" class="flex-1 bg-white p-3 rounded-xl shadow-sm font-bold text-xs border-b-4 border-gray-200">🏢 مذخر</button>
+        <div id="mainDashboard" class="hidden animate-fade">
+            <div class="flex gap-2 mb-4">
+                <button id="btnAll" onclick="filterData('all')" class="tab-btn tab-active flex-1 bg-white p-4 rounded-2xl shadow-sm font-bold text-xs">الكل</button>
+                <button id="btnPharm" onclick="filterData('pharmacy')" class="tab-btn flex-1 bg-white p-4 rounded-2xl shadow-sm font-bold text-xs">💊 صيدليات</button>
+                <button id="btnStore" onclick="filterData('store')" class="tab-btn flex-1 bg-white p-4 rounded-2xl shadow-sm font-bold text-xs">🏢 مذاخر</button>
             </div>
-            <input type="text" id="searchInput" onkeyup="searchByName()" placeholder="ابحث عن اسم الصيدلية..." class="w-full p-4 rounded-2xl border-none shadow-sm focus:ring-2 focus:ring-blue-500 outline-none font-bold text-sm">
-        </div>
 
-        <div id="listSection" class="hidden mt-6 space-y-4 pb-24">
-            </div>
+            <input type="text" id="searchBox" onkeyup="search()" placeholder="ابحث عن اسم الصيدلية..." class="w-full p-4 rounded-2xl border-none shadow-sm mb-6 outline-none font-bold text-sm focus:ring-2 focus:ring-blue-500">
+
+            <div id="invoiceList" class="space-y-4 pb-24"></div>
+        </div>
 
     </main>
 
     <script>
-        const { jsPDF } = window.jspdf;
-        let masterData = [];
-        let filteredData = [];
-        let repName = "";
+        // إعدادات محرك قراءة الـ PDF
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
+        
+        let masterRecords = [];
+        let currentDisplay = [];
+        let currentFilter = 'all';
+        let employeeName = "";
 
-        function login() {
-            repName = document.getElementById('repName').value;
-            if (repName.length < 3) return alert("يرجى كتابة اسم المندوب");
-            document.getElementById('loginSection').classList.add('hidden');
-            document.getElementById('uploadSection').classList.remove('hidden');
+        function goToUpload() {
+            employeeName = document.getElementById('repName').value;
+            if (employeeName.trim().length < 3) return alert("يرجى كتابة الاسم الثلاثي");
+            document.getElementById('loginStep').classList.add('hidden');
+            document.getElementById('uploadStep').classList.remove('hidden');
         }
 
-        document.getElementById('fileInput').addEventListener('change', async (e) => {
+        document.getElementById('pdfInput').addEventListener('change', async (e) => {
             const file = e.target.files[0];
+            if (!file) return;
+
             const reader = new FileReader();
             reader.onload = async function() {
                 const pdf = await pdfjsLib.getDocument(new Uint8Array(this.result)).promise;
-                let textLines = [];
+                let lines = [];
                 for (let i = 1; i <= pdf.numPages; i++) {
                     const page = await pdf.getPage(i);
-                    const content = await page.getTextContent();
-                    textLines = textLines.concat(content.items.map(item => item.str));
+                    const text = await page.getTextContent();
+                    lines = lines.concat(text.items.map(s => s.str));
                 }
-                processData(textLines);
+                processInvoices(lines);
             };
             reader.readAsArrayBuffer(file);
         });
 
-        function processData(lines) {
-            masterData = [];
+        function processInvoices(lines) {
+            masterRecords = [];
             for (let i = 0; i < lines.length; i++) {
                 let text = lines[i].trim();
+                // إذا وجدنا رقم فاتورة (5 أو 6 أرقام)
                 if (/^\d{5,6}$/.test(text)) {
-                    let entry = {
+                    let obj = {
                         id: text,
                         name: "غير معروف",
-                        address: "الشرقاط - محافظة صلاح الدين", // عنوان افتراضي لكشوفات الشرقاط
+                        address: "الشرقاط - صلاح الدين",
                         date: "---",
-                        fullAmount: "0.00",
-                        remAmount: "0.00",
+                        price: "0.00",
                         type: 'pharmacy',
-                        matched: false
+                        checked: false
                     };
-                    for (let j = 1; j <= 15; j++) {
-                        let p = lines[i - j] || "";
-                        if (/\d{2}\/\d{2}\/\d{4}/.test(p)) entry.date = p;
-                        if (/[\d,]+\.\d{2}/.test(p)) {
-                            if (entry.fullAmount === "0.00") entry.fullAmount = p;
-                            else if (entry.remAmount === "0.00") entry.remAmount = p;
-                        }
-                        if (/[\u0600-\u06FF]/.test(p) && entry.name === "غير معروف" && p.length > 4) {
-                            entry.name = p.replace(/[ѧ\s]+/g, ' ').trim();
-                            if (p.includes("مذخر") || p.includes("متخر") || p.includes("مكتب")) entry.type = 'store';
+                    
+                    // البحث حول رقم الفاتورة عن التفاصيل
+                    for (let j = 1; j <= 20; j++) {
+                        let prev = lines[i - j] || "";
+                        if (/\d{2}\/\d{2}\/\d{4}/.test(prev)) obj.date = prev;
+                        if (/[\d,]+\.\d{2}/.test(prev) && obj.price === "0.00") obj.price = prev;
+                        if (/[\u0600-\u06FF]/.test(prev) && obj.name === "غير معروف" && prev.length > 4) {
+                            obj.name = prev.replace(/[ѧ\s]+/g, ' ').trim();
+                            if (prev.includes("مذخر") || prev.includes("مكتب") || prev.includes("متخر")) obj.type = 'store';
                         }
                     }
-                    masterData.push(entry);
+                    masterRecords.push(obj);
                 }
             }
-            filteredData = [...masterData];
-            document.getElementById('uploadSection').classList.add('hidden');
-            document.getElementById('filterSection').classList.remove('hidden');
-            document.getElementById('listSection').classList.remove('hidden');
-            document.getElementById('printBtn').classList.remove('hidden');
-            renderUI();
+            currentDisplay = [...masterRecords];
+            document.getElementById('uploadStep').classList.add('hidden');
+            document.getElementById('mainDashboard').classList.remove('hidden');
+            document.getElementById('pdfBtn').classList.remove('hidden');
+            updateList();
         }
 
-        function renderUI() {
-            const container = document.getElementById('listSection');
-            container.innerHTML = "";
-            filteredData.forEach((item, index) => {
-                const div = document.createElement('div');
-                div.className = `bg-white p-5 rounded-[2rem] shadow-sm border-r-[12px] flex justify-between items-center transition-all ${item.matched ? 'border-green-500 opacity-60' : 'border-blue-600'}`;
-                div.innerHTML = `
+        function updateList() {
+            const list = document.getElementById('invoiceList');
+            list.innerHTML = "";
+            
+            currentDisplay.forEach((item) => {
+                const card = document.createElement('div');
+                card.className = `bg-white p-5 rounded-[2rem] shadow-sm border-r-[12px] flex justify-between items-center transition-all ${item.checked ? 'border-green-500 opacity-60' : 'border-blue-700'}`;
+                card.innerHTML = `
                     <div class="flex-1 ml-4">
-                        <div class="flex gap-2 mb-1 items-center">
-                            <span class="bg-blue-100 text-blue-700 text-[10px] px-2 py-0.5 rounded font-bold">#${item.id}</span>
+                        <div class="flex gap-2 items-center mb-1">
+                            <span class="bg-blue-50 text-blue-700 text-[10px] px-2 py-0.5 rounded font-bold">#${item.id}</span>
                             <span class="text-[9px] text-gray-400 font-bold">${item.date}</span>
                         </div>
                         <h4 class="font-bold text-slate-800 text-sm mb-1">${item.name}</h4>
-                        <p class="text-[9px] text-gray-400 mb-2 font-bold italic">📍 العنوان: ${item.address}</p>
-                        <div class="flex flex-col gap-0.5">
-                            <span class="text-[10px] text-gray-500">القيمة: ${item.fullAmount}</span>
-                            <span class="text-blue-700 font-black text-xs">المتبقي: ${item.remAmount} دينار</span>
-                        </div>
+                        <p class="text-[9px] text-gray-400 font-bold mb-2 italic">📍 ${item.address}</p>
+                        <p class="text-blue-700 font-black text-xs">المبلغ: ${item.price} د.ع</p>
                     </div>
-                    <input type="checkbox" ${item.matched ? 'checked' : ''} onchange="toggleMatch(${index})">
+                    <input type="checkbox" ${item.checked ? 'checked' : ''} onchange="toggleCheck('${item.id}')">
                 `;
-                container.appendChild(div);
+                list.appendChild(card);
             });
         }
 
-        function toggleMatch(idx) {
-            filteredData[idx].matched = !filteredData[idx].matched;
-            renderUI();
+        function toggleCheck(id) {
+            const index = masterRecords.findIndex(x => x.id === id);
+            masterRecords[index].checked = !masterRecords[index].checked;
+            filterData(currentFilter); // تحديث العرض بناءً على الفلتر الحالي
         }
 
-        function filterType(type) {
-            if (type === 'all') filteredData = [...masterData];
-            else filteredData = masterData.filter(x => x.type === type);
-            renderUI();
-        }
-
-        function searchByName() {
-            let val = document.getElementById('searchInput').value.toLowerCase();
-            filteredData = masterData.filter(x => x.name.toLowerCase().includes(val));
-            renderUI();
-        }
-
-        async function generatePDF() {
-            const doc = new jsPDF('p', 'mm', 'a4');
-            doc.addFont('https://cdnjs.cloudflare.com/ajax/libs/pdfjs-dist/2.12.313/pdf_viewer.css', 'Cairo', 'normal');
-            
-            doc.setFontSize(20);
-            doc.text("تقرير مطابقة فواتير بيور العلمي", 105, 20, { align: "center" });
-            
-            doc.setFontSize(12);
-            doc.text(`المندوب المسؤول: ${repName}`, 190, 30, { align: "right" });
-            doc.text(`تاريخ التقرير: ${new Date().toLocaleDateString('ar-EG')}`, 190, 38, { align: "right" });
-
-            const tableData = filteredData.map(x => [
-                x.matched ? "تمت المطابقة" : "غير مطابقة",
-                x.remAmount,
-                x.name,
-                x.id
-            ]);
-
-            doc.autoTable({
-                startY: 45,
-                head: [['الحالة', 'المبلغ المتبقي', 'اسم الصيدلية / المذخر', 'رقم الفاتورة']],
-                body: tableData,
-                styles: { font: 'Cairo', halign: 'right' },
-                headStyles: { fillColor: [30, 58, 138] }
-            });
-
-            doc.save(`تقرير_مطابقة_${repName}.pdf`);
-        }
-    </script>
-</body>
-</html>
+        function filterData(type) {
+            currentFilter = type;
+            // تحديث شكل الأزرار
+            document.getElementById('btnAll').className = `tab-btn flex-1 bg-
