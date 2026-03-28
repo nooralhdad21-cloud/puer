@@ -134,3 +134,64 @@ function exportToPDF() {
     
     doc.save(`تقرير_بيور_${currentEmployee}.pdf`);
 }
+// المتغيرات العالمية
+let currentEmployee = "";
+let invoiceData = []; 
+let matchedInvoices = []; 
+
+// دالة حفظ الموظف والدخول
+function saveEmployee() {
+    const nameInput = document.getElementById('employeeName');
+    const name = nameInput.value.trim();
+
+    if (name.length < 3) {
+        alert("يرجى إدخال اسمك الثلاثي بشكل صحيح لبدء العمل.");
+        return;
+    }
+
+    // حفظ الاسم وتحديث الواجهة
+    currentEmployee = name;
+    
+    // إخفاء مرحلة تسجيل الدخول وإظهار مرحلة رفع الملفات
+    document.getElementById('loginStep').classList.add('hidden');
+    document.getElementById('uploadStep').classList.remove('hidden');
+    
+    // إظهار اسم الموظف في الأعلى (اختياري)
+    const badge = document.getElementById('userBadge');
+    if(badge) {
+        badge.innerText = "المسؤول: " + name;
+        badge.classList.remove('hidden');
+    }
+
+    console.log("تم تسجيل دخول الموظف: " + name);
+}
+
+// دالة معالجة رفع ملف الإكسل
+// سنضعها هنا لضمان عدم حدوث خطأ عند رفع الملف لاحقاً
+document.addEventListener('DOMContentLoaded', () => {
+    const fileInput = document.getElementById('excelFile');
+    if(fileInput) {
+        fileInput.addEventListener('change', handleFileUpload);
+    }
+});
+
+function handleFileUpload(e) {
+    const file = e.target.files[0];
+    const reader = new FileReader();
+    
+    reader.onload = function(e) {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: 'array' });
+        const firstSheet = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[firstSheet];
+        
+        invoiceData = XLSX.utils.sheet_to_json(worksheet);
+        alert("تم تحميل " + invoiceData.length + " فاتورة بنجاح.");
+        
+        // إظهار مرحلة المطابقة
+        document.getElementById('uploadStep').classList.add('hidden');
+        document.getElementById('matchStep').classList.remove('hidden');
+        displayVendors();
+    };
+    reader.readAsArrayBuffer(file);
+}
