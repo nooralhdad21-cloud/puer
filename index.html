@@ -2,57 +2,63 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>PurePharma | نظام المطابقة الاحترافي</title>
+    <title>PurePharma | نظام الإدارة والتدقيق المركزي</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        body { background: #f1f5f9; font-family: 'Cairo', sans-serif; }
-        .pharmacy-card { background: white; border-radius: 1rem; border-right: 6px solid #1e40af; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
-        .invoice-row { border-bottom: 1px solid #f1f5f9; transition: 0.2s; }
-        .invoice-row:hover { background-color: #f8fafc; }
-        .num-font { font-family: sans-serif; font-weight: 700; }
-        .sticky-header { position: sticky; top: 0; background: rgba(255,255,255,0.9); backdrop-filter: blur(10px); z-index: 100; border-bottom: 2px solid #e2e8f0; }
+        body { background: #f8fafc; font-family: 'Cairo', sans-serif; overflow: hidden; }
+        .sidebar { width: 350px; height: 100vh; background: white; border-left: 2px solid #e2e8f0; overflow-y: auto; }
+        .main-content { flex: 1; height: 100vh; overflow-y: auto; background: #f1f5f9; }
+        .live-stat { animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+        .pharmacy-item { cursor: pointer; transition: 0.2s; border-bottom: 1px solid #f1f5f9; }
+        .pharmacy-item:hover { background: #eff6ff; }
+        .pharmacy-item.active { background: #2563eb; color: white; }
     </style>
 </head>
-<body class="p-4">
+<body class="flex">
 
-    <div id="uploadScreen" class="max-w-xl mx-auto mt-20 p-10 bg-white rounded-3xl shadow-2xl text-center border-2 border-dashed border-blue-200">
-        <div class="w-20 h-20 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg rotate-3">
-            <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+    <aside class="sidebar flex flex-col">
+        <div class="p-6 bg-white border-b-2 sticky top-0 z-10">
+            <h1 class="text-xl font-black text-blue-900 mb-2 italic">PUREPHARMA PRO</h1>
+            <input type="file" id="pdfFile" class="hidden" accept=".pdf">
+            <button onclick="document.getElementById('pdfFile').click()" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold hover:bg-blue-700 transition-all">رفع الملف الرئيسي</button>
+            <input type="text" id="search" onkeyup="renderSidebar()" placeholder="بحث عن صيدلية..." class="w-full mt-4 p-3 bg-gray-50 border rounded-lg text-sm outline-none focus:border-blue-500">
         </div>
-        <h2 class="text-2xl font-black text-slate-800 mb-2">مكتب بيور العلمي</h2>
-        <p class="text-slate-500 mb-8 font-bold">ارفع كشف "أصيل" لبدء الجرد والتدقيق</p>
-        <label class="bg-blue-600 hover:bg-blue-700 text-white px-12 py-4 rounded-2xl font-black cursor-pointer inline-block shadow-xl transition-transform hover:scale-105">
-            اختيار الملف
-            <input type="file" id="pdfInput" accept=".pdf" class="hidden">
-        </label>
-    </div>
+        <div id="pharmacyList" class="flex-1">
+            <div class="p-10 text-center text-gray-400 font-bold">يرجى رفع الملف لعرض قائمة الصيدليات</div>
+        </div>
+    </aside>
 
-    <div id="mainDashboard" class="hidden max-w-4xl mx-auto">
-        <header class="sticky-header p-4 mb-6 rounded-2xl flex justify-between items-center shadow-sm">
-            <div>
-                <h1 class="text-xl font-black text-blue-900">PUREPHARMA <span class="text-blue-500">AUDIT</span></h1>
-                <p id="fileInfo" class="text-[10px] font-bold text-slate-400"></p>
+    <main class="main-content flex flex-col">
+        <header class="p-6 bg-white shadow-sm flex gap-6">
+            <div class="flex-1 bg-blue-900 p-4 rounded-2xl text-white">
+                <p class="text-[10px] font-bold opacity-70 uppercase italic">الحالة الحية | Live Status</p>
+                <h2 id="liveTotal" class="text-2xl font-black mt-1">0 <span class="text-xs">د.ع</span></h2>
             </div>
-            <div class="flex gap-4">
-                <div class="text-center">
-                    <p class="text-[9px] font-black text-slate-400 uppercase">إجمالي المطابقة</p>
-                    <p id="matchTotal" class="text-lg font-black text-emerald-600 num-font">0</p>
-                </div>
+            <div class="flex-1 bg-emerald-600 p-4 rounded-2xl text-white">
+                <p class="text-[10px] font-bold opacity-70 uppercase italic">إجمالي المطابقة المختارة</p>
+                <h2 id="liveMatch" class="text-2xl font-black mt-1">0 <span class="text-xs">د.ع</span></h2>
             </div>
+            <button onclick="generateReport()" class="bg-amber-500 text-white px-8 rounded-2xl font-black hover:bg-amber-600 shadow-lg shadow-amber-200">تحميل تقرير المدير</button>
         </header>
 
-        <input type="text" id="search" onkeyup="render()" placeholder="ابحث باسم الصيدلية أو رقم الفاتورة..." class="w-full p-5 mb-6 bg-white rounded-2xl shadow-sm outline-none border-2 border-transparent focus:border-blue-500 font-bold">
-
-        <div id="contentList" class="space-y-6 pb-20"></div>
-    </div>
+        <div id="detailsArea" class="p-8">
+            <div class="max-w-3xl mx-auto text-center mt-20">
+                <div class="text-6xl mb-6">📊</div>
+                <h2 class="text-2xl font-black text-slate-400 italic">بانتظار اختيار صيدلية لعرض تفاصيل الفواتير والعنوان</h2>
+            </div>
+        </div>
+    </main>
 
     <script>
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
-        let store = [];
+        let store = {}; 
+        let currentShop = null;
 
-        document.getElementById('pdfInput').addEventListener('change', async (e) => {
+        document.getElementById('pdfFile').addEventListener('change', async (e) => {
             const file = e.target.files[0];
             if (!file) return;
 
@@ -65,115 +71,101 @@
                     const text = await page.getTextContent();
                     fullData.push(...text.items.map(it => ({ str: it.str, y: Math.round(it.transform[5]) })));
                 }
-                processAseelFile(fullData);
+                processFile(fullData);
             };
             reader.readAsArrayBuffer(file);
         });
 
-        function processAseelFile(data) {
-            store = [];
-            let currentShop = "غير معروف";
-            
-            // ترتيب البيانات من الأعلى للأسفل لضمان قراءة الترويسة قبل الفواتير
+        function processFile(data) {
+            store = {};
+            let tempShop = "غير معروف";
+            let tempAddress = "قيد التدقيق";
+
             data.sort((a, b) => b.y - a.y);
 
             data.forEach((item, index) => {
                 let txt = item.str.trim();
 
-                // 1. التقاط اسم الصيدلية من "المستطيل الأزرق" (الترويسة)
-                if ((txt.includes("صيدلية") || txt.includes("مذخر") || txt.includes("مكتب")) && !txt.includes("بيور")) {
-                    currentShop = txt.replace(/ѧ|:|الاسم|رقم الموبايل|العنوان/g, '').trim();
+                // كشف اسم الصيدلية والعنوان (الترويسة الزرقاء في أصيل)
+                if ((txt.includes("صيدلية") || txt.includes("مذخر") || txt.includes("مكتب")) && !txt.includes("بيور العلمي")) {
+                    tempShop = txt.replace(/ѧ|:|الاسم/g, '').trim();
+                    // البحث عن العنوان في نفس النطاق
+                    let nearby = data.filter(it => Math.abs(it.y - item.y) < 20);
+                    nearby.forEach(n => {
+                        if (n.str.includes("الشرقاط") || n.str.includes("العراق") || n.str.includes("صلاح الدين")) {
+                            tempAddress = n.str.replace(/ѧ|:/g, '').trim();
+                        }
+                    });
+                    if (!store[tempShop]) store[tempShop] = { address: tempAddress, invoices: [], total: 0 };
                 }
 
-                // 2. التقاط الفواتير المرتبطة بهذا الاسم
+                // كشف الفواتير
                 if (/^\d{5,6}$/.test(txt)) {
-                    let inv = {
-                        shop: currentShop,
-                        id: txt,
-                        date: "---",
-                        amount: 0,
-                        checked: false
-                    };
-
-                    // البحث عن المبلغ والتاريخ في نفس السطر (Y متقارب)
+                    let inv = { id: txt, date: "---", amount: 0, checked: false };
                     const row = data.filter(it => Math.abs(it.y - item.y) < 10);
                     row.forEach(r => {
                         if (r.str.includes('/')) inv.date = r.str;
-                        if (/^[\d,]+\.\d{2}$/.test(r.str)) {
-                            inv.amount = parseFloat(r.str.replace(/,/g, ''));
-                        }
+                        if (/^[\d,]+\.\d{2}$/.test(r.str)) inv.amount = parseFloat(r.str.replace(/,/g, ''));
                     });
 
-                    if (inv.amount > 0) store.push(inv);
+                    if (inv.amount > 0 && tempShop !== "غير معروف") {
+                        store[tempShop].invoices.push(inv);
+                        store[tempShop].total += inv.amount;
+                    }
                 }
             });
-
-            document.getElementById('uploadScreen').classList.add('hidden');
-            document.getElementById('mainDashboard').classList.remove('hidden');
-            render();
+            renderSidebar();
+            updateLiveStats();
         }
 
-        function render() {
-            const list = document.getElementById('contentList');
-            list.innerHTML = "";
+        function renderSidebar() {
+            const list = document.getElementById('pharmacyList');
             const q = document.getElementById('search').value.toLowerCase();
+            list.innerHTML = "";
 
-            let groups = {};
-            store.forEach(v => {
-                if (v.shop.toLowerCase().includes(q) || v.id.includes(q)) {
-                    if (!groups[v.shop]) groups[v.shop] = { items: [], total: 0 };
-                    groups[v.shop].items.push(v);
-                    groups[v.shop].total += v.amount;
+            Object.keys(store).forEach(name => {
+                if (name.toLowerCase().includes(q)) {
+                    const div = document.createElement('div');
+                    div.className = `pharmacy-item p-5 ${currentShop === name ? 'active' : ''}`;
+                    div.onclick = () => showDetails(name);
+                    div.innerHTML = `
+                        <p class="text-[10px] font-bold opacity-60 uppercase">${store[name].address}</p>
+                        <h3 class="font-black text-sm">${name}</h3>
+                        <div class="flex justify-between mt-2">
+                            <span class="text-[10px] font-bold">فواتير: ${store[name].invoices.length}</span>
+                            <span class="text-[11px] font-black">${store[name].total.toLocaleString()} د.ع</span>
+                        </div>
+                    `;
+                    list.appendChild(div);
                 }
             });
+        }
 
-            Object.keys(groups).forEach(name => {
-                const g = groups[name];
-                const card = document.createElement('div');
-                card.className = "pharmacy-card p-6 mb-4";
-                card.innerHTML = `
-                    <div class="flex justify-between items-center mb-4 border-b pb-3">
+        function showDetails(name) {
+            currentShop = name;
+            renderSidebar();
+            const area = document.getElementById('detailsArea');
+            const shop = store[name];
+
+            area.innerHTML = `
+                <div class="bg-white p-8 rounded-[2rem] shadow-xl border-t-8 border-blue-600">
+                    <div class="flex justify-between items-start mb-8">
                         <div>
-                            <h3 class="text-lg font-black text-slate-800">${name}</h3>
-                            <p class="text-[10px] font-bold text-blue-600 uppercase italic">المجموع الكلي: ${g.total.toLocaleString()} د.ع</p>
+                            <h2 class="text-3xl font-black text-slate-800">${name}</h2>
+                            <p class="text-blue-600 font-bold italic mt-1">📍 العنوان: ${shop.address}</p>
                         </div>
-                        <div class="bg-blue-50 px-3 py-1 rounded-lg border border-blue-100 font-black text-blue-700 text-xs">
-                            فواتير: ${g.items.length}
+                        <div class="text-left">
+                            <p class="text-xs font-bold text-slate-400 uppercase">المبلغ الكلي للصيدلية</p>
+                            <p class="text-2xl font-black text-slate-800">${shop.total.toLocaleString()} د.ع</p>
                         </div>
                     </div>
-                    <div class="space-y-2">
-                        ${g.items.map(inv => `
-                            <div onclick="toggleInv('${inv.id}')" class="invoice-row p-3 flex justify-between items-center cursor-pointer rounded-xl ${inv.checked ? 'bg-emerald-50 opacity-60' : ''}">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-6 h-6 border-2 rounded flex items-center justify-center ${inv.checked ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-slate-200'}">
-                                        ${inv.checked ? '✓' : ''}
-                                    </div>
+                    <div class="space-y-3">
+                        ${shop.invoices.map(inv => `
+                            <div onclick="toggleInv('${inv.id}')" class="flex justify-between items-center p-5 bg-slate-50 rounded-2xl border-2 cursor-pointer transition-all ${inv.checked ? 'border-emerald-500 bg-emerald-50 shadow-inner' : 'border-transparent hover:border-blue-100'}">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-8 h-8 rounded-full border-2 flex items-center justify-center ${inv.checked ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-slate-300 text-slate-300'}">✓</div>
                                     <div>
-                                        <p class="text-xs font-black text-slate-700">#${inv.id}</p>
-                                        <p class="text-[9px] text-slate-400 font-bold uppercase">${inv.date}</p>
+                                        <p class="font-black text-slate-800">فاتورة #${inv.id}</p>
+                                        <p class="text-[10px] text-slate-400 font-bold tracking-widest uppercase">${inv.date}</p>
                                     </div>
                                 </div>
-                                <p class="font-black text-slate-800 num-font">${inv.amount.toLocaleString()}</p>
-                            </div>
-                        `).join('')}
-                    </div>
-                `;
-                list.appendChild(card);
-            });
-            updateTotal();
-        }
-
-        function toggleInv(id) {
-            const item = store.find(x => x.id === id);
-            item.checked = !item.checked;
-            render();
-        }
-
-        function updateTotal() {
-            let total = 0;
-            store.filter(x => x.checked).forEach(i => total += i.amount);
-            document.getElementById('matchTotal').innerText = total.toLocaleString() + " د.ع";
-        }
-    </script>
-</body>
-</html>
