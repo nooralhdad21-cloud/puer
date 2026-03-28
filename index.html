@@ -5,87 +5,42 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>نظام مطابقة مكتب بيور العلمي</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
-    <style>
-        body { font-family: 'IBM Plex Sans Arabic', sans-serif; }
-        .glass-morphism { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
-    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-slate-50 min-h-screen pb-20">
+<body class="bg-gray-100 min-h-screen font-['IBM_Plex_Sans_Arabic']">
 
-    <nav class="bg-blue-900 text-white p-4 sticky top-0 z-50 shadow-lg">
+    <nav class="bg-blue-800 text-white p-4 shadow-md sticky top-0 z-50">
         <div class="container mx-auto flex justify-between items-center">
-            <div class="flex items-center gap-2">
-                <div class="w-8 h-8 bg-white rounded-full flex items-center justify-center text-blue-900 font-bold italic">P</div>
-                <h1 class="text-lg font-bold tracking-tight">بيور العلمي <span class="text-blue-300 text-xs font-normal">Pure Science</span></h1>
-            </div>
-            <div id="userBadge" class="text-xs bg-blue-800 px-3 py-1 rounded-full border border-blue-700 hidden"></div>
+            <h1 class="text-xl font-bold italic">PURE SCIENCE</h1>
+            <span id="userBadge" class="hidden bg-blue-700 px-3 py-1 rounded-full text-sm"></span>
         </div>
     </nav>
 
     <main class="container mx-auto p-4 max-w-2xl">
-        
-        <section id="loginStep" class="mb-6">
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-                <h2 class="text-slate-800 font-bold mb-4 flex items-center gap-2">
-                    <span>👤</span> تعريف الموظف المسؤول
-                </h2>
-                <input type="text" id="employeeName" placeholder="اكتب اسمك الثلاثي..." class="w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all">
-                <button onclick="saveEmployee()" class="w-full mt-3 bg-blue-600 text-white py-3 rounded-xl font-semibold shadow-md active:scale-95 transition-transform">حفظ والهوية</button>
+        <div id="loginStep" class="glass-morphism p-8 rounded-3xl shadow-xl text-center mt-10">
+            <div class="text-5xl mb-4">🩺</div>
+            <h2 class="text-2xl font-bold mb-6 text-gray-800">تسجيل دخول الموظف</h2>
+            <input type="text" id="employeeName" placeholder="أدخل اسمك الثلاثي" class="w-full p-4 border-2 border-gray-200 rounded-2xl mb-4 text-center focus:border-blue-500 outline-none transition-all">
+            <button onclick="saveEmployee()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold shadow-lg hover:bg-blue-700 transition-all">بدء المطابقة</button>
+        </div>
+
+        <div id="uploadStep" class="hidden mt-10 text-center">
+            <div class="bg-white p-10 rounded-3xl border-4 border-dashed border-blue-200">
+                <p class="text-gray-500 font-bold mb-4">ارفع كشف الشرقاط (PDF)</p>
+                <input type="file" id="pdfFile" accept=".pdf" class="hidden">
+                <label for="pdfFile" class="bg-blue-100 text-blue-700 px-8 py-4 rounded-2xl cursor-pointer hover:bg-blue-200 transition-all font-bold inline-block">اختر ملف الكشف</label>
             </div>
-        </section>
+        </div>
 
-        <section id="uploadStep" class="hidden mb-6">
-            <div class="bg-blue-50 border-2 border-dashed border-blue-200 p-8 rounded-2xl text-center cursor-pointer hover:bg-blue-100 transition-colors relative">
-                <input type="file" id="excelFile" class="absolute inset-0 opacity-0 cursor-pointer" accept=".xlsx, .xls">
-                <div class="text-blue-600 text-4xl mb-2">📁</div>
-                <p class="text-blue-800 font-medium">ارفع كشف المكتب (Excel)</p>
-                <p class="text-blue-500 text-xs mt-1">سيتم استخراج المذاخر والف
-
-<link rel="stylesheet" href="css/style.css">
-<script src="script.js"></script>
-</body>
-                    
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام مطابقة مكتب بيور العلمي</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;700&display=swap" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <style>body { font-family: 'IBM Plex Sans Arabic', sans-serif; }</style>
-</head>
-<body class="bg-slate-50 min-h-screen pb-20">
-    <nav class="bg-blue-900 text-white p-4 sticky top-0 z-50 shadow-lg text-center">
-        <h1 class="text-lg font-bold italic">PURE SCIENCE | بيور العلمي</h1>
-    </nav>
-
-    <main class="container mx-auto p-4 max-w-2xl">
-        <section id="loginStep" class="bg-white p-6 rounded-2xl shadow-md border">
-            <h2 class="font-bold mb-4 text-center">👤 تعريف الموظف المسؤول</h2>
-            <input type="text" id="employeeName" placeholder="اكتب اسمك الثلاثي..." class="w-full p-4 border rounded-xl outline-none focus:ring-2 focus:ring-blue-500 text-center">
-            <button onclick="saveEmployee()" class="w-full mt-4 bg-blue-600 text-white py-4 rounded-xl font-bold shadow-lg hover:bg-blue-700 transition-all">حفظ والهوية</button>
-        </section>
-
-        <section id="uploadStep" class="hidden mt-6 bg-white p-8 rounded-2xl shadow-md border text-center">
-            <div class="border-4 border-dashed border-slate-100 p-6 rounded-xl">
-                <p class="mb-4 text-slate-600 font-bold">ارفع كشف المكتب (PDF أو Excel)</p>
-                <input type="file" id="mainFile" accept=".pdf, .xlsx, .xls" class="hidden">
-                <label for="mainFile" class="bg-blue-50 text-blue-700 px-6 py-3 rounded-lg cursor-pointer border border-blue-200 hover:bg-blue-100">اختر الملف</label>
+        <div id="matchStep" class="hidden mt-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="font-bold text-gray-700">الفواتير المكتشفة:</h3>
+                <span id="invoiceCount" class="bg-blue-600 text-white px-3 py-1 rounded-lg text-sm font-bold">0</span>
             </div>
-            <p class="text-xs text-slate-400 mt-4">نظام ذكي لقراءة كشوفات الشرقاط والمحافظات</p>
-        </section>
-
-        <section id="matchStep" class="hidden mt-6">
-            <div id="vendorList" class="grid gap-4"></div>
-        </section>
+            <div id="invoiceList" class="space-y-4"></div>
+        </div>
     </main>
 
     <script src="script.js"></script>
