@@ -3,40 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>بيور العلمي - نظام المطابقة</title>
+    <title>PURE SCIENCE | نظام المطابقة</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Cairo', sans-serif; }
-        .hidden { display: none; }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-slate-50 min-h-screen">
+<body class="bg-slate-50 min-h-screen font-['Cairo']">
     <nav class="bg-blue-900 text-white p-4 shadow-xl sticky top-0 z-50">
-        <div class="container mx-auto flex justify-between items-center">
+        <div class="container mx-auto flex justify-between items-center px-4">
             <h1 class="text-xl font-bold italic">PURE SCIENCE</h1>
-            <span id="userBadge" class="hidden bg-blue-700 px-3 py-1 rounded-full text-xs border border-blue-400"></span>
+            <span id="badge" class="hidden bg-blue-700 px-3 py-1 rounded-full text-[10px] border border-blue-400"></span>
         </div>
     </nav>
 
     <main class="container mx-auto p-4 max-w-xl">
-        <div id="loginStep" class="bg-white p-8 rounded-[2rem] shadow-xl mt-10 text-center border">
+        <div id="loginStep" class="bg-white p-8 rounded-[2rem] shadow-xl mt-10 text-center border animate-in">
             <div class="text-5xl mb-4">🩺</div>
-            <h2 class="text-2xl font-bold mb-6 text-gray-800">تسجيل دخول المندوب</h2>
-            <input type="text" id="nameInput" placeholder="أدخل اسمك الثلاثي" class="w-full p-5 bg-gray-50 border-2 rounded-2xl mb-4 text-center focus:border-blue-500 outline-none transition-all">
-            <button onclick="login()" class="w-full bg-blue-600 text-white py-5 rounded-2xl font-bold shadow-lg hover:bg-blue-700 transition-all">دخول للنظام</button>
+            <h2 class="text-2xl font-bold mb-6 text-gray-800">تسجيل المندوب</h2>
+            <input type="text" id="nameInput" placeholder="أدخل اسمك الثلاثي" class="w-full p-5 bg-gray-50 border-2 rounded-2xl mb-4 text-center focus:border-blue-600 outline-none transition-all">
+            <button onclick="handleLogin()" class="w-full bg-blue-600 text-white py-5 rounded-2xl font-bold shadow-lg hover:bg-blue-700 transition-all active:scale-95">دخول للنظام</button>
         </div>
 
-        <div id="uploadStep" class="hidden mt-10 text-center">
-            <div class="bg-white p-10 rounded-[2rem] border-4 border-dashed border-blue-100">
-                <p class="font-bold text-blue-900 mb-6 text-lg text-center">ارفع كشف المحافظة (PDF)</p>
+        <div id="uploadStep" class="hidden mt-10 text-center animate-in">
+            <div class="bg-white p-10 rounded-[2rem] border-4 border-dashed border-blue-100 shadow-inner">
+                <p class="font-bold text-blue-900 mb-6 text-lg">ارفع كشف المحافظة (PDF)</p>
                 <input type="file" id="pdfInput" accept=".pdf" class="hidden">
-                <label for="pdfInput" class="bg-blue-600 text-white px-12 py-4 rounded-2xl cursor-pointer font-bold inline-block shadow-lg">اختيار ملف PDF</label>
+                <label for="pdfInput" class="bg-blue-600 text-white px-12 py-4 rounded-2xl cursor-pointer font-bold inline-block shadow-lg hover:bg-blue-700 transition-all">اختيار الملف</label>
+                <p class="text-[10px] text-gray-400 mt-4 italic">سيتم قراءة الأسعار والأسماء تلقائياً</p>
             </div>
         </div>
 
-        <div id="listStep" class="hidden mt-8">
+        <div id="listStep" class="hidden mt-6 animate-in">
             <div id="results" class="space-y-4"></div>
         </div>
     </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
