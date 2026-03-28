@@ -3,233 +3,70 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CORE SYNC - نظام المطابقة الاحترافي</title>
+    <title>CORE SYNC - نظام التدقيق المتكامل</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #1e3a8a; --accent: #3b82f6; --bg: #f8fafc; }
-        body { background-color: var(--bg); font-family: 'Cairo', sans-serif; color: #1e293b; }
-        .official-card { background: white; border-radius: 1.5rem; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); transition: all 0.3s ease; }
-        .official-card:hover { box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); border-color: var(--accent); }
-        .btn-prime { background: var(--primary); color: white; transition: 0.3s; box-shadow: 0 4px 14px 0 rgba(30, 58, 138, 0.3); }
-        .btn-prime:hover { background: var(--accent); transform: translateY(-1px); }
-        .drawer { max-height: 0; overflow: hidden; transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
-        .drawer.open { max-height: 5000px; border-top: 1px solid #f1f5f9; }
-        .status-check { width: 24px; height: 24px; border: 2px solid #cbd5e1; border-radius: 6px; cursor: pointer; position: relative; }
-        .status-check.active { background: #10b981; border-color: #10b981; }
-        .status-check.active::after { content: '✓'; color: white; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); font-weight: bold; font-size: 14px; }
-        .num-data { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-weight: 700; }
+        body { background-color: #f1f5f9; font-family: 'Cairo', sans-serif; color: #334155; }
+        .main-card { background: white; border-radius: 1.5rem; border: 1px solid #e2e8f0; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+        .nav-glass { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); border-bottom: 1px solid #e2e8f0; }
+        .invoice-item { transition: all 0.2s; border-right: 5px solid transparent; }
+        .invoice-item.active { border-right-color: #10b981; background-color: #f0fdf4; }
+        .btn-action { background: #1e3a8a; color: white; transition: 0.3s; }
+        .btn-action:hover { background: #2563eb; transform: translateY(-1px); }
+        .num-bold { font-family: 'system-ui'; font-weight: 800; }
     </style>
 </head>
-<body class="pb-20">
+<body class="pb-10">
 
-    <nav class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200 p-4 shadow-sm">
+    <nav class="sticky top-0 z-50 nav-glass p-4 mb-6">
         <div class="container mx-auto flex justify-between items-center px-4">
             <div class="flex items-center gap-3">
-                <div class="w-11 h-11 btn-prime rounded-xl flex items-center justify-center text-xl font-bold shadow-lg">CS</div>
+                <div class="w-12 h-12 bg-blue-900 rounded-2xl flex items-center justify-center shadow-lg">
+                    <span class="text-white font-black text-xl">CS</span>
+                </div>
                 <div>
-                    <h1 class="text-xl font-black text-slate-800 tracking-tighter uppercase leading-none">CORE SYNC</h1>
-                    <p class="text-[9px] font-bold text-blue-600 tracking-[0.2em] uppercase">Enterprise Audit System</p>
+                    <h1 class="text-xl font-black text-slate-900 leading-none">CORE SYNC</h1>
+                    <p class="text-[10px] font-bold text-blue-600 uppercase tracking-tighter mt-1 italic">Professional Audit Hub</p>
                 </div>
             </div>
-            <button id="exportBtn" onclick="exportReport()" class="hidden btn-prime px-6 py-2 rounded-lg text-xs font-bold uppercase tracking-wider">استخراج التقرير النهائي</button>
+            <button id="dlBtn" onclick="generateReport()" class="hidden bg-slate-800 text-white px-6 py-2 rounded-xl text-[10px] font-black uppercase">تصدير التقرير</button>
         </div>
     </nav>
 
-    <main class="container mx-auto px-4 mt-8 max-w-2xl">
+    <main class="container mx-auto px-4 max-w-2xl">
 
-        <div id="welcome" class="official-card p-12 text-center animate-fade-in">
-            <div class="w-20 h-20 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
-            </div>
-            <h2 class="text-2xl font-black text-slate-800 mb-2">منصة المطابقة والتدقيق</h2>
-            <p class="text-slate-500 text-sm mb-10 font-medium leading-relaxed">نظام احترافي مخصص لمطابقة بيانات برنامج أصيل ومكتب بيور العلمي بدقة متناهية.</p>
-            <label class="btn-prime px-16 py-5 rounded-2xl font-black cursor-pointer shadow-2xl inline-block hover:scale-105 transition-transform">
-                رفع البيانات المصدرية
-                <input type="file" id="pdfInput" accept=".pdf" class="hidden">
+        <div id="uploadArea" class="main-card p-12 text-center border-2 border-dashed border-blue-200">
+            <div class="text-5xl mb-4">📥</div>
+            <h2 class="text-2xl font-black text-slate-800 mb-2">منصة التدقيق الموحدة</h2>
+            <p class="text-slate-500 text-sm mb-8 font-medium">متوافق مع تقارير أصيل، بيور، والشرقاط</p>
+            <label class="btn-action px-14 py-4 rounded-2xl font-black cursor-pointer shadow-xl inline-block">
+                اختيار ملف PDF
+                <input type="file" id="fileIn" accept=".pdf" class="hidden">
             </label>
         </div>
 
-        <div id="dashboard" class="hidden space-y-6">
-            <div class="grid grid-cols-2 gap-4">
-                <div class="official-card p-6 bg-gradient-to-br from-white to-blue-50/30">
-                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">مستوى الإنجاز</p>
-                    <div class="flex items-end gap-2">
-                        <h3 id="statPerc" class="text-4xl font-black text-slate-800">0%</h3>
-                        <div id="miniBar" class="h-2 w-full bg-slate-100 rounded-full mb-2 overflow-hidden">
-                            <div id="barInner" class="h-full bg-blue-600 transition-all duration-700" style="width: 0%"></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="official-card p-6">
-                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">إجمالي المطابقة</p>
-                    <h3 id="statSum" class="text-2xl font-black text-blue-700 num-data">0</h3>
-                </div>
+        <div id="stats" class="hidden grid grid-cols-2 gap-4 mb-6">
+            <div class="main-card p-5 border-l-4 border-blue-600">
+                <span class="text-[10px] text-slate-400 font-black uppercase">المطابقة</span>
+                <h3 id="perc" class="text-3xl font-black text-slate-800">0%</h3>
             </div>
-
-            <div class="relative">
-                <input type="text" id="searchInput" onkeyup="renderData()" placeholder="ابحث عن كيان أو رقم فاتورة..." class="w-full p-5 bg-white rounded-2xl border border-slate-200 outline-none font-bold text-sm shadow-sm focus:border-blue-600 focus:ring-1 focus:ring-blue-100 transition-all">
+            <div class="main-card p-5 border-l-4 border-emerald-500">
+                <span class="text-[10px] text-slate-400 font-black uppercase">إجمالي المسدد</span>
+                <h3 id="totalSum" class="text-xl font-black text-emerald-600 num-bold">0</h3>
             </div>
-
-            <div id="auditList" class="space-y-4"></div>
         </div>
+
+        <div id="searchBox" class="hidden mb-6">
+            <input type="text" id="query" onkeyup="render()" placeholder="ابحث باسم الصيدلية، رقم الفاتورة، أو التاريخ..." class="w-full p-5 bg-white rounded-2xl border border-slate-200 shadow-sm outline-none focus:border-blue-500 transition-all font-bold">
+        </div>
+
+        <div id="results" class="space-y-4"></div>
 
     </main>
 
     <script>
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
-        let mainStore = [];
-
-        document.getElementById('pdfInput').addEventListener('change', async (e) => {
-            const file = e.target.files[0];
-            const reader = new FileReader();
-            reader.onload = async function() {
-                const pdf = await pdfjsLib.getDocument(new Uint8Array(this.result)).promise;
-                let textLines = [];
-                for (let i = 1; i <= pdf.numPages; i++) {
-                    const page = await pdf.getPage(i);
-                    const content = await page.getTextContent();
-                    textLines = textLines.concat(content.items.map(s => s.str));
-                }
-                processAuditData(textLines);
-            };
-            reader.readAsArrayBuffer(file);
-        });
-
-        function processAuditData(lines) {
-            mainStore = [];
-            let currentClient = "غير محدد";
-            for (let i = 0; i < lines.length; i++) {
-                let txt = lines[i].trim();
-                if (txt.includes("الاسم") || txt.includes("صيدلية") || txt.includes("مذخر") || txt.includes("مكتب")) {
-                    currentClient = txt.replace(/الاسم:|ѧ|:|_/g, '').trim();
-                }
-                if (/^\d{6}$/.test(txt)) {
-                    let record = {
-                        client: currentClient,
-                        id: txt,
-                        date: lines[i+1] || "---",
-                        val: "0.00", paid: "0.00", rem: "0.00", checked: false
-                    };
-                    let amounts = [];
-                    for (let j = 1; j < 25; j++) {
-                        let c = (lines[i+j] || "").trim();
-                        if (/^[\d,]+\.\d{2}$/.test(c)) amounts.push(c);
-                    }
-                    if (amounts.length >= 3) {
-                        record.val = amounts[0]; record.paid = amounts[1]; record.rem = amounts[2];
-                    } else if (amounts.length === 2) {
-                        record.val = amounts[0]; record.rem = amounts[1];
-                    }
-                    mainStore.push(record);
-                }
-            }
-            document.getElementById('welcome').classList.add('hidden');
-            document.getElementById('dashboard').classList.remove('hidden');
-            document.getElementById('exportBtn').classList.remove('hidden');
-            renderData();
-        }
-
-        function renderData() {
-            const container = document.getElementById('auditList');
-            container.innerHTML = "";
-            const q = document.getElementById('searchInput').value.toLowerCase();
-
-            let groups = {};
-            mainStore.forEach(v => {
-                if (v.client.toLowerCase().includes(q) || v.id.includes(q)) {
-                    if (!groups[v.client]) groups[v.client] = { items: [], total: 0 };
-                    groups[v.client].items.push(v);
-                    groups[v.client].total += parseFloat(v.rem.replace(/,/g, ''));
-                }
-            });
-
-            Object.keys(groups).forEach(name => {
-                const g = groups[name];
-                const card = document.createElement('div');
-                card.className = "official-card overflow-hidden";
-                card.innerHTML = `
-                    <div onclick="this.nextElementSibling.classList.toggle('open')" class="p-5 flex justify-between items-center cursor-pointer hover:bg-slate-50 transition-colors">
-                        <div class="flex items-center gap-4">
-                            <div class="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center font-bold text-slate-600 text-sm border border-slate-200">
-                                ${g.items.length}
-                            </div>
-                            <div>
-                                <h3 class="font-bold text-slate-800 text-[13px]">${name}</h3>
-                                <p class="text-[10px] font-bold text-blue-600 uppercase">متبقي الذمة: <span class="num-data">${g.total.toLocaleString()}</span></p>
-                            </div>
-                        </div>
-                        <span class="text-slate-400 text-xs">▼</span>
-                    </div>
-                    <div class="drawer bg-slate-50/50">
-                        <div class="p-4 space-y-3">
-                            ${g.items.map(inv => `
-                                <div class="bg-white p-4 rounded-xl border border-slate-200 flex justify-between items-center shadow-sm">
-                                    <div class="flex-1">
-                                        <div class="flex gap-2 items-center mb-2">
-                                            <span class="text-[9px] font-black text-slate-500 bg-slate-100 px-2 py-0.5 rounded">ID: ${inv.id}</span>
-                                            <span class="text-[9px] text-slate-400 font-bold italic">${inv.date}</span>
-                                        </div>
-                                        <div class="grid grid-cols-3 gap-2">
-                                            <div class="text-center">
-                                                <p class="text-[7px] text-slate-400 font-bold uppercase mb-1">الفاتورة</p>
-                                                <p class="text-[10px] font-bold num-data">${inv.val}</p>
-                                            </div>
-                                            <div class="text-center">
-                                                <p class="text-[7px] text-emerald-500 font-bold uppercase mb-1">المدفوع</p>
-                                                <p class="text-[10px] font-bold text-emerald-600 num-data">${inv.paid}</p>
-                                            </div>
-                                            <div class="text-center bg-blue-50 rounded-lg p-1">
-                                                <p class="text-[7px] text-blue-500 font-bold uppercase mb-1">المتبقي</p>
-                                                <p class="text-[10px] font-black text-blue-700 num-data">${inv.rem}</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div onclick="toggleCheck('${inv.id}')" class="status-check ml-4 ${inv.checked ? 'active' : ''}"></div>
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                `;
-                container.appendChild(card);
-            });
-            updateStats();
-        }
-
-        function toggleCheck(id) {
-            const item = mainStore.find(x => x.id === id);
-            item.checked = !item.checked;
-            renderData();
-        }
-
-        function updateStats() {
-            const total = mainStore.length;
-            const done = mainStore.filter(x => x.checked).length;
-            const perc = total === 0 ? 0 : Math.round((done / total) * 100);
-            let sum = 0;
-            mainStore.filter(x => x.checked).forEach(v => sum += parseFloat(v.rem.replace(/,/g, '')));
-            document.getElementById('statPerc').innerText = perc + "%";
-            document.getElementById('barInner').style.width = perc + "%";
-            document.getElementById('statSum').innerText = sum.toLocaleString() + " د.ع";
-        }
-
-        function exportReport() {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF('p', 'mm', 'a4');
-            doc.setFontSize(18); doc.text("CORE SYNC - AUDIT REPORT", 105, 20, { align: "center" });
-            const data = mainStore.filter(x => x.checked).map(v => [v.rem, v.paid, v.val, v.client, v.id]);
-            doc.autoTable({
-                startY: 30,
-                head: [['Remaining', 'Paid', 'Value', 'Client', 'ID']],
-                body: data,
-                headStyles: { fillColor: [30, 58, 138] },
-                styles: { font: 'helvetica', fontSize: 8 }
-            });
-            doc.save("CORE_SYNC_REPORT.pdf");
-        }
-    </script>
-</body>
-</html>
+        pdfjsLib.GlobalWorkerOptions.workerSrc = '
