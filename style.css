@@ -1,14 +1,3 @@
 .hidden { display: none; }
-
-.animate-in {
-    animation: fadeInUp 0.5s ease-out forwards;
-}
-
-@keyframes fadeInUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-input, button {
-    -webkit-tap-highlight-color: transparent;
-}
+button { transition: all 0.2s ease; }
+button:active { transform: scale(0.95); }
