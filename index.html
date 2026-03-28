@@ -6,30 +6,26 @@
     <title>بيور العلمي - نظام المطابقة الذكي</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-gray-50 min-h-screen">
+<body class="bg-slate-50 min-h-screen font-['Cairo']">
     <nav class="bg-blue-900 text-white p-4 shadow-xl sticky top-0 z-50">
         <div class="container mx-auto flex justify-between items-center">
-            <h1 class="text-lg font-bold">PURE SCIENCE | بيور العلمي</h1>
-            <span id="userName" class="text-xs bg-blue-800 px-3 py-1 rounded-full hidden"></span>
+            <h1 class="text-xl font-bold italic tracking-wider">PURE SCIENCE</h1>
+            <span id="badge" class="hidden bg-blue-700 px-4 py-1 rounded-full text-xs border border-blue-400"></span>
         </div>
     </nav>
 
     <main class="container mx-auto p-4 max-w-xl">
-        <div id="loginSection" class="bg-white p-8 rounded-3xl shadow-sm mt-10 text-center">
-            <div class="text-5xl mb-4">👨‍⚕️</div>
-            <h2 class="font-bold mb-6 text-xl text-gray-800">تعريف الموظف المسؤول</h2>
-            <input type="text" id="empName" placeholder="أدخل اسمك الثلاثي" class="w-full p-4 border-2 rounded-2xl mb-4 text-center focus:border-blue-500 outline-none transition-all">
-            <button onclick="login()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold shadow-lg hover:bg-blue-700 transition-all">بدء العمل</button>
+        <div id="loginSection" class="bg-white p-8 rounded-[2rem] shadow-xl mt-10 border border-gray-100 text-center">
+            <div class="bg-blue-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
+                <span class="text-4xl">👤</span>
+            </div>
+            <h2 class="text-2xl font-bold mb-2 text-gray-800">مرحباً بك</h2>
+            <p class="text-gray-500 mb-8 text-sm">يرجى تسجيل الدخول لبدء عملية المطابقة</p>
+            <input type="text" id="empNameInput" placeholder="أدخل اسمك الثلاثي" class="w-full p-5 bg-gray-50 border-2 border-gray-100 rounded-2xl mb-4 text-center focus:border-blue-500 focus:bg-white outline-none transition-all">
+            <button onclick="handleLogin()" class="w-full bg-blue-600 text-white py-5 rounded-2xl font-bold shadow-lg hover:bg-blue-700 active:scale-95 transition-all">دخول للنظام</button>
         </div>
 
-        <div id="uploadSection" class="hidden mt-10 text-center animate-fade">
-            <div class="bg-blue-50 p-10 rounded-3xl border-4 border-dashed border-blue-200">
-                <img src="https://cdn-icons-png.flaticon.com/512/337/337946.png" class="w-16 mx-auto mb-4 opacity-50">
-                <p class="font-bold text-blue-900 mb-4 text-lg">ارفع كشف PDF للمحافظة</p>
-                <input type="file" id="pdfFile" accept=".pdf" class="hidden">
-                <label for="pdfFile" class="bg-blue-600 text-white px-10 py-4 rounded-2xl cursor-pointer font-bold inline-block shadow-md hover:scale-105 transition-all">اختيار ملف الكشف</label>
-            </div>
-        </div>
+        <div id="uploadSection" class="hidden mt-10 text-center animate-in">
