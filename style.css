@@ -1,32 +1,27 @@
-/* تحسينات إضافية لتجربة الموبايل */
-input:focus {
-    transform: translateY(-1px);
+.glass-morphism {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-.vendor-card {
-    transition: all 0.2s ease;
+.hidden { display: none; }
+
+.invoice-card {
+    transition: all 0.3s ease;
+    border-right: 6px solid #2563eb;
 }
 
-.vendor-card:active {
-    background-color: #f1f5f9;
+.invoice-card.matched {
+    border-right-color: #10b981;
+    opacity: 0.7;
+    background-color: #f0fdf4;
 }
 
-/* حركة الأنيميشن عند المطابقة */
-.matched-anim {
-    animation: successPulse 0.5s ease;
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes successPulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.05); background-color: #dcfce7; }
-    100% { transform: scale(1); }
-}
-
-/* Scrollbar مخفي لإعطاء مظهر تطبيق */
-::-webkit-scrollbar {
-    width: 4px;
-}
-::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
-    border-radius: 10px;
+#invoiceList > div {
+    animation: fadeIn 0.4s ease forwards;
 }
