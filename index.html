@@ -3,176 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام بيور لإدارة الكشوفات</title>
+    <title>نظام بيور | إدارة كشوفات الشرقاط</title>
+    <link rel="stylesheet" href="style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
-    
-    <style>
-        body { font-family: 'Cairo', sans-serif; background-color: #f0f2f5; }
-        .checked-row { background-color: #d1fae5 !important; text-decoration: line-through; opacity: 0.6; }
-        .card-shadow { transition: all 0.3s ease; border: 1px solid #e5e7eb; }
-        .card-shadow:hover { transform: translateY(-5px); border-color: #4f46e5; box-shadow: 0 10px 25px -5px rgba(79, 70, 229, 0.2); }
-        @media print { .no-print { display: none !important; } .print-only { display: block !important; } }
-    </style>
 </head>
 <body class="p-4 md:p-8">
 
     <div class="max-w-6xl mx-auto">
-        <div class="bg-indigo-900 text-white p-8 rounded-3xl shadow-2xl mb-10 no-print">
-            <div class="flex flex-col md:flex-row justify-between items-center gap-6">
-                <div class="text-center md:text-right">
-                    <h1 class="text-3xl font-black tracking-tight text-indigo-100 italic">PUREPHARMA SYSTEM</h1>
-                    <p class="text-indigo-300 font-bold mt-1">نظام تدقيق كشوفات الشرقاط - النسخة الموحدة</p>
-                </div>
-                <div class="flex flex-col items-center">
-                    <input type="file" id="pdfFile" class="hidden" accept=".pdf">
-                    <button onclick="document.getElementById('pdfFile').click()" class="bg-indigo-500 hover:bg-indigo-400 text-white px-10 py-4 rounded-2xl font-black shadow-lg transition-all active:scale-95">
-                        📂 ارفع ملف الـ 27 صفحة
-                    </button>
-                    <div id="loader" class="hidden mt-3 text-sm font-bold animate-pulse text-indigo-200">جاري قراءة وتحليل البيانات...</div>
-                </div>
+        <div class="bg-slate-900 text-white p-8 rounded-3xl shadow-xl mb-10 no-print flex justify-between items-center">
+            <div>
+                <h1 class="text-2xl font-black italic text-indigo-400">PUREPHARMA v3.0</h1>
+                <p class="text-slate-400 text-sm">نظام عزل العملاء بناءً على الرقم الفريد</p>
+            </div>
+            <div class="flex flex-col items-end">
+                <input type="file" id="pdfFile" class="hidden" accept=".pdf">
+                <button onclick="document.getElementById('pdfFile').click()" class="bg-indigo-600 hover:bg-indigo-500 px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-indigo-500/20">رفع ملف الـ 27 صفحة</button>
+                <div id="loader" class="hidden mt-2 text-xs animate-pulse text-indigo-400 font-bold">جاري تحليل البيانات...</div>
             </div>
         </div>
 
-        <div id="clientsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 no-print">
-            </div>
+        <div id="clientsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 no-print"></div>
 
-        <div id="detailsModal" class="fixed inset-0 bg-slate-900/80 hidden flex items-center justify-center p-4 z-50 backdrop-blur-sm">
-            <div class="bg-white rounded-3xl w-full max-w-4xl max-h-[90vh] overflow-hidden shadow-2xl flex flex-col">
-                <div id="modalHeader" class="p-6 bg-slate-50 border-b flex justify-between items-center">
+        <div id="detailsModal" class="fixed inset-0 bg-black/70 hidden flex items-center justify-center p-4 z-50 backdrop-blur-sm">
+            <div class="bg-white rounded-3xl w-full max-w-4xl max-h-[90vh] overflow-hidden shadow-2xl flex flex-col scale-in">
+                <div class="p-6 border-b flex justify-between items-center bg-slate-50">
                     <button onclick="closeModal()" class="text-slate-400 hover:text-red-500 font-bold text-xl transition-colors">✕</button>
-                    <div class="flex gap-3">
+                    <div class="flex gap-2">
                         <button onclick="window.print()" class="bg-slate-800 text-white px-5 py-2 rounded-xl text-sm font-bold hover:bg-black transition">🖨️ طباعة تقرير</button>
-                        <button id="whatsappBtn" class="bg-green-600 text-white px-5 py-2 rounded-xl text-sm font-bold hover:bg-green-700 transition">💬 واتساب</button>
+                        <button id="waBtn" class="bg-green-600 text-white px-5 py-2 rounded-xl text-sm font-bold hover:bg-green-700 transition">💬 واتساب</button>
                     </div>
                 </div>
-                <div id="modalContent" class="p-8 overflow-y-auto overflow-x-hidden">
-                    </div>
+                <div id="modalContent" class="p-8 overflow-y-auto"></div>
             </div>
         </div>
     </div>
 
-    <script>
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
-        let allData = {};
-
-        document.getElementById('pdfFile').addEventListener('change', async (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            document.getElementById('loader').classList.remove('hidden');
-            const arrayBuffer = await file.arrayBuffer();
-            const pdf = await pdfjsLib.getDocument(arrayBuffer).promise;
-            allData = {};
-
-            for (let i = 1; i <= pdf.numPages; i++) {
-                const page = await pdf.getPage(i);
-                const text = await page.getTextContent();
-                // تجميع النص مع الحفاظ على المسافات لمعالجة التقطيع
-                let pageText = text.items.map(item => item.str).join(' ');
-                
-                // البحث عن رقم الحساب (ID) والاسم الخام
-                let idMatch = pageText.match(/(?:رقم|رق م|الحساب)[:\-\s]*(\d{4,5})/);
-                let nameMatch = pageText.match(/(?:الاسم|الاس م)[:\-\s]*(.*?)(?=رقم|رق م|الموبايل|الموباي)/);
-
-                if (idMatch) {
-                    let id = idMatch[1];
-                    let rawName = nameMatch ? nameMatch[1].trim() : "اسم غير واضح";
-
-                    if (!allData[id]) {
-                        allData[id] = { id: id, name: rawName, bills: [], total: 0, firstPage: i };
-                    }
-
-                    // استخراج مبالغ الفواتير (تعديل النمط ليناسب أرقام المبالغ في أصيل)
-                    let billLines = pageText.match(/(\d{6,8})\s+(\d{4}\/\d{1,2}\/\d{1,2})\s+([\d,]+\.\d{2})/g);
-                    if (billLines) {
-                        billLines.forEach(line => {
-                            let parts = line.split(/\s+/);
-                            allData[id].bills.push({ num: parts[0], date: parts[1], amount: parts[2] });
-                            allData[id].total += parseFloat(parts[2].replace(/,/g, ''));
-                        });
-                    }
-                }
-            }
-            renderGrid();
-            document.getElementById('loader').classList.add('hidden');
-        });
-
-        function renderGrid() {
-            const grid = document.getElementById('clientsGrid');
-            grid.innerHTML = "";
-            Object.values(allData).forEach(client => {
-                grid.innerHTML += `
-                    <div class="bg-white p-6 rounded-2xl card-shadow cursor-pointer" onclick="showDetails('${client.id}')">
-                        <div class="flex justify-between items-center mb-4">
-                            <span class="bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full text-xs font-black">رقم الحساب: ${client.id}</span>
-                            <span class="text-slate-300 text-xs">صـ ${client.firstPage}</span>
-                        </div>
-                        <h3 class="text-lg font-black text-slate-800 leading-tight mb-4 text-right">(${client.name})</h3>
-                        <div class="flex justify-between items-end border-t pt-4">
-                            <span class="text-slate-400 text-xs font-bold">المتبقي الإجمالي</span>
-                            <span class="text-indigo-600 font-black text-xl">${client.total.toLocaleString()} د.ع</span>
-                        </div>
-                    </div>`;
-            });
-        }
-
-        function showDetails(id) {
-            const client = allData[id];
-            const modal = document.getElementById('detailsModal');
-            const content = document.getElementById('modalContent');
-            const waBtn = document.getElementById('whatsappBtn');
-            
-            modal.classList.remove('hidden');
-            waBtn.onclick = () => shareWhatsApp(id);
-
-            content.innerHTML = `
-                <div class="text-right mb-8">
-                    <h2 class="text-3xl font-black text-slate-900">${client.name}</h2>
-                    <p class="text-slate-500 font-bold mt-2 italic">نبذة: عميل من منطقة الشرقاط - كشف حساب تفصيلي</p>
-                </div>
-
-                <div class="overflow-x-auto">
-                    <table class="w-full text-right border-collapse">
-                        <thead>
-                            <tr class="bg-slate-100 text-slate-600 border-b-2 border-slate-200">
-                                <th class="p-4 font-black">مطابقة</th>
-                                <th class="p-4 font-black">رقم الفاتورة</th>
-                                <th class="p-4 font-black text-center">التاريخ</th>
-                                <th class="p-4 font-black text-left font-mono">المبلغ المتبقي</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-100">
-                            ${client.bills.map((bill, index) => `
-                                <tr id="row-${index}" class="hover:bg-slate-50 transition">
-                                    <td class="p-4"><input type="checkbox" onchange="toggleRow(this, 'row-${index}')" class="w-6 h-6 accent-indigo-600 cursor-pointer"></td>
-                                    <td class="p-4 font-bold text-slate-700 font-mono">${bill.num}</td>
-                                    <td class="p-4 text-slate-500 text-center font-bold text-sm">${bill.date}</td>
-                                    <td class="p-4 font-black text-indigo-900 text-left text-lg">${bill.amount}</td>
-                                </tr>`).join('')}
-                        </tbody>
-                    </table>
-                </div>
-
-                <div class="mt-8 bg-indigo-900 text-white p-6 rounded-2xl flex justify-between items-center shadow-lg">
-                    <span class="text-lg font-bold opacity-80 uppercase tracking-widest">Grand Total</span>
-                    <span class="text-3xl font-black">${client.total.toLocaleString()} د.ع</span>
-                </div>
-            `;
-        }
-
-        function toggleRow(checkbox, rowId) {
-            document.getElementById(rowId).classList.toggle('checked-row', checkbox.checked);
-        }
-
-        function closeModal() { document.getElementById('detailsModal').classList.add('hidden'); }
-
-        function shareWhatsApp(id) {
-            const client = allData[id];
-            let message = `*كشف حساب مكتب بيور*%0A-----------------------%0A*العميل:* ${client.name}%0A*رقم الحساب:* ${client.id}%0A*الإجمالي المتبقي:* ${client.total.toLocaleString()} د.ع%0A-----------------------%0A_يرجى المطابقة والتدقيق_`;
-            window.open(`https://wa.me/?text=${message}`, '_blank');
-        }
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>
