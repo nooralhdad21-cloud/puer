@@ -3,55 +3,143 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pure Science Pro Dashboard</title>
+    <title>Pure Pro Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <style>
+        body { background-color: #f1f5f9; font-family: 'Cairo', sans-serif; -webkit-tap-highlight-color: transparent; }
+        .hidden { display: none; }
+        .animate-fade { animation: fadeIn 0.4s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        input[type="checkbox"] { appearance: none; -webkit-appearance: none; width: 40px; height: 40px; border: 3px solid #cbd5e1; border-radius: 50%; cursor: pointer; position: relative; transition: all 0.3s; background: white; }
+        input[type="checkbox"]:checked { background-color: #10b981; border-color: #10b981; transform: scale(1.1); }
+        input[type="checkbox"]:checked::after { content: "✓"; color: white; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-weight: bold; font-size: 20px; }
+    </style>
 </head>
-<body class="bg-slate-100 min-h-screen font-['Cairo']">
+<body>
 
-    <nav class="bg-blue-900 text-white p-4 shadow-2xl sticky top-0 z-50">
+    <nav class="bg-blue-900 text-white p-4 shadow-xl sticky top-0 z-50">
         <div class="container mx-auto flex justify-between items-center px-4">
-            <h1 class="text-2xl font-black italic tracking-tighter">PURE <span class="text-blue-400">PRO</span></h1>
-            <div id="userStatus" class="hidden bg-blue-800 px-4 py-1 rounded-full text-xs border border-blue-400 animate-pulse">متصل الآن</div>
+            <h1 class="text-xl font-black italic">PURE <span class="text-blue-400">PRO</span></h1>
+            <div id="userBadge" class="hidden bg-blue-800 px-3 py-1 rounded-full text-[10px] border border-blue-400"></div>
         </div>
     </nav>
 
-    <main class="container mx-auto p-4 max-w-2xl">
+    <main class="container mx-auto p-4 max-w-xl">
         
-        <div id="liveDashboard" class="hidden grid grid-cols-2 gap-4 mb-8">
-            <div class="bg-white p-6 rounded-[2.5rem] shadow-xl border-b-8 border-blue-600 text-center transform transition hover:scale-105">
-                <p class="text-gray-400 text-[10px] font-bold uppercase mb-2">إجمالي الفواتير</p>
-                <span id="statTotal" class="text-4xl font-black text-slate-800">0</span>
+        <div id="statsBoard" class="hidden grid grid-cols-2 gap-4 mb-8 animate-fade">
+            <div class="bg-white p-6 rounded-[2rem] shadow-md border-b-8 border-blue-600 text-center">
+                <p class="text-gray-400 text-[10px] font-bold mb-1">الكلي</p>
+                <span id="tCount" class="text-3xl font-black text-slate-800">0</span>
             </div>
-            <div class="bg-white p-6 rounded-[2.5rem] shadow-xl border-b-8 border-red-500 text-center transform transition hover:scale-105">
-                <p class="text-gray-400 text-[10px] font-bold uppercase mb-2">غير مطابقة</p>
-                <span id="statUnmatched" class="text-4xl font-black text-red-600">0</span>
-            </div>
-        </div>
-
-        <div id="stepLogin" class="bg-white p-10 rounded-[3rem] shadow-2xl mt-10 text-center border border-white/50">
-            <div class="text-6xl mb-6">📊</div>
-            <h2 class="text-2xl font-black text-slate-800 mb-6">نظام المطابقة الذكي</h2>
-            <input type="text" id="userName" placeholder="اسم المندوب المسؤول" class="w-full p-5 bg-slate-50 border-2 border-slate-100 rounded-3xl mb-4 text-center focus:border-blue-600 outline-none transition-all font-bold">
-            <button onclick="startSystem()" class="w-full bg-blue-600 text-white py-5 rounded-3xl font-black text-lg shadow-[0_10px_20px_rgba(37,99,235,0.3)] hover:bg-blue-700 active:scale-95 transition-all">فتح الداشبورد</button>
-        </div>
-
-        <div id="stepUpload" class="hidden mt-10 animate-fade-in">
-            <div class="bg-white p-12 rounded-[3rem] border-4 border-dashed border-blue-200 shadow-inner text-center">
-                <div class="text-5xl mb-4 opacity-30">📁</div>
-                <p class="font-bold text-slate-700 mb-8">ارفع كشف (الشرقاط) بصيغة PDF</p>
-                <input type="file" id="pdfInput" accept=".pdf" class="hidden">
-                <label for="pdfInput" class="bg-blue-600 text-white px-12 py-5 rounded-3xl cursor-pointer font-black shadow-xl hover:bg-blue-700 transition-all inline-block">اختيار الملف</label>
+            <div class="bg-white p-6 rounded-[2rem] shadow-md border-b-8 border-red-500 text-center">
+                <p class="text-gray-400 text-[10px] font-bold mb-1">غير مطابق</p>
+                <span id="uCount" class="text-3xl font-black text-red-600">0</span>
             </div>
         </div>
 
-        <div id="stepList" class="hidden space-y-4 mt-4 pb-20">
+        <div id="loginStep" class="bg-white p-10 rounded-[2.5rem] shadow-2xl mt-10 text-center animate-fade">
+            <div class="text-5xl mb-6">👔</div>
+            <h2 class="text-xl font-black mb-6">نظام مطابقة المندوبين</h2>
+            <input type="text" id="userName" placeholder="الاسم الثلاثي للمندوب" class="w-full p-5 bg-slate-50 border-2 rounded-2xl mb-4 text-center focus:border-blue-600 outline-none font-bold">
+            <button onclick="initSystem()" class="w-full bg-blue-600 text-white py-5 rounded-2xl font-black shadow-lg active:scale-95 transition-all">دخول للداشبورد</button>
+        </div>
+
+        <div id="uploadStep" class="hidden mt-10 text-center animate-fade">
+            <div class="bg-white p-12 rounded-[2.5rem] border-4 border-dashed border-blue-100 shadow-inner">
+                <p class="font-bold text-blue-900 mb-6 text-lg">ارفع كشف PDF (الشرقاط)</p>
+                <input type="file" id="pdfFile" accept=".pdf" class="hidden">
+                <label for="pdfFile" class="bg-blue-600 text-white px-12 py-4 rounded-2xl cursor-pointer font-black shadow-lg inline-block">اختر الملف</label>
             </div>
+        </div>
+
+        <div id="listStep" class="hidden space-y-4 mt-4 pb-10"></div>
 
     </main>
 
-    <script src="script.js"></script>
+    <script>
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
+        let dataStore = [];
+        let remaining = 0;
+
+        function initSystem() {
+            const name = document.getElementById('userName').value;
+            if (name.length < 3) return alert("سجل اسمك أولاً");
+            document.getElementById('userBadge').innerText = "المندوب: " + name;
+            document.getElementById('userBadge').classList.remove('hidden');
+            document.getElementById('loginStep').classList.add('hidden');
+            document.getElementById('uploadStep').classList.remove('hidden');
+        }
+
+        document.getElementById('pdfFile').addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            const reader = new FileReader();
+            reader.onload = async function() {
+                const typedarray = new Uint8Array(this.result);
+                const pdf = await pdfjsLib.getDocument(typedarray).promise;
+                let textLines = [];
+                for (let i = 1; i <= pdf.numPages; i++) {
+                    const page = await pdf.getPage(i);
+                    const content = await page.getTextContent();
+                    textLines = textLines.concat(content.items.map(item => item.str));
+                }
+                processPDF(textLines);
+            };
+            reader.readAsArrayBuffer(file);
+        });
+
+        function processPDF(lines) {
+            dataStore = [];
+            for (let i = 0; i < lines.length; i++) {
+                let val = lines[i].trim();
+                if (/^\d{5,6}$/.test(val)) {
+                    let item = { id: val, pharmacy: "صيدلية غير محددة", price: "0.00", date: "---", done: false };
+                    for (let j = 1; j <= 15; j++) {
+                        let p = lines[i - j] || "";
+                        if (/\d{2}\/\d{2}\/\d{4}/.test(p)) item.date = p;
+                        if (/[\d,]+\.\d{2}/.test(p) && item.price === "0.00") item.price = p;
+                        if (/[\u0600-\u06FF]/.test(p) && item.pharmacy === "صيدلية غير محددة" && p.length > 5) item.pharmacy = p;
+                    }
+                    dataStore.push(item);
+                }
+            }
+            remaining = dataStore.length;
+            updateUI();
+        }
+
+        function updateUI() {
+            document.getElementById('tCount').innerText = dataStore.length;
+            document.getElementById('uCount').innerText = remaining;
+            document.getElementById('statsBoard').classList.remove('hidden');
+            document.getElementById('uploadStep').classList.add('hidden');
+            document.getElementById('listStep').classList.remove('hidden');
+
+            const container = document.getElementById('listStep');
+            container.innerHTML = "";
+            dataStore.forEach((inv, idx) => {
+                const div = document.createElement('div');
+                div.className = `bg-white p-5 rounded-[2rem] shadow-sm border-r-[10px] flex justify-between items-center transition-all ${inv.done ? 'border-green-500 opacity-50' : 'border-blue-600'}`;
+                div.innerHTML = `
+                    <div class="flex-1">
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="text-[10px] bg-blue-50 text-blue-600 px-2 py-0.5 rounded-lg font-bold">#${inv.id}</span>
+                            <span class="text-[10px] text-gray-400 font-bold">${inv.date}</span>
+                        </div>
+                        <h4 class="font-bold text-gray-800 text-sm mb-1">${inv.pharmacy}</h4>
+                        <p class="text-blue-700 font-black text-xs">المبلغ: ${inv.price}</p>
+                    </div>
+                    <input type="checkbox" ${inv.done ? 'checked' : ''} onchange="toggle(${idx})">
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function toggle(idx) {
+            dataStore[idx].done = !dataStore[idx].done;
+            remaining = dataStore.filter(x => !x.done).length;
+            updateUI();
+        }
+    </script>
 </body>
 </html>
