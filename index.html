@@ -2,138 +2,159 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>PurePharma | نظام الإدارة والتدقيق المركزي</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PurePharma | نظام إدارة المحافظات والمدن</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        body { background: #f8fafc; font-family: 'Cairo', sans-serif; overflow: hidden; }
-        .sidebar { width: 350px; height: 100vh; background: white; border-left: 2px solid #e2e8f0; overflow-y: auto; }
-        .main-content { flex: 1; height: 100vh; overflow-y: auto; background: #f1f5f9; }
-        .live-stat { animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
-        .pharmacy-item { cursor: pointer; transition: 0.2s; border-bottom: 1px solid #f1f5f9; }
-        .pharmacy-item:hover { background: #eff6ff; }
-        .pharmacy-item.active { background: #2563eb; color: white; }
+        body { background: #f4f7fa; font-family: 'Cairo', sans-serif; }
+        .glass-card { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); }
+        .sidebar { width: 350px; height: 100vh; position: fixed; right: 0; top: 0; background: #fff; border-left: 1px solid #e5e7eb; z-index: 40; }
+        .main-content { margin-right: 350px; padding: 2rem; min-height: 100vh; }
+        .pharmacy-active { background: #eff6ff; border-right: 4px solid #2563eb; }
+        .num-font { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
     </style>
 </head>
-<body class="flex">
+<body>
 
-    <aside class="sidebar flex flex-col">
-        <div class="p-6 bg-white border-b-2 sticky top-0 z-10">
-            <h1 class="text-xl font-black text-blue-900 mb-2 italic">PUREPHARMA PRO</h1>
-            <input type="file" id="pdfFile" class="hidden" accept=".pdf">
-            <button onclick="document.getElementById('pdfFile').click()" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold hover:bg-blue-700 transition-all">رفع الملف الرئيسي</button>
-            <input type="text" id="search" onkeyup="renderSidebar()" placeholder="بحث عن صيدلية..." class="w-full mt-4 p-3 bg-gray-50 border rounded-lg text-sm outline-none focus:border-blue-500">
+    <aside class="sidebar flex flex-col shadow-2xl">
+        <div class="p-6 border-b">
+            <h1 class="text-2xl font-black text-blue-900 mb-1 italic">PUREPHARMA</h1>
+            <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">نظام التدقيق المركزي</p>
         </div>
-        <div id="pharmacyList" class="flex-1">
-            <div class="p-10 text-center text-gray-400 font-bold">يرجى رفع الملف لعرض قائمة الصيدليات</div>
+        
+        <div class="p-4 bg-gray-50 border-b">
+            <input type="file" id="pdfUpload" class="hidden" accept=".pdf">
+            <button onclick="document.getElementById('pdfUpload').click()" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold hover:bg-blue-700 transition-all shadow-lg mb-3">رفع كشف المدينة</button>
+            <input type="text" id="searchBox" onkeyup="renderSidebar()" placeholder="بحث في العملاء..." class="w-full p-3 rounded-lg border outline-none text-sm focus:border-blue-500">
+        </div>
+
+        <div id="customerList" class="flex-1 overflow-y-auto">
+            <div class="p-10 text-center text-gray-300 font-bold italic">ارفع ملف PDF لبدء الجرد</div>
         </div>
     </aside>
 
-    <main class="main-content flex flex-col">
-        <header class="p-6 bg-white shadow-sm flex gap-6">
-            <div class="flex-1 bg-blue-900 p-4 rounded-2xl text-white">
-                <p class="text-[10px] font-bold opacity-70 uppercase italic">الحالة الحية | Live Status</p>
-                <h2 id="liveTotal" class="text-2xl font-black mt-1">0 <span class="text-xs">د.ع</span></h2>
+    <main class="main-content">
+        <div id="headerInfo" class="hidden mb-8 flex justify-between items-end">
+            <div>
+                <nav class="flex text-sm text-gray-500 font-bold mb-2">
+                    <span id="provinceLabel" class="text-blue-600">محافظة ...</span>
+                    <span class="mx-2">/</span>
+                    <span id="cityLabel">مدينة ...</span>
+                </nav>
+                <h2 class="text-3xl font-black text-slate-800">تفاصيل فواتير المدينة</h2>
             </div>
-            <div class="flex-1 bg-emerald-600 p-4 rounded-2xl text-white">
-                <p class="text-[10px] font-bold opacity-70 uppercase italic">إجمالي المطابقة المختارة</p>
-                <h2 id="liveMatch" class="text-2xl font-black mt-1">0 <span class="text-xs">د.ع</span></h2>
+            <div class="flex gap-4">
+                <div class="bg-white p-4 rounded-2xl shadow-sm border text-center min-w-[120px]">
+                    <p class="text-[10px] font-bold text-gray-400">عدد العملاء</p>
+                    <p id="clientCount" class="text-xl font-black text-slate-800">0</p>
+                </div>
+                <div class="bg-blue-900 p-4 rounded-2xl shadow-lg text-center min-w-[180px]">
+                    <p class="text-[10px] font-bold text-blue-200">إجمالي ديون المدينة</p>
+                    <p id="cityTotal" class="text-xl font-black text-white num-font">0</p>
+                </div>
             </div>
-            <button onclick="generateReport()" class="bg-amber-500 text-white px-8 rounded-2xl font-black hover:bg-amber-600 shadow-lg shadow-amber-200">تحميل تقرير المدير</button>
-        </header>
+        </div>
 
-        <div id="detailsArea" class="p-8">
-            <div class="max-w-3xl mx-auto text-center mt-20">
-                <div class="text-6xl mb-6">📊</div>
-                <h2 class="text-2xl font-black text-slate-400 italic">بانتظار اختيار صيدلية لعرض تفاصيل الفواتير والعنوان</h2>
+        <div id="detailsWorkspace">
+            <div class="flex flex-col items-center justify-center mt-32 text-gray-300">
+                <svg class="w-24 h-24 mb-4 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                <p class="text-xl font-bold italic text-slate-400">لم يتم اختيار عميل بعد</p>
             </div>
         </div>
     </main>
 
     <script>
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
-        let store = {}; 
-        let currentShop = null;
+        let mainData = {}; 
+        let currentActive = null;
 
-        document.getElementById('pdfFile').addEventListener('change', async (e) => {
+        document.getElementById('pdfUpload').addEventListener('change', async (e) => {
             const file = e.target.files[0];
             if (!file) return;
 
             const reader = new FileReader();
             reader.onload = async function() {
                 const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(this.result) }).promise;
-                let fullData = [];
+                let textItems = [];
                 for (let i = 1; i <= pdf.numPages; i++) {
                     const page = await pdf.getPage(i);
-                    const text = await page.getTextContent();
-                    fullData.push(...text.items.map(it => ({ str: it.str, y: Math.round(it.transform[5]) })));
+                    const content = await page.getTextContent();
+                    textItems.push(...content.items.map(it => ({ str: it.str, y: Math.round(it.transform[5]) })));
                 }
-                processFile(fullData);
+                analyzeFile(textItems);
             };
             reader.readAsArrayBuffer(file);
         });
 
-        function processFile(data) {
-            store = {};
-            let tempShop = "غير معروف";
-            let tempAddress = "قيد التدقيق";
+        function analyzeFile(data) {
+            mainData = {};
+            let tempCustomer = "غير معروف";
+            let city = "غير محدد";
+            let province = "غير محدد";
 
+            // ترتيب البيانات لقراءة الترويسات قبل الفواتير
             data.sort((a, b) => b.y - a.y);
 
-            data.forEach((item, index) => {
+            data.forEach(item => {
                 let txt = item.str.trim();
-
-                // كشف اسم الصيدلية والعنوان (الترويسة الزرقاء في أصيل)
-                if ((txt.includes("صيدلية") || txt.includes("مذخر") || txt.includes("مكتب")) && !txt.includes("بيور العلمي")) {
-                    tempShop = txt.replace(/ѧ|:|الاسم/g, '').trim();
-                    // البحث عن العنوان في نفس النطاق
-                    let nearby = data.filter(it => Math.abs(it.y - item.y) < 20);
-                    nearby.forEach(n => {
-                        if (n.str.includes("الشرقاط") || n.str.includes("العراق") || n.str.includes("صلاح الدين")) {
-                            tempAddress = n.str.replace(/ѧ|:/g, '').trim();
-                        }
-                    });
-                    if (!store[tempShop]) store[tempShop] = { address: tempAddress, invoices: [], total: 0 };
+                
+                // 1. استخراج المدينة والمحافظة
+                if (txt.includes("الشرقاط")) { city = "قضاء الشرقاط"; province = "صلاح الدين"; }
+                
+                // 2. تصفية أسماء العملاء (تجاهل مكتب بيور)
+                if ((txt.includes("مذخر") || txt.includes("صيدلية")) && !txt.includes("بيور العلمي")) {
+                    // تنظيف الاسم من الرموز والكلمات الزائدة
+                    tempCustomer = txt.replace(/الاسم|:|ѧ|متر|متخر/g, 'مذخر').trim();
+                    if (!mainData[tempCustomer]) {
+                        mainData[tempCustomer] = { invoices: [], total: 0 };
+                    }
                 }
 
-                // كشف الفواتير
+                // 3. استخراج الفواتير (رقم الفاتورة، المبلغ المتبقي)
                 if (/^\d{5,6}$/.test(txt)) {
-                    let inv = { id: txt, date: "---", amount: 0, checked: false };
-                    const row = data.filter(it => Math.abs(it.y - item.y) < 10);
+                    let invoice = { id: txt, amount: 0, date: '---' };
+                    let row = data.filter(it => Math.abs(it.y - item.y) < 10);
+                    
                     row.forEach(r => {
-                        if (r.str.includes('/')) inv.date = r.str;
-                        if (/^[\d,]+\.\d{2}$/.test(r.str)) inv.amount = parseFloat(r.str.replace(/,/g, ''));
+                        if (r.str.includes('/')) invoice.date = r.str;
+                        if (/^[\d,]+\.\d{2}$/.test(r.str)) {
+                            invoice.amount = parseFloat(r.str.replace(/,/g, ''));
+                        }
                     });
 
-                    if (inv.amount > 0 && tempShop !== "غير معروف") {
-                        store[tempShop].invoices.push(inv);
-                        store[tempShop].total += inv.amount;
+                    if (invoice.amount > 0 && tempCustomer !== "غير معروف") {
+                        mainData[tempCustomer].invoices.push(invoice);
+                        mainData[tempCustomer].total += invoice.amount;
                     }
                 }
             });
+
+            // تحديث العناوين في الواجهة
+            document.getElementById('provinceLabel').innerText = province;
+            document.getElementById('cityLabel').innerText = city;
+            document.getElementById('headerInfo').classList.remove('hidden');
+            
             renderSidebar();
-            updateLiveStats();
+            updateGlobalStats();
         }
 
         function renderSidebar() {
-            const list = document.getElementById('pharmacyList');
-            const q = document.getElementById('search').value.toLowerCase();
+            const list = document.getElementById('customerList');
+            const query = document.getElementById('searchBox').value.toLowerCase();
             list.innerHTML = "";
 
-            Object.keys(store).forEach(name => {
-                if (name.toLowerCase().includes(q)) {
+            Object.keys(mainData).forEach(name => {
+                if (name.toLowerCase().includes(query)) {
                     const div = document.createElement('div');
-                    div.className = `pharmacy-item p-5 ${currentShop === name ? 'active' : ''}`;
-                    div.onclick = () => showDetails(name);
+                    div.className = `p-5 border-b cursor-pointer hover:bg-gray-50 transition-all ${currentActive === name ? 'pharmacy-active' : ''}`;
+                    div.onclick = () => selectCustomer(name);
                     div.innerHTML = `
-                        <p class="text-[10px] font-bold opacity-60 uppercase">${store[name].address}</p>
-                        <h3 class="font-black text-sm">${name}</h3>
-                        <div class="flex justify-between mt-2">
-                            <span class="text-[10px] font-bold">فواتير: ${store[name].invoices.length}</span>
-                            <span class="text-[11px] font-black">${store[name].total.toLocaleString()} د.ع</span>
+                        <h4 class="font-black text-sm text-slate-800 mb-1">${name}</h4>
+                        <div class="flex justify-between items-center text-[10px] font-bold text-gray-400">
+                            <span>${mainData[name].invoices.length} فاتورة</span>
+                            <span class="text-blue-600">${mainData[name].total.toLocaleString()} د.ع</span>
                         </div>
                     `;
                     list.appendChild(div);
@@ -141,31 +162,57 @@
             });
         }
 
-        function showDetails(name) {
-            currentShop = name;
+        function selectCustomer(name) {
+            currentActive = name;
             renderSidebar();
-            const area = document.getElementById('detailsArea');
-            const shop = store[name];
+            const customer = mainData[name];
+            const workspace = document.getElementById('detailsWorkspace');
 
-            area.innerHTML = `
-                <div class="bg-white p-8 rounded-[2rem] shadow-xl border-t-8 border-blue-600">
-                    <div class="flex justify-between items-start mb-8">
+            workspace.innerHTML = `
+                <div class="bg-white rounded-3xl p-8 shadow-xl border border-gray-100 animate-in fade-in duration-500">
+                    <div class="flex justify-between items-start mb-8 pb-6 border-b border-gray-50">
                         <div>
-                            <h2 class="text-3xl font-black text-slate-800">${name}</h2>
-                            <p class="text-blue-600 font-bold italic mt-1">📍 العنوان: ${shop.address}</p>
+                            <h2 class="text-2xl font-black text-slate-800 mb-1">${name}</h2>
+                            <p class="text-sm font-bold text-blue-500 italic">📍 كافة فواتير العميل المسجلة في هذا الملف</p>
                         </div>
-                        <div class="text-left">
-                            <p class="text-xs font-bold text-slate-400 uppercase">المبلغ الكلي للصيدلية</p>
-                            <p class="text-2xl font-black text-slate-800">${shop.total.toLocaleString()} د.ع</p>
+                        <div class="text-left bg-blue-50 p-4 rounded-2xl border border-blue-100">
+                            <p class="text-[10px] font-black text-blue-400 uppercase">إجمالي مبلغه في الملف</p>
+                            <p class="text-2xl font-black text-blue-900 num-font">${customer.total.toLocaleString()}</p>
                         </div>
                     </div>
-                    <div class="space-y-3">
-                        ${shop.invoices.map(inv => `
-                            <div onclick="toggleInv('${inv.id}')" class="flex justify-between items-center p-5 bg-slate-50 rounded-2xl border-2 cursor-pointer transition-all ${inv.checked ? 'border-emerald-500 bg-emerald-50 shadow-inner' : 'border-transparent hover:border-blue-100'}">
-                                <div class="flex items-center gap-4">
-                                    <div class="w-8 h-8 rounded-full border-2 flex items-center justify-center ${inv.checked ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-slate-300 text-slate-300'}">✓</div>
-                                    <div>
-                                        <p class="font-black text-slate-800">فاتورة #${inv.id}</p>
-                                        <p class="text-[10px] text-slate-400 font-bold tracking-widest uppercase">${inv.date}</p>
-                                    </div>
-                                </div>
+
+                    <div class="overflow-hidden rounded-2xl border border-gray-100">
+                        <table class="w-full text-right bg-white text-sm">
+                            <thead class="bg-gray-50 text-gray-400 font-black text-[10px] uppercase">
+                                <tr>
+                                    <th class="p-4">رقم الفاتورة</th>
+                                    <th class="p-4 text-center">التاريخ</th>
+                                    <th class="p-4 text-left">المبلغ المتبقي</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-50">
+                                ${customer.invoices.map(inv => `
+                                    <tr class="hover:bg-slate-50 transition-colors">
+                                        <td class="p-4 font-black text-slate-700">#${inv.id}</td>
+                                        <td class="p-4 text-center text-gray-500 font-bold">${inv.date}</td>
+                                        <td class="p-4 text-left font-black text-blue-700 num-font">${inv.amount.toLocaleString()}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+        }
+
+        function updateGlobalStats() {
+            const names = Object.keys(mainData);
+            let grandTotal = 0;
+            names.forEach(n => grandTotal += mainData[n].total);
+            
+            document.getElementById('clientCount').innerText = names.length;
+            document.getElementById('cityTotal').innerText = grandTotal.toLocaleString() + " د.ع";
+        }
+    </script>
+</body>
+</html>
