@@ -2,145 +2,200 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CORE SYNC | المنصة الأولى للتدقيق في العراق</title>
+    <title>CORE SYNC | ULTRA SMART</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        body { background: #f0f4f8; font-family: 'Cairo', sans-serif; }
-        .glass-nav { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); border-bottom: 2px solid #3b82f6; }
-        .stat-card { background: white; border-radius: 1.5rem; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; }
-        .drawer { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out; }
-        .drawer.open { max-height: 5000px; padding-top: 1rem; }
-        .num-font { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-weight: 700; }
+        body { background: #f1f5f9; font-family: 'Cairo', sans-serif; }
+        .card { background: white; border-radius: 1.5rem; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        .drawer { max-height: 0; overflow: hidden; transition: all 0.5s ease; }
+        .drawer.open { max-height: 10000px; padding: 1rem; }
+        .num-font { font-family: sans-serif; font-weight: 700; }
+        .btn-primary { background: #1e3a8a; color: white; transition: 0.3s; }
+        .btn-primary:hover { background: #2563eb; transform: translateY(-2px); }
     </style>
 </head>
-<body class="pb-10 text-slate-800">
+<body class="p-4">
 
-    <nav class="sticky top-0 z-50 glass-nav p-4 shadow-md">
-        <div class="container mx-auto flex justify-between items-center px-4">
-            <div class="flex items-center gap-3">
-                <div class="w-12 h-12 bg-blue-700 rounded-2xl flex items-center justify-center shadow-lg">
-                    <span class="text-white font-black text-xl">CS</span>
-                </div>
-                <div>
-                    <h1 class="text-xl font-black text-blue-900 tracking-tighter">CORE SYNC <span class="text-blue-500 font-bold">ELITE</span></h1>
-                    <p class="text-[9px] font-bold text-slate-500 tracking-widest uppercase">نظام المطابقة الميداني الأول</p>
-                </div>
-            </div>
-            <button onclick="exportFullReport()" class="hidden id="reportBtn" class="bg-blue-600 text-white px-5 py-2 rounded-xl text-[10px] font-black hover:bg-blue-700 transition-all">تحميل التقرير النهائي</button>
+    <nav class="max-w-3xl mx-auto mb-6 flex justify-between items-center bg-white p-4 rounded-2xl shadow-sm border">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-blue-800 rounded-xl flex items-center justify-center text-white font-black text-xl italic">X</div>
+            <h1 class="text-lg font-black text-slate-800">نظام التدقيق الذكي</h1>
         </div>
+        <div id="loader" class="hidden animate-spin rounded-full h-6 w-6 border-b-2 border-blue-800"></div>
     </nav>
 
-    <main class="container mx-auto px-4 max-w-2xl mt-8">
-
-        <div id="welcome" class="stat-card p-12 text-center">
-            <div class="text-6xl mb-6">🇮🇶</div>
-            <h2 class="text-2xl font-black mb-2 italic">أهلاً بك في منصة التدقيق العراقي</h2>
-            <p class="text-slate-500 text-sm mb-10 leading-relaxed">ارفع كشف "بيور / أصيل" وسنقوم بالتنظيف العميق للبيانات فوراً.</p>
-            <label class="bg-blue-700 hover:bg-blue-800 text-white px-16 py-5 rounded-2xl font-black cursor-pointer shadow-xl inline-block transition-transform hover:scale-105">
-                بدء استيراد الكشف
-                <input type="file" id="pdfIn" accept=".pdf" class="hidden">
+    <main class="max-w-3xl mx-auto">
+        <div id="uploadBox" class="card p-16 text-center border-2 border-dashed border-blue-200">
+            <h2 class="text-2xl font-black mb-4">ارفع ملف (كشف الشرقاط) هنا</h2>
+            <p class="text-slate-500 mb-8 text-sm font-bold">سأقوم بتنظيف الرموز ѧѧ وفك تشفير الأسماء تلقائياً</p>
+            <label class="btn-primary px-12 py-4 rounded-2xl font-black cursor-pointer inline-block shadow-lg">
+                اختيار ملف PDF
+                <input type="file" id="pdfFile" accept=".pdf" class="hidden">
             </label>
         </div>
 
-        <div id="dash" class="hidden space-y-6">
-            
-            <div class="stat-card p-6 grid grid-cols-2 gap-4">
-                <div>
-                    <label class="text-[10px] font-bold text-slate-400 block mb-1">من تاريخ</label>
-                    <input type="date" id="dateFrom" onchange="render()" class="w-full p-2 rounded-lg border border-slate-200 text-xs font-bold">
-                </div>
-                <div>
-                    <label class="text-[10px] font-bold text-slate-400 block mb-1">إلى تاريخ</label>
-                    <input type="date" id="dateTo" onchange="render()" class="w-full p-2 rounded-lg border border-slate-200 text-xs font-bold">
-                </div>
-            </div>
-
+        <div id="dashboard" class="hidden space-y-6">
             <div class="grid grid-cols-2 gap-4">
-                <div class="stat-card p-6 border-r-8 border-blue-600">
-                    <p class="text-[10px] font-black text-slate-400 uppercase">إجمالي الدين المختار</p>
-                    <h3 id="totalSumLabel" class="text-2xl font-black text-blue-900 num-font">0</h3>
+                <div class="card p-4">
+                    <p class="text-[10px] font-black text-slate-400 uppercase">إجمالي الدين المتبقي</p>
+                    <h3 id="totalSum" class="text-2xl font-black text-blue-800 num-font">0</h3>
                 </div>
-                <div class="stat-card p-6 border-r-8 border-emerald-500">
-                    <p class="text-[10px] font-black text-slate-400 uppercase">فواتير تمت مطابقتها</p>
-                    <h3 id="countLabel" class="text-2xl font-black text-emerald-600 num-font">0</h3>
+                <div class="card p-4">
+                    <p class="text-[10px] font-black text-slate-400 uppercase">عدد الصيدليات</p>
+                    <h3 id="shopCount" class="text-2xl font-black text-slate-800 num-font">0</h3>
                 </div>
             </div>
 
-            <input type="text" id="search" onkeyup="render()" placeholder="ابحث باسم الصيدلية أو رقم الفاتورة..." class="w-full p-5 stat-card outline-none focus:ring-2 focus:ring-blue-500 font-bold text-sm">
+            <input type="text" id="searchInput" onkeyup="render()" placeholder="ابحث باسم الصيدلية أو رقم الفاتورة..." class="w-full p-5 card outline-none focus:border-blue-500 font-bold">
 
-            <div id="list" class="space-y-4 pb-20"></div>
+            <div id="results" class="space-y-4"></div>
         </div>
-
     </main>
 
     <script>
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
-        let store = [];
+        let mainData = [];
 
-        document.getElementById('pdfIn').addEventListener('change', async (e) => {
+        document.getElementById('pdfFile').addEventListener('change', async (e) => {
             const file = e.target.files[0];
             if (!file) return;
-            
+
+            document.getElementById('loader').classList.remove('hidden');
             const reader = new FileReader();
             reader.onload = async function() {
-                const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(this.result) }).promise;
-                let fullText = [];
+                const typedarray = new Uint8Array(this.result);
+                const pdf = await pdfjsLib.getDocument(typedarray).promise;
+                let allItems = [];
+
                 for (let i = 1; i <= pdf.numPages; i++) {
                     const page = await pdf.getPage(i);
-                    const content = await page.getTextContent();
-                    fullText = fullText.concat(content.items.map(s => s.str));
+                    const textContent = await page.getTextContent();
+                    
+                    // تحويل مصفوفة النصوص إلى كائنات تحتوي على النص ومكانه (Y-axis)
+                    const pageLines = textContent.items.map(item => ({
+                        text: item.str,
+                        y: Math.round(item.transform[5]), // موقع السطر في الصفحة
+                        x: Math.round(item.transform[4])
+                    }));
+                    allItems = allItems.concat(pageLines);
                 }
-                deepCleanProcess(fullText);
+                processSmart(allItems);
             };
             reader.readAsArrayBuffer(file);
         });
 
-        function deepCleanProcess(lines) {
-            store = [];
-            let currentName = "جهة غير معروفة";
-            
-            for (let i = 0; i < lines.length; i++) {
-                let raw = lines[i].trim();
-                
-                // التنظيف العميق (Deep Cleaning) - مسح الرموز والكلمات الزائدة
-                let cleanLine = raw.replace(/ѧ|:|رقم:|الاسم:|عنوان:|رقم الموبايل:|ѧ/g, '').trim();
+        function processSmart(data) {
+            mainData = [];
+            let currentShop = "غير محدد";
 
-                if (cleanLine.includes("صيدلية") || cleanLine.includes("مذخر") || cleanLine.includes("مكتب")) {
-                    currentName = cleanLine;
+            // فرز البيانات حسب موقعها في الصفحة (من الأعلى للأسفل)
+            data.sort((a, b) => b.y - a.y);
+
+            for (let i = 0; i < data.length; i++) {
+                let txt = data[i].text.trim();
+                
+                // تنظيف الاسم من رموز أصيل
+                let cleanTxt = txt.replace(/ѧ|:|الاسم|مذخر|صيدلية|مكتب/g, '').trim();
+
+                if (txt.includes("صيدلية") || txt.includes("مذخر") || txt.includes("مكتب")) {
+                    currentShop = txt.replace(/ѧ|:|الاسم/g, '').trim();
+                    if (currentShop === "") currentShop = data[i+1]?.text.replace(/ѧ|:/g, '').trim();
                 }
 
-                // كشف الفاتورة (نمط أصيل)
-                if (/^\d{5,6}$/.test(raw)) {
-                    let inv = {
-                        shop: currentName,
-                        id: raw,
-                        date: lines[i+1] ? formatToISO(lines[i+1]) : null,
-                        dateRaw: lines[i+1] || "---",
-                        total: 0, paid: 0, rem: 0, checked: false
+                // التقاط رقم الفاتورة (5-6 أرقام)
+                if (/^\d{5,6}$/.test(txt)) {
+                    let record = {
+                        shop: currentShop,
+                        id: txt,
+                        date: "---",
+                        rem: "0.00",
+                        checked: false
                     };
 
-                    let prices = [];
-                    for (let j = 1; j < 25; j++) {
-                        let c = (lines[i+j] || "").trim();
-                        if (/^[\d,]+\.\d{2}$/.test(c)) prices.push(parseFloat(c.replace(/,/g, '')));
-                    }
+                    // البحث عن المبالغ والتاريخ في محيط هذا السطر (نطاق Y متقارب)
+                    const rowItems = data.filter(item => Math.abs(item.y - data[i].y) < 15);
+                    
+                    rowItems.forEach(item => {
+                        if (item.text.includes('/')) record.date = item.text;
+                        if (/^[\d,]+\.\d{2}$/.test(item.text.trim())) {
+                            // نأخذ القيمة الأكبر كـ "متبقي" في حال تداخلت الأرقام
+                            record.rem = item.text.trim();
+                        }
+                    });
 
-                    if (prices.length >= 3) {
-                        inv.total = prices[0]; inv.paid = prices[1]; inv.rem = prices[2];
-                    } else if (prices.length === 2) {
-                        inv.total = prices[0]; inv.rem = prices[1];
-                    }
-                    store.push(inv);
+                    mainData.push(record);
                 }
             }
-            document.getElementById('welcome').classList.add('hidden');
-            document.getElementById('dash').classList.remove('hidden');
+
+            document.getElementById('uploadBox').classList.add('hidden');
+            document.getElementById('dashboard').classList.remove('hidden');
+            document.getElementById('loader').classList.add('hidden');
             render();
         }
 
-        // تحويل التاريخ من DD/MM/YYYY إلى YYYY-MM-DD
+        function render() {
+            const list = document.getElementById('results');
+            list.innerHTML = "";
+            const query = document.getElementById('searchInput').value.toLowerCase();
+
+            // تجميع حسب الصيدلية
+            let groups = {};
+            mainData.forEach(inv => {
+                if (inv.shop.toLowerCase().includes(query) || inv.id.includes(query)) {
+                    if (!groups[inv.shop]) groups[inv.shop] = { items: [], total: 0 };
+                    groups[inv.shop].items.push(inv);
+                    groups[inv.shop].total += parseFloat(inv.rem.replace(/,/g, ''));
+                }
+            });
+
+            document.getElementById('shopCount').innerText = Object.keys(groups).length;
+
+            Object.keys(groups).forEach(name => {
+                const g = groups[name];
+                const card = document.createElement('div');
+                card.className = "card overflow-hidden mb-4";
+                card.innerHTML = `
+                    <div onclick="this.nextElementSibling.classList.toggle('open')" class="p-5 flex justify-between items-center cursor-pointer hover:bg-slate-50">
+                        <div>
+                            <h3 class="font-black text-slate-800 text-sm">${name}</h3>
+                            <p class="text-[10px] text-blue-600 font-bold uppercase mt-1">عدد الفواتير: ${g.items.length} | المجموع: ${g.total.toLocaleString()} د.ع</p>
+                        </div>
+                        <span class="text-slate-300">▼</span>
+                    </div>
+                    <div class="drawer border-t bg-slate-50">
+                        <div class="space-y-3">
+                            ${g.items.map(inv => `
+                                <div class="bg-white p-4 rounded-xl border flex justify-between items-center shadow-sm">
+                                    <div>
+                                        <p class="text-[10px] font-black text-slate-400 mb-1">فاتورة #${inv.id} | ${inv.date}</p>
+                                        <p class="text-blue-800 font-black num-font">${inv.rem} <span class="text-[9px]">د.ع</span></p>
+                                    </div>
+                                    <div onclick="toggleCheck('${inv.id}')" class="w-10 h-10 border-2 rounded-xl flex items-center justify-center cursor-pointer ${inv.checked ? 'bg-emerald-500 border-emerald-500 text-white' : 'bg-white text-slate-200 border-slate-100'}">
+                                        ✓
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+                list.appendChild(card);
+            });
+            updateTotal();
+        }
+
+        function toggleCheck(id) {
+            const item = mainData.find(x => x.id === id);
+            item.checked = !item.checked;
+            render();
+        }
+
+        function updateTotal() {
+            let sum = 0;
+            mainData.filter(x => x.checked).forEach(v => sum += parseFloat(v.rem.replace(/,/g, '')));
+            document.getElementById('totalSum').innerText = sum.toLocaleString() + " د.ع";
+        }
+    </script>
+</body>
+</html>
