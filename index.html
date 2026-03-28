@@ -2,135 +2,122 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>مكتب بيور | فلتر كشف الشرقاط السريع</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>نظام مكتب بيور | معالج كشوفات أصيل</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
-    <style>body { font-family: 'Cairo', sans-serif; background-color: #f3f4f6; }</style>
+    <style> body { font-family: 'Cairo', sans-serif; } </style>
 </head>
-<body class="p-4 md:p-8">
+<body class="bg-gray-100 min-h-screen">
 
-    <div class="max-w-5xl mx-auto">
-        <div class="bg-white p-6 rounded-2xl shadow-sm mb-6 flex flex-col md:flex-row justify-between items-center gap-4 border-b-4 border-blue-600">
+    <div class="max-w-6xl mx-auto p-8">
+        <div class="bg-blue-800 text-white p-8 rounded-3xl shadow-lg mb-8 flex justify-between items-center">
             <div>
-                <h1 class="text-2xl font-black text-blue-900">نظام فلترة الكشوفات</h1>
-                <p id="locationDisplay" class="text-sm text-gray-500 font-bold italic">ارفع ملف (كشف الشرقاط) للبدء</p>
+                <h1 class="text-3xl font-black italic">PUREPHARMA SYSTEM</h1>
+                <p class="text-blue-200 mt-2">نظام استخراج البيانات بناءً على الرقم الفريد (كشف الشرقاط)</p>
             </div>
-            <input type="file" id="pdfFile" class="hidden" accept=".pdf">
-            <button onclick="document.getElementById('pdfFile').click()" class="bg-blue-600 text-white px-8 py-3 rounded-xl font-black hover:bg-blue-700 shadow-lg transition-all">رفع الكشف الآن</button>
+            <div class="flex gap-4">
+                <input type="file" id="pdfInput" class="hidden" accept=".pdf">
+                <button onclick="document.getElementById('pdfInput').click()" class="bg-white text-blue-800 px-8 py-4 rounded-2xl font-black shadow-md hover:bg-blue-50 transition-all">رفع ملف الكشف (27 صفحة)</button>
+            </div>
         </div>
 
-        <div id="filterBar" class="hidden flex flex-wrap gap-3 mb-6">
-            <button onclick="filterType('all')" class="bg-slate-800 text-white px-6 py-2 rounded-lg font-bold">الكل</button>
-            <button onclick="filterType('صيدلية')" class="bg-emerald-600 text-white px-6 py-2 rounded-lg font-bold">الصيدليات فقط</button>
-            <button onclick="filterType('مذخر')" class="bg-amber-500 text-white px-6 py-2 rounded-lg font-bold">المذاخر فقط</button>
-            <div class="mr-auto bg-white px-4 py-2 rounded-lg border font-black text-blue-800" id="totalCount">إجمالي الديون: 0 د.ع</div>
-        </div>
+        <div id="status" class="hidden mb-6 p-4 bg-yellow-100 border-r-4 border-yellow-500 text-yellow-800 font-bold animate-pulse text-center rounded-xl">جاري قراءة صفحات الملف واستخراج الأرقام الفريدة...</div>
 
-        <div id="resultsGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+        <div class="bg-white rounded-3xl shadow-2xl overflow-hidden border border-gray-200">
+            <table class="w-full text-right border-collapse">
+                <thead class="bg-slate-800 text-white">
+                    <tr>
+                        <th class="p-5 font-bold">رقم العميل (الفريد)</th>
+                        <th class="p-5 font-bold">الاسم الخام من الملف (قابل للخطأ)</th>
+                        <th class="p-5 font-bold text-center">عدد العمليات</th>
+                        <th class="p-5 font-bold text-left">إجمالي المبلغ المتبقي</th>
+                    </tr>
+                </thead>
+                <tbody id="resultTable" class="divide-y divide-gray-200 text-gray-700">
+                    </tbody>
+            </table>
+        </div>
     </div>
 
     <script>
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
-        let allData = [];
 
-        document.getElementById('pdfFile').addEventListener('change', async (e) => {
+        document.getElementById('pdfInput').addEventListener('change', async (e) => {
             const file = e.target.files[0];
             if (!file) return;
 
-            document.getElementById('locationDisplay').innerText = "جاري قراءة الملف وتصنيف الأسماء...";
+            document.getElementById('status').classList.remove('hidden');
             const reader = new FileReader();
+
             reader.onload = async function() {
-                const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(this.result) }).promise;
-                let textRows = [];
+                const typedarray = new Uint8Array(this.result);
+                const pdf = await pdfjsLib.getDocument(typedarray).promise;
+                let store = {};
+
                 for (let i = 1; i <= pdf.numPages; i++) {
                     const page = await pdf.getPage(i);
                     const content = await page.getTextContent();
-                    textRows.push(...content.items.map(it => ({ str: it.str, y: Math.round(it.transform[5]) })));
+                    const items = content.items;
+
+                    let currentPageID = "";
+                    let currentPageName = "اسم غير محدد";
+
+                    // الخطوة 1: البحث عن الرقم الفريد والاسم في الصفحة
+                    for (let j = 0; j < items.length; j++) {
+                        let txt = items[j].str.trim();
+
+                        // رادار الاسم الخام (يأخذه كما هو)
+                        if (txt.includes("الاس م") || txt.includes("الاسم")) {
+                            currentPageName = items[j+1] ? items[j+1].str : "غير واضح";
+                        }
+
+                        // رادار الرقم الفريد (4-5 أرقام)
+                        let idMatch = txt.match(/\b\d{4,5}\b/);
+                        if (idMatch && (txt.includes("رقم") || txt.includes("رق م"))) {
+                            currentPageID = idMatch[0];
+                            if (!store[currentPageID]) {
+                                store[currentPageID] = { 
+                                    id: currentPageID, 
+                                    rawName: currentPageName, 
+                                    total: 0, 
+                                    count: 0 
+                                };
+                            }
+                        }
+
+                        // الخطوة 2: جمع المبالغ بناءً على الرقم الفريد المكتشف
+                        if (currentPageID && /^[\d,]+\.\d{2}$/.test(txt)) {
+                            let amount = parseFloat(txt.replace(/,/g, ''));
+                            store[currentPageID].total += amount;
+                            store[currentPageID].count++;
+                        }
+                    }
                 }
-                processData(textRows);
+                renderResults(store);
             };
             reader.readAsArrayBuffer(file);
         });
 
-        function processData(rows) {
-            allData = [];
-            let currentName = "";
-            let city = "الشرقاط";
+        function renderResults(store) {
+            const table = document.getElementById('resultTable');
+            const status = document.getElementById('status');
+            table.innerHTML = "";
+            status.classList.add('hidden');
 
-            rows.sort((a, b) => b.y - a.y);
-
-            rows.forEach((item, index) => {
-                let txt = item.str.trim();
-
-                // استخراج الاسم وتصنيفه (صيدلية أو مذخر)
-                if ((txt.includes("صيدلية") || txt.includes("مذخر") || txt.includes("مكتب")) && !txt.includes("بيور العلمي")) {
-                    currentName = txt.replace(/الاسم|:|ѧ|متر|متخر|منخر/g, 'مذخر').trim();
-                    if (!allData.find(d => d.name === currentName)) {
-                        allData.push({ name: currentName, type: txt.includes("صيدلية") ? "صيدلية" : "مذخر", invoices: [], total: 0 });
-                    }
-                }
-
-                // استخراج الفواتير والمبالغ المتبقية
-                if (/^\d{5,6}$/.test(txt)) {
-                    let amount = 0;
-                    let row = rows.filter(r => Math.abs(r.y - item.y) < 10);
-                    row.forEach(r => {
-                        if (/^[\d,]+\.\d{2}$/.test(r.str)) amount = parseFloat(r.str.replace(/,/g, ''));
-                    });
-
-                    if (amount > 0 && currentName) {
-                        let emp = allData.find(d => d.name === currentName);
-                        if (emp && !emp.invoices.find(v => v.id === txt)) {
-                            emp.invoices.push({ id: txt, amount: amount });
-                            emp.total += amount;
-                        }
-                    }
-                }
-            });
-
-            document.getElementById('locationDisplay').innerText = "تم استخراج البيانات لمدينة: الشرقاط / محافظة صلاح الدين";
-            document.getElementById('filterBar').classList.remove('hidden');
-            filterType('all');
-        }
-
-        function filterType(type) {
-            const grid = document.getElementById('resultsGrid');
-            grid.innerHTML = "";
-            let grandTotal = 0;
-
-            allData.forEach(item => {
-                if (type === 'all' || item.type === type) {
-                    grandTotal += item.total;
-                    const card = document.createElement('div');
-                    card.className = "bg-white p-5 rounded-xl shadow-sm border-r-4 " + (item.type === 'صيدلية' ? 'border-emerald-500' : 'border-amber-500');
-                    card.innerHTML = `
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <span class="text-[10px] font-bold px-2 py-1 rounded bg-gray-100 text-gray-500 mb-2 inline-block">${item.type.toUpperCase()}</span>
-                                <h3 class="font-black text-slate-800">${item.name}</h3>
-                                <p class="text-xs text-gray-400 mt-1 font-bold italic">عدد الفواتير: ${item.invoices.length}</p>
-                            </div>
-                            <div class="text-left">
-                                <p class="text-lg font-black text-blue-700">${item.total.toLocaleString()} <span class="text-[10px]">د.ع</span></p>
-                            </div>
-                        </div>
-                        <details class="mt-4 border-t pt-2">
-                            <summary class="text-xs font-bold text-gray-400 cursor-pointer hover:text-blue-600">عرض تفاصيل الفواتير والمبالغ المتبقية...</summary>
-                            <div class="mt-2 space-y-1">
-                                ${item.invoices.map(v => `
-                                    <div class="flex justify-between text-[11px] font-bold p-1 bg-gray-50 rounded">
-                                        <span>فاتورة #${v.id}</span>
-                                        <span class="text-slate-700">${v.amount.toLocaleString()}</span>
-                                    </div>
-                                `).join('')}
-                            </div>
-                        </details>
+            Object.values(store).forEach(client => {
+                if (client.id) {
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-blue-50 transition-colors";
+                    tr.innerHTML = `
+                        <td class="p-5 font-black text-blue-700">${client.id}</td>
+                        <td class="p-5 font-bold text-gray-500 leading-relaxed">(${client.rawName})</td>
+                        <td class="p-5 text-center font-bold text-slate-400">${client.count}</td>
+                        <td class="p-5 text-left font-black text-emerald-600 text-lg">${client.total.toLocaleString()} د.ع</td>
                     `;
-                    grid.appendChild(card);
+                    table.appendChild(tr);
                 }
             });
-            document.getElementById('totalCount').innerText = "إجمالي الديون: " + grandTotal.toLocaleString() + " د.ع";
         }
     </script>
 </body>
