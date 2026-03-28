@@ -3,214 +3,188 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PurePharma | Auditor Pro</title>
+    <title>PurePharma | مراجع الفواتير الذكي</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        body { background-color: #f8fafc; font-family: 'Cairo', sans-serif; color: #1e293b; }
-        .medical-shadow { box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); }
-        .pure-blue { color: #004a99; }
-        .bg-pure { background-color: #004a99; }
-        .drawer { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-in-out; }
-        .drawer.open { max-height: 5000px; border-top: 1px solid #e2e8f0; }
-        .num-font { font-family: 'Segoe UI', Tahoma, sans-serif; font-weight: 700; }
-        .status-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+        body { font-family: 'Cairo', sans-serif; background-color: #f0f4f8; }
+        .card { transition: all 0.3s ease; border: 1px solid #e2e8f0; }
+        .card:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+        .medical-blue { color: #0056b3; }
+        .bg-medical { background-color: #0056b3; }
+        .status-checked { background-color: #d1fae5; border-color: #10b981; }
     </style>
 </head>
-<body class="bg-[#f4f7f9]">
+<body class="p-4 md:p-8">
 
-    <nav class="bg-white border-b border-gray-200 py-4 px-6 sticky top-0 z-50 medical-shadow">
-        <div class="max-w-6xl mx-auto flex justify-between items-center">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-pure rounded-lg flex items-center justify-center shadow-md">
-                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
-                </div>
-                <div>
-                    <h1 class="text-lg font-bold pure-blue leading-none">PUREPHARMA</h1>
-                    <p class="text-[10px] text-gray-400 font-bold tracking-widest uppercase">Scientific Office | Audit System</p>
-                </div>
+    <div class="max-w-4xl mx-auto">
+        <div class="flex items-center justify-between mb-8 bg-white p-6 rounded-2xl shadow-sm border-b-4 border-blue-600">
+            <div>
+                <h1 class="text-2xl font-black medical-blue leading-none">PUREPHARMA</h1>
+                <p class="text-xs text-gray-500 mt-1 font-bold">نظام التدقيق الذكي - مكتب بيور العلمي</p>
             </div>
-            <div id="loader" class="hidden flex items-center gap-2">
-                <span class="text-xs font-bold text-gray-400">جاري المعالجة...</span>
-                <div class="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-            </div>
+            <div id="status" class="text-sm font-bold text-gray-400 italic">بانتظار الملف...</div>
         </div>
-    </nav>
 
-    <main class="max-w-4xl mx-auto p-4 mt-6">
-        
-        <div id="uploadArea" class="bg-white rounded-3xl p-16 text-center border-2 border-dashed border-gray-200 medical-shadow">
-            <div class="w-20 h-20 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-6">
-                <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-            </div>
-            <h2 class="text-xl font-extrabold text-gray-800 mb-2">استيراد كشف الفواتير</h2>
-            <p class="text-gray-400 text-sm mb-8">يدعم نظام "أصيل" وملفات "مكتب بيور العلمي" الرسمية</p>
-            <label class="bg-pure hover:bg-blue-800 text-white px-10 py-4 rounded-xl font-bold cursor-pointer transition-all shadow-lg inline-block">
-                اختر ملف الـ PDF
-                <input type="file" id="pdfFile" accept=".pdf" class="hidden">
+        <div id="uploadBox" class="bg-white p-12 rounded-3xl border-2 border-dashed border-blue-200 text-center mb-8 shadow-inner">
+            <input type="file" id="pdfInput" accept=".pdf" class="hidden">
+            <label for="pdfInput" class="cursor-pointer group">
+                <div class="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-blue-600 transition-colors">
+                    <svg class="w-10 h-10 text-blue-600 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4" stroke-width="2" stroke-linecap="round"/></svg>
+                </div>
+                <p class="text-lg font-bold text-gray-700">اضغط لرفع "كشف الشرقاط" أو أي ملف أصيل</p>
+                <p class="text-sm text-gray-400 mt-2">سيتم استخراج الأسماء والمبالغ تلقائياً</p>
             </label>
         </div>
 
-        <div id="dashboard" class="hidden space-y-6">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div class="bg-white p-5 rounded-2xl medical-shadow border-r-4 border-blue-600">
-                    <p class="text-[10px] font-bold text-gray-400 uppercase">إجمالي الدين المتبقي</p>
-                    <h3 id="statDebt" class="text-xl font-extrabold text-gray-800 num-font mt-1">0</h3>
+        <div id="results" class="hidden space-y-4">
+            <div class="grid grid-cols-2 gap-4 mb-6">
+                <div class="bg-white p-4 rounded-xl shadow-sm">
+                    <p class="text-xs font-bold text-gray-400 uppercase">إجمالي المطالبة</p>
+                    <h2 id="totalAmount" class="text-xl font-black text-blue-700">0</h2>
                 </div>
-                <div class="bg-white p-5 rounded-2xl medical-shadow border-r-4 border-emerald-500">
-                    <p class="text-[10px] font-bold text-gray-400 uppercase">المطابقة الحالية</p>
-                    <h3 id="statMatch" class="text-xl font-extrabold text-emerald-600 num-font mt-1">0</h3>
-                </div>
-                <div class="bg-white p-5 rounded-2xl medical-shadow border-r-4 border-amber-500">
-                    <p class="text-[10px] font-bold text-gray-400 uppercase">عدد الصيدليات</p>
-                    <h3 id="statCount" class="text-xl font-extrabold text-gray-800 num-font mt-1">0</h3>
+                <div class="bg-white p-4 rounded-xl shadow-sm">
+                    <p class="text-xs font-bold text-gray-400 uppercase">تمت مطابقتها</p>
+                    <h2 id="checkedAmount" class="text-xl font-black text-emerald-600">0</h2>
                 </div>
             </div>
-
-            <div class="relative">
-                <input type="text" id="searchInput" onkeyup="render()" placeholder="البحث باسم الصيدلية أو رقم الفاتورة..." class="w-full p-4 bg-white rounded-2xl border border-gray-100 outline-none focus:border-blue-500 transition-all font-bold text-sm medical-shadow">
-            </div>
-
-            <div id="resultsList" class="space-y-4 pb-10"></div>
+            
+            <div id="customersList" class="space-y-6"></div>
         </div>
-    </main>
+    </div>
 
     <script>
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
-        let db = [];
 
-        document.getElementById('pdfFile').addEventListener('change', async (e) => {
+        const pdfInput = document.getElementById('pdfInput');
+        let invoicesData = [];
+
+        pdfInput.addEventListener('change', async (e) => {
             const file = e.target.files[0];
             if (!file) return;
 
-            document.getElementById('loader').classList.remove('hidden');
+            document.getElementById('status').innerText = "جاري القراءة...";
             const reader = new FileReader();
             reader.onload = async function() {
                 const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(this.result) }).promise;
-                let extractedData = [];
+                let fullTextData = [];
+
                 for (let i = 1; i <= pdf.numPages; i++) {
                     const page = await pdf.getPage(i);
-                    const text = await page.getTextContent();
-                    const items = text.items.map(it => ({ str: it.str, y: Math.round(it.transform[5]) }));
-                    extractedData = extractedData.concat(items);
+                    const textContent = await page.getTextContent();
+                    fullTextData.push(...textContent.items.map(item => item.str));
                 }
-                processMedicalData(extractedData);
+                
+                parseInvoices(fullTextData);
             };
             reader.readAsArrayBuffer(file);
         });
 
-        function processMedicalData(data) {
-            db = [];
+        function parseInvoices(lines) {
+            invoicesData = [];
             let currentCustomer = "غير معروف";
-            // ترتيب البيانات من الأعلى للأسفل
-            data.sort((a, b) => b.y - a.y);
 
-            for (let i = 0; i < data.length; i++) {
-                let text = data[i].str.trim();
+            lines.forEach((line, index) => {
+                let cleanLine = line.replace(/ѧ/g, '').trim();
 
-                // عزل "صاحب الفاتورة" وتجاهل اسم المكتب
-                if ((text.includes("صيدلية") || text.includes("مذخر") || text.includes("مكتب")) && !text.includes("بيور")) {
-                    currentCustomer = text.replace(/الاسم:|ѧ|:|رقم الموبايل|عنوان/g, '').trim();
-                    if (currentCustomer === "") currentCustomer = (data[i+1]?.str || "").replace(/ѧ|:/g, '').trim();
+                // قاعدة استخراج الاسم: ابحث عن سطر يحتوي على "مذخر" أو "صيدلية" ولا يحتوي على "بيور"
+                if ((cleanLine.includes("مذخر") || cleanLine.includes("صيدلية") || cleanLine.includes("متر") || cleanLine.includes("مستخر")) 
+                     && !cleanLine.includes("بيور العلمي") 
+                     && !cleanLine.includes("صاحب الفاتورة")) {
+                    currentCustomer = cleanLine.replace(/الاسم|:|العنوان|الشرقاط/g, '').trim();
                 }
 
-                // كشف الفاتورة (5-6 أرقام)
-                if (/^\d{5,6}$/.test(text)) {
-                    let inv = { id: text, shop: currentCustomer, date: "---", rem: 0, checked: false };
-                    
-                    // البحث عن المبلغ والتاريخ في نفس السطر
-                    const rowItems = data.filter(item => Math.abs(item.y - data[i].y) < 10);
-                    rowItems.forEach(item => {
-                        if (item.str.includes('/')) inv.date = item.str.trim();
-                        if (/^[\d,]+\.\d{2}$/.test(item.str.trim())) {
-                            inv.rem = parseFloat(item.str.trim().replace(/,/g, ''));
+                // قاعدة استخراج الفاتورة: إذا كان السطر عبارة عن رقم فاتورة (5-6 أرقام)
+                if (/^\d{5,6}$/.test(cleanLine)) {
+                    // محاولة العثور على المبلغ في الأسطر القريبة
+                    let amount = 0;
+                    for (let j = -5; j <= 5; j++) {
+                        let potentialAmount = lines[index + j]?.replace(/,/g, '');
+                        if (/^\d+\.\d{2}$/.test(potentialAmount)) {
+                            amount = parseFloat(potentialAmount);
+                            break;
                         }
-                    });
+                    }
 
-                    if (inv.rem > 0) db.push(inv);
-                }
-            }
-
-            document.getElementById('uploadArea').classList.add('hidden');
-            document.getElementById('dashboard').classList.remove('hidden');
-            document.getElementById('loader').classList.add('hidden');
-            render();
-        }
-
-        function render() {
-            const list = document.getElementById('resultsList');
-            list.innerHTML = "";
-            const q = document.getElementById('searchInput').value.toLowerCase();
-
-            // تجميع احترافي للمدير
-            let groups = {};
-            db.forEach(v => {
-                if (v.shop.toLowerCase().includes(q) || v.id.includes(q)) {
-                    if (!groups[v.shop]) groups[v.shop] = { items: [], total: 0 };
-                    groups[v.shop].items.push(v);
-                    groups[v.shop].total += v.rem;
+                    if (amount > 0) {
+                        invoicesData.push({
+                            id: cleanLine,
+                            customer: currentCustomer,
+                            amount: amount,
+                            checked: false
+                        });
+                    }
                 }
             });
 
-            document.getElementById('statCount').innerText = Object.keys(groups).length;
-            let grandTotal = 0; db.forEach(d => grandTotal += d.rem);
-            document.getElementById('statDebt').innerText = grandTotal.toLocaleString() + " د.ع";
+            renderUI();
+        }
 
-            Object.keys(groups).forEach(name => {
-                const g = groups[name];
+        function renderUI() {
+            document.getElementById('uploadBox').classList.add('hidden');
+            document.getElementById('results').classList.remove('hidden');
+            document.getElementById('status').innerText = "تم استخراج البيانات";
+
+            const list = document.getElementById('customersList');
+            list.innerHTML = "";
+
+            // تجميع الفواتير حسب اسم العميل
+            const grouped = invoicesData.reduce((acc, inv) => {
+                if (!acc[inv.customer]) acc[inv.customer] = [];
+                acc[inv.customer].push(inv);
+                return acc;
+            }, {});
+
+            let grandTotal = 0;
+
+            for (const customer in grouped) {
+                let customerTotal = 0;
                 const card = document.createElement('div');
-                card.className = "bg-white rounded-2xl overflow-hidden medical-shadow mb-4 border border-gray-50";
-                card.innerHTML = `
-                    <div onclick="this.nextElementSibling.classList.toggle('open')" class="p-5 flex justify-between items-center cursor-pointer hover:bg-gray-50 transition-all">
-                        <div class="flex items-center gap-4">
-                            <div class="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center font-bold text-blue-600 text-sm">
-                                ${g.items.length}
-                            </div>
-                            <div>
-                                <h3 class="font-extrabold text-gray-800 text-[14px]">${name}</h3>
-                                <p class="text-[10px] text-gray-400 font-bold uppercase mt-0.5">المحافظة: ${name.includes('شرقاط') ? 'صلاح الدين' : 'قيد التدقيق'}</p>
-                            </div>
-                        </div>
-                        <div class="text-left">
-                            <p class="text-[9px] font-bold text-gray-400 uppercase">المتبقي</p>
-                            <p class="text-[15px] font-extrabold text-blue-800 num-font">${g.total.toLocaleString()}</p>
-                        </div>
-                    </div>
-                    <div class="drawer">
-                        <div class="p-4 space-y-3 bg-[#fcfdfe]">
-                            ${g.items.map(inv => `
-                                <div class="bg-white p-4 rounded-xl border border-gray-100 flex justify-between items-center">
-                                    <div class="flex-1">
-                                        <div class="flex items-center gap-2 mb-2">
-                                            <span class="bg-gray-100 text-gray-500 px-2 py-0.5 rounded text-[9px] font-black num-font">#${inv.id}</span>
-                                            <span class="text-[9px] text-gray-400 font-bold italic">${inv.date}</span>
-                                        </div>
-                                        <p class="text-sm font-black text-gray-700 num-font">${inv.rem.toLocaleString()} <span class="text-[10px] text-gray-400">د.ع</span></p>
-                                    </div>
-                                    <button onclick="toggleInv('${inv.id}')" class="w-10 h-10 rounded-lg border-2 flex items-center justify-center transition-all ${inv.checked ? 'bg-emerald-500 border-emerald-500 text-white shadow-md' : 'border-gray-100 text-gray-200'}">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
-                                    </button>
+                card.className = "bg-white rounded-2xl p-6 shadow-sm border border-gray-100";
+                
+                const itemsHtml = grouped[customer].map(inv => {
+                    customerTotal += inv.amount;
+                    grandTotal += inv.amount;
+                    return `
+                        <div onclick="toggleCheck('${inv.id}')" class="flex justify-between items-center p-3 border-b border-gray-50 cursor-pointer hover:bg-gray-50 ${inv.checked ? 'opacity-40' : ''}">
+                            <div class="flex items-center gap-3">
+                                <div class="w-5 h-5 border-2 border-blue-400 rounded flex items-center justify-center ${inv.checked ? 'bg-blue-600 border-blue-600' : ''}">
+                                    ${inv.checked ? '<svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/></svg>' : ''}
                                 </div>
-                            `).join('')}
+                                <span class="text-sm font-bold text-gray-600">فاتورة #${inv.id}</span>
+                            </div>
+                            <span class="font-mono font-bold text-gray-800">${inv.amount.toLocaleString()}</span>
+                        </div>
+                    `;
+                }).join('');
+
+                card.innerHTML = `
+                    <div class="flex justify-between items-end mb-4 border-b-2 border-blue-50 pb-2">
+                        <h3 class="text-lg font-black text-gray-800">${customer}</h3>
+                        <div class="text-left">
+                            <p class="text-[10px] text-gray-400 font-bold uppercase">المجموع</p>
+                            <p class="text-md font-black text-blue-600">${customerTotal.toLocaleString()}</p>
                         </div>
                     </div>
+                    <div class="space-y-1">${itemsHtml}</div>
                 `;
                 list.appendChild(card);
-            });
-            updateStats();
+            }
+
+            document.getElementById('totalAmount').innerText = grandTotal.toLocaleString() + " د.ع";
+            updateCheckedStats();
         }
 
-        function toggleInv(id) {
-            const item = db.find(x => x.id === id);
-            item.checked = !item.checked;
-            render();
+        function toggleCheck(id) {
+            const inv = invoicesData.find(x => x.id === id);
+            inv.checked = !inv.checked;
+            renderUI();
         }
 
-        function updateStats() {
-            let matched = 0;
-            db.filter(x => x.checked).forEach(i => matched += i.rem);
-            document.getElementById('statMatch').innerText = matched.toLocaleString() + " د.ع";
+        function updateCheckedStats() {
+            const checkedTotal = invoicesData.filter(x => x.checked).reduce((sum, x) => sum + x.amount, 0);
+            document.getElementById('checkedAmount').innerText = checkedTotal.toLocaleString() + " د.ع";
         }
     </script>
 </body>
