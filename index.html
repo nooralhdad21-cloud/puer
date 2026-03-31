@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>نظام مطابقة بيور - النسخة الاحترافية الدقيقة</title>
+    <title>نظام مطابقة بيور - النسخة الذكية</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
@@ -11,54 +11,66 @@
         .is-active { border-right: 6px solid #10b981; background-color: #f0fdf4 !important; }
         .not-active { border-right: 6px solid #ef4444; background-color: #fef2f2 !important; }
         .stamp-box { border: 2px dashed #cbd5e1; border-radius: 1.5rem; width: 160px; height: 110px; display: flex; align-items: center; justify-content: center; color: #94a3b8; font-size: 11px; font-weight: 800; text-align: center; }
-        
         .client-name-container { min-height: 80px; display: flex; flex-direction: column; justify-content: center; }
-        #outClient { width: 100%; background: transparent; border: none; outline: none; resize: none; overflow: hidden; line-height: 1.4; display: block; white-space: pre-wrap; word-wrap: break-word; }
-        
+        #outClient { width: 100%; background: transparent; border: none; outline: none; resize: none; overflow: hidden; line-height: 1.4; display: block; white-space: pre-wrap; word-wrap: break-word; font-weight: 900; }
+        .hidden-content { display: none !important; }
         @media print { 
             .no-print { display: none !important; } 
-            .report-container { border: none !important; box-shadow: none !important; width: 100%; margin:0; padding: 10mm; }
+            .report-container { border: none !important; box-shadow: none !important; width: 100%; margin:0; padding: 10mm; min-height: auto !important; }
             body { background-color: white; }
+            .print-hidden { display: none !important; }
         }
     </style>
 </head>
-<body class="p-4" onload="loadSavedName()">
+<body class="p-4" onload="initApp()">
 
     <div class="max-w-4xl mx-auto">
         <header class="no-print bg-[#1e293b] text-white p-6 rounded-[2rem] mb-6 shadow-2xl">
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                <div><label class="block text-[10px] mb-1 text-slate-400 font-bold">مُعد التقرير</label><input type="text" id="myNameInput" oninput="saveName(); sync();" class="w-full bg-slate-800 border-none rounded-xl p-2 text-xs text-white"></div>
-                <div><label class="block text-[10px] mb-1 text-indigo-400 font-bold">المحافظة</label><input type="text" id="provInput" oninput="sync()" class="w-full bg-slate-800 border-none rounded-xl p-2 text-xs"></div>
-                <div><label class="block text-[10px] mb-1 text-indigo-400 font-bold">المدينة</label><input type="text" id="cityInput" oninput="sync()" class="w-full bg-slate-800 border-none rounded-xl p-2 text-xs"></div>
-                <div><label class="block text-[10px] mb-1 text-indigo-400 font-bold">المندوب</label><input type="text" id="repInput" oninput="sync()" class="w-full bg-slate-800 border-none rounded-xl p-2 text-xs"></div>
+                <div>
+                    <label class="block text-[10px] mb-1 text-slate-400 font-bold">مُعد التقرير</label>
+                    <input type="text" id="myNameInput" oninput="saveName(); sync();" class="w-full bg-slate-800 border-none rounded-xl p-2 text-xs text-white">
+                </div>
+                <div>
+                    <label class="block text-[10px] mb-1 text-indigo-400 font-bold">المحافظة</label>
+                    <select id="provInput" onchange="updateCities(); sync();" class="w-full bg-slate-800 border-none rounded-xl p-2 text-xs text-white">
+                        <option value="">اختر المحافظة</option>
+                        <option value="صلاح الدين">صلاح الدين</option>
+                        <option value="بغداد">بغداد</option>
+                        <option value="نينوى">نينوى</option>
+                        <option value="كركوك">كركوك</option>
+                        <option value="الأنبار">الأنبار</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-[10px] mb-1 text-indigo-400 font-bold">المدينة/المنطقة</label>
+                    <select id="cityInput" onchange="sync()" class="w-full bg-slate-800 border-none rounded-xl p-2 text-xs text-white">
+                        <option value="">اختر المدينة</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-[10px] mb-1 text-indigo-400 font-bold">المندوب</label>
+                    <input type="text" id="repInput" oninput="sync()" class="w-full bg-slate-800 border-none rounded-xl p-2 text-xs text-white">
+                </div>
             </div>
 
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 border-t border-slate-700 pt-4 mb-6">
-                <div><label class="block text-[10px] mb-1 text-orange-400 font-bold">مبلغ سابق</label><input type="number" id="prevShow" oninput="sync()" class="w-full bg-slate-800 border-none rounded-xl p-2 text-xs"></div>
-                <div><label class="block text-[10px] mb-1 text-orange-400 font-bold">خصم سابق %</label><input type="text" id="discShow" oninput="sync()" class="w-full bg-slate-800 border-none rounded-xl p-2 text-xs"></div>
+                <div><label class="block text-[10px] mb-1 text-orange-400 font-bold">مبلغ سابق</label><input type="number" id="prevShow" class="w-full bg-slate-800 border-none rounded-xl p-2 text-xs"></div>
+                <div><label class="block text-[10px] mb-1 text-orange-400 font-bold">خصم سابق %</label><input type="text" id="discShow" class="w-full bg-slate-800 border-none rounded-xl p-2 text-xs"></div>
                 <div>
                     <label class="block text-[10px] mb-1 text-emerald-400 font-bold">خصم المطابقة %</label>
-                    <select id="currDiscPerc" onchange="calculate()" class="w-full bg-slate-800 border-none rounded-xl p-2 text-xs text-white font-bold cursor-pointer">
-                        <option value="0">0% (بدون خصم)</option>
-                        <option value="1">1%</option>
-                        <option value="2">2%</option>
-                        <option value="3">3%</option>
-                        <option value="4">4%</option>
-                        <option value="5">5%</option>
-                        <option value="7">7%</option>
-                        <option value="10">10%</option>
-                    </select>
+                    <select id="currDiscPerc" onchange="calculate()" class="w-full bg-slate-800 border-none rounded-xl p-2 text-xs text-white font-bold"></select>
                 </div>
                 <div class="flex items-end gap-2">
                     <button onclick="document.getElementById('pdfFile').click()" class="flex-1 bg-indigo-600 p-2 rounded-xl text-[10px] font-bold">رفع PDF</button>
                     <button onclick="resetAll()" class="bg-red-900/40 p-2 rounded-xl text-[10px] font-bold">تصفير</button>
                 </div>
             </div>
-            <button onclick="window.print()" class="w-full bg-emerald-600 p-4 rounded-2xl font-black shadow-xl transition active:scale-95">إصدار وطباعة التقرير</button>
+            <button onclick="window.print()" class="w-full bg-emerald-600 p-4 rounded-2xl font-black shadow-xl transition active:scale-95 text-sm">إصدار وطباعة التقرير النهائي</button>
             <input type="file" id="pdfFile" class="hidden" accept=".pdf">
         </header>
 
-        <div class="bg-white p-10 rounded-[3rem] report-container min-h-[1100px] flex flex-col border border-slate-200 shadow-sm">
+        <div class="bg-white p-10 rounded-[3rem] report-container min-h-[1100px] flex flex-col border border-slate-200">
             <div class="flex justify-between items-start border-b-4 border-slate-900 pb-6 mb-8">
                 <div>
                     <h1 class="text-3xl font-black text-slate-900">مكتب بيور العلمي</h1>
@@ -72,10 +84,8 @@
 
             <div class="mb-6 p-7 bg-slate-900 rounded-[2.5rem] text-white flex justify-between items-center shadow-xl">
                 <div class="flex-1 pr-4 client-name-container">
-                    <p class="text-[9px] font-bold text-indigo-300 uppercase mb-1 italic">اسم الصيدلية / العميل المعتمد</p>
-                    <textarea id="outClient" placeholder="اكتب الاسم هنا..." rows="1" 
-                        oninput="this.style.height = '';this.style.height = this.scrollHeight + 'px'" 
-                        class="text-2xl font-black placeholder:text-slate-800"></textarea>
+                    <p class="text-[9px] font-bold text-indigo-300 uppercase mb-1 italic">اسم العميل / المذخر المعتمد</p>
+                    <textarea id="outClient" placeholder="اسم الصيدلية..." rows="1" oninput="this.style.height = '';this.style.height = this.scrollHeight + 'px'" class="text-2xl font-black placeholder:text-slate-800"></textarea>
                 </div>
                 <div class="text-left border-r border-slate-700 pr-6 min-w-[140px]">
                     <p class="text-[8px] font-bold text-slate-500 mb-1">إجمالي الكشف:</p>
@@ -83,19 +93,26 @@
                 </div>
             </div>
 
-            <div id="billsList" class="space-y-1.5 mb-8 flex-grow"></div>
+            <div class="no-print flex items-center gap-2 mb-4 cursor-pointer hover:bg-slate-50 p-2 rounded-xl w-fit" onclick="toggleBills()">
+                <div id="arrowIcon" class="w-8 h-8 bg-slate-100 rounded-full flex items-center justify-center transition-transform">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                </div>
+                <span id="toggleText" class="text-[10px] font-black text-slate-500">إخفاء تفاصيل الفواتير من التقرير</span>
+            </div>
 
-            <div class="bg-indigo-50 p-6 rounded-[2rem] border border-indigo-100 mb-8 shadow-inner">
-                <p id="officialMessage" class="text-[12px] font-bold text-slate-700 text-center italic leading-relaxed">
-                    تمت مطابقة الحسابات بنجاح، بانتظار رفع ملف...
-                </p>
+            <div id="billsSection">
+                <div id="billsList" class="space-y-1.5 mb-8"></div>
+            </div>
+
+            <div class="bg-indigo-50 p-6 rounded-[2rem] border border-indigo-100 mb-8 mt-4">
+                <p id="officialMessage" class="text-[12px] font-bold text-slate-700 text-center italic leading-relaxed">يرجى رفع ملف الـ PDF لبدء المطابقة...</p>
             </div>
 
             <div class="border-t-4 border-slate-900 pt-8 mt-auto">
                 <div class="flex justify-between items-end gap-10">
                     <div class="flex-1">
                         <p class="text-[10px] font-black text-slate-400 uppercase mb-1">صافي مبلغ المطابقة المعتمد:</p>
-                        <p id="resFinal" class="text-5xl font-black text-slate-900 tracking-tighter">0.00 IQD</p>
+                        <p id="resFinal" class="text-5xl font-black text-slate-900 tracking-tighter leading-tight">0.00 IQD</p>
                         <p id="tafgeet" class="text-[11px] font-bold text-indigo-700 mt-4 bg-indigo-50 px-4 py-1.5 rounded-2xl border border-indigo-100">....</p>
                     </div>
                     <div class="flex gap-4">
@@ -109,7 +126,53 @@
 
     <script>
         let db = [];
-        document.getElementById('outDate').innerText = new Date().toLocaleDateString('en-GB');
+        let billsVisible = true;
+
+        // بيانات المدن حسب المحافظة
+        const cityData = {
+            "صلاح الدين": ["الشرقاط", "بيجي", "تكرت", "الدور", "سامراء", "بلد", "الضلوعية"],
+            "بغداد": ["الكرادة", "المنصور", "الأعظمية", "الدورة", "بغداد الجديدة", "الشعلة", "الكاظمية"],
+            "نينوى": ["الموصل", "القيارة", "حمام العليل", "تلعفر", "سنجار"],
+            "كركوك": ["مركز كركوك", "الحويجة", "دقوق", "دبس"],
+            "الأنبار": ["الرمادي", "الفلوجة", "هيت", "القائم", "الرطبة"]
+        };
+
+        function updateCities() {
+            const prov = document.getElementById('provInput').value;
+            const citySelect = document.getElementById('cityInput');
+            citySelect.innerHTML = '<option value="">اختر المدينة</option>';
+            
+            if(prov && cityData[prov]) {
+                cityData[prov].forEach(city => {
+                    citySelect.innerHTML += `<option value="${city}">${city}</option>`;
+                });
+            }
+        }
+
+        function initApp() {
+            const select = document.getElementById('currDiscPerc');
+            let options = '<option value="0">0%</option>';
+            for(let i=1; i<=100; i++) { options += `<option value="${i}">${i}%</option>`; }
+            select.innerHTML = options;
+            loadSavedName();
+            document.getElementById('outDate').innerText = new Date().toLocaleDateString('en-GB');
+        }
+
+        function toggleBills() {
+            billsVisible = !billsVisible;
+            const section = document.getElementById('billsSection');
+            const icon = document.getElementById('arrowIcon');
+            const text = document.getElementById('toggleText');
+            if(!billsVisible) {
+                section.classList.add('hidden-content', 'print-hidden');
+                icon.style.transform = 'rotate(180deg)';
+                text.innerText = "إظهار تفاصيل الفواتير";
+            } else {
+                section.classList.remove('hidden-content', 'print-hidden');
+                icon.style.transform = 'rotate(0deg)';
+                text.innerText = "إخفاء تفاصيل الفواتير من التقرير";
+            }
+        }
 
         function saveName() { localStorage.setItem('pure_final_name', document.getElementById('myNameInput').value); }
         function loadSavedName() {
@@ -119,7 +182,9 @@
 
         function sync() {
             document.getElementById('outMyName').innerText = document.getElementById('myNameInput').value || '....';
-            document.getElementById('outLoc').innerText = (document.getElementById('provInput').value || '..') + " / " + (document.getElementById('cityInput').value || '..');
+            const p = document.getElementById('provInput').value || '..';
+            const c = document.getElementById('cityInput').value || '..';
+            document.getElementById('outLoc').innerText = p + " / " + c;
         }
 
         document.getElementById('pdfFile').onchange = async (e) => {
@@ -134,14 +199,12 @@
                 const page = await pdf.getPage(i);
                 const content = await page.getTextContent();
                 const items = content.items.sort((a, b) => b.transform[5] - a.transform[5] || a.transform[4] - b.transform[4]);
-                
                 let client = items.map(it => it.str).find(t => t.length > 10 && !t.includes("بيور")) || "";
                 if(client) {
                     document.getElementById('outClient').value = client;
                     const el = document.getElementById('outClient');
                     el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px';
                 }
-
                 items.forEach(item => {
                     if (/\d{2}\/\d{2}\/\d{4}/.test(item.str)) {
                         let id = "000000", amt = "0";
@@ -161,16 +224,10 @@
 
         function calculate() {
             const list = document.getElementById('billsList');
-            list.innerHTML = ""; let sumOk = 0;
-            let excludedIds = [];
-
+            list.innerHTML = ""; let sumOk = 0; let excludedIds = [];
             db.forEach((b, i) => {
                 const val = parseFloat(b.amount.replace(/,/g,'')) || 0;
-                if (b.status === 'ok') {
-                    sumOk += val;
-                } else {
-                    excludedIds.push(b.id);
-                }
+                if (b.status === 'ok') sumOk += val; else excludedIds.push(b.id);
                 list.innerHTML += `
                     <div onclick="toggle(${i})" class="flex justify-between items-center p-2.5 rounded-2xl cursor-pointer transition-all ${b.status === 'ok' ? 'is-active shadow-sm' : 'not-active'}">
                         <div class="flex items-center gap-3">
@@ -181,29 +238,15 @@
                         <span class="font-black text-[11px] tabular-nums">${b.amount}</span>
                     </div>`;
             });
-
-            // تحديث الرسالة السفلية الذكية
-            updateOfficialMessage(excludedIds);
-
-            const discPerc = parseFloat(document.getElementById('currDiscPerc').value) || 0;
-            const final = sumOk - (sumOk * (discPerc / 100));
-            
-            document.getElementById('resFinal').innerText = final.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0}) + " IQD";
-            document.getElementById('tafgeet').innerText = "فقط " + final.toLocaleString('ar-IQ') + " دينار لا غير";
-        }
-
-        function updateOfficialMessage(excluded) {
-            if(db.length === 0) return;
-            const start = db[0].id;
-            const end = db[db.length-1].id;
-            let msg = `تمت مطابقة الحسابات بنجاح من فاتورة رقم <span class="font-black text-indigo-600 underline">#${start}</span> إلى فاتورة رقم <span class="font-black text-indigo-600 underline">#${end}</span>.`;
-            
-            if(excluded.length > 0) {
-                msg += ` تم استبعاد الفواتير التالية لمراجعتها: <span class="text-red-600 font-black">(${excluded.join(' - ')})</span> والمؤشر عليها بعلامة (!)`;
-            } else {
-                msg += ` لا توجد فواتير مستبعدة.`;
-            }
+            const start = db.length > 0 ? db[0].id : '....';
+            const end = db.length > 0 ? db[db.length-1].id : '....';
+            let msg = `تمت مطابقة الحسابات بنجاح من فاتورة رقم <span class="text-indigo-600 underline">#${start}</span> إلى فاتورة رقم <span class="text-indigo-600 underline">#${end}</span>.`;
+            if(excludedIds.length > 0) msg += ` باستثناء الفواتير المستبعدة: <span class="text-red-600 font-black">(${excludedIds.join(' - ')})</span>.`;
             document.getElementById('officialMessage').innerHTML = msg;
+
+            const final = sumOk - (sumOk * (parseFloat(document.getElementById('currDiscPerc').value) / 100));
+            document.getElementById('resFinal').innerText = final.toLocaleString(undefined, {maximumFractionDigits:0}) + " IQD";
+            document.getElementById('tafgeet').innerText = "فقط " + final.toLocaleString('ar-IQ') + " دينار لا غير";
         }
 
         function toggle(i) { db[i].status = db[i].status === 'ok' ? 'none' : 'ok'; calculate(); }
