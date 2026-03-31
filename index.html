@@ -9,55 +9,43 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+
+    <style>
+        :root { --primary: #4f46e5; --bg-main: #f8fafc; }
+        body { background-color: var(--bg-main); font-family: 'Cairo', sans-serif; }
+        
+        /* تصميم البطاقات */
+        .pharmacy-card { transition: all 0.3s ease; border-radius: 2rem; }
+        .pharmacy-card:hover { transform: translateY(-5px); shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1); }
+        
+        /* إعدادات الطباعة */
+        @media print { .no-print { display: none !important; } body { background: white; } }
+        
+        /* أنيميشن التحميل */
+        .loader-spin { border: 3px solid #f3f3f3; border-top: 3px solid var(--primary); border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* مظهر المودال */
+        #modalOverlay { backdrop-filter: blur(8px); transition: opacity 0.3s ease; }
+        .row-checked { background-color: #f0fdf4 !important; opacity: 0.5; text-decoration: line-through; }
+    </style>
 </head>
-<body class="bg-[#f8fafc] text-slate-900 font-['Cairo'] antialiased">
+<body>
 
-    <div class="max-w-7xl mx-auto p-4 lg:p-10">
-        <header class="relative bg-slate-900 rounded-[3rem] p-10 shadow-2xl overflow-hidden mb-10 no-print">
-            <div class="relative z-10 flex flex-col lg:flex-row justify-between items-center gap-8">
-                <div class="text-center lg:text-right">
-                    <div class="inline-block bg-indigo-500 text-[10px] font-bold px-3 py-1 rounded-full text-white mb-4 tracking-widest uppercase">Global Enterprise Edition</div>
-                    <h1 class="text-5xl font-black text-white italic mb-2">PURE PHARMA <span class="text-indigo-400">PRO</span></h1>
-                    <p class="text-slate-400 font-medium italic">يدعم: الأصيل، الأمين، QuickBooks، وملفات الإكسل العالمية</p>
+    <div class="max-w-6xl mx-auto p-4 lg:p-10">
+        <header class="bg-slate-900 rounded-[2.5rem] p-8 lg:p-12 shadow-2xl mb-10 no-print text-center lg:text-right relative overflow-hidden">
+            <div class="relative z-10 flex flex-col lg:flex-row justify-between items-center gap-6">
+                <div>
+                    <h1 class="text-4xl lg:text-5xl font-black text-white mb-2 italic">PURE PHARMA <span class="text-indigo-400">PRO</span></h1>
+                    <p class="text-slate-400 font-bold">المعالج العالمي: (الأصيل، الأمين، Excel، PDF)</p>
                 </div>
-                
                 <div class="flex flex-col items-center">
-                    <input type="file" id="universalUpload" class="hidden" accept=".pdf, .xlsx, .xls, .csv">
-                    <button onclick="document.getElementById('universalUpload').click()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-12 py-5 rounded-2xl font-black shadow-xl transition-all transform active:scale-95 text-xl flex items-center gap-4">
-                        <span>رفع كشف الحساب</span>
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    <input type="file" id="fileInput" class="hidden" accept=".pdf, .xlsx, .xls, .csv">
+                    <button onclick="document.getElementById('fileInput').click()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-10 py-4 rounded-2xl font-black shadow-lg transition-all flex items-center gap-3 text-lg">
+                        <span>إدراج كشف الحساب</span>
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                     </button>
-                    <div id="loader" class="hidden mt-4 text-indigo-400 font-bold animate-pulse">جاري فحص وتوافق البيانات...</div>
+                    <div id="loader" class="hidden mt-4 flex items-center gap-2 text-indigo-400 font-bold">
+                        <div class="loader-spin"></div> جاري المعالجة...
+                    </div>
                 </div>
-            </div>
-        </header>
-
-        <div class="flex flex-col md:flex-row gap-4 mb-8 no-print">
-            <input type="text" id="searchInput" placeholder="ابحث باسم الصيدلية، المعرف، أو رقم القائمة..." class="flex-grow p-5 rounded-2xl border-2 border-white shadow-sm focus:border-indigo-500 outline-none font-bold transition-all bg-white">
-            <div class="bg-white px-6 py-4 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-3">
-                <span class="text-slate-400 font-bold text-sm">الحسابات المكتشفة:</span>
-                <span id="accCount" class="text-indigo-600 font-black text-xl">0</span>
-            </div>
-        </div>
-
-        <div id="mainGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            </div>
-    </div>
-
-    <div id="modalOverlay" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md opacity-0 pointer-events-none transition-all duration-300 z-50 flex items-center justify-center p-4 no-print">
-        <div class="bg-white rounded-[2.5rem] w-full max-w-5xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
-            <div class="p-6 border-b flex justify-between items-center bg-slate-50">
-                <button onclick="closeModal()" class="w-12 h-12 rounded-full bg-white shadow-sm flex items-center justify-center font-bold hover:bg-rose-500 hover:text-white transition-all text-xl">✕</button>
-                <div class="flex gap-4">
-                    <button onclick="window.print()" class="bg-slate-900 text-white px-8 py-3 rounded-xl font-bold hover:bg-black transition-all">طباعة الكشف</button>
-                    <button id="whatsappBtn" class="bg-emerald-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-emerald-700 transition-all flex items-center gap-2">WhatsApp</button>
-                </div>
-            </div>
-            <div id="modalBody" class="p-8 lg:p-12 overflow-y-auto"></div>
-        </div>
-    </div>
-
-    <script src="script.js"></script>
-</body>
-</html>
