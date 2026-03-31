@@ -2,19 +2,20 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>نظام مطابقة بيور العلمي - الإصدار الاحترافي الكامل</title>
+    <title>نظام مطابقة بيور العلمي - الإصدار النهائي</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Cairo', sans-serif; background-color: #f1f5f9; }
-        .bill-card { display: flex; flex-direction: column; padding: 12px 20px; background: white; border-radius: 15px; border: 1px solid #e2e8f0; margin-bottom: 8px; cursor: pointer; transition: 0.2s; position: relative; }
-        .is-active { border-right: 8px solid #10b981; }
-        .not-active { border-right: 8px solid #ef4444; background-color: #fff1f2; opacity: 0.6; }
-        .is-hidden-all { display: none !important; } /* لإخفاء القائمة كاملة بالطباعة */
+        body { font-family: 'Cairo', sans-serif; background-color: #f8fafc; }
+        .bill-card { display: flex; flex-direction: column; padding: 10px 18px; background: white; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 6px; cursor: pointer; transition: 0.2s; position: relative; }
+        .is-active { border-right: 6px solid #10b981; }
+        .not-active { border-right: 6px solid #ef4444; background-color: #fff1f2; opacity: 0.7; }
+        .is-hidden-all { display: none !important; }
+        .amount-sub { font-size: 10px; font-weight: 700; }
+        .total-transparent { color: #94a3b8; opacity: 0.8; } /* مبلغ الفاتورة الكلي شفاف صغير */
+        .paid-highlight { color: #0ea5e9; background: #f0f9ff; padding: 1px 4px; border-radius: 4px; } /* المبلغ المدفوع مميز */
         @media print { .no-print { display: none !important; } .report-container { border: none !important; width: 100%; padding: 0; } }
-        #toggleArrow { transition: transform 0.3s; }
-        .rotate-180 { transform: rotate(180deg); }
     </style>
 </head>
 <body class="p-4" onload="initApp()">
@@ -35,18 +36,18 @@
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 border-t border-slate-700 pt-4 mb-4">
                 <div><label class="block text-[10px] mb-1 text-orange-400 font-bold italic">المبلغ السابق (توثيق)</label>
                     <input type="text" id="prevInput" oninput="sync()" class="w-full bg-slate-800 border-none rounded-xl p-2 text-xs"></div>
-                <div><label class="block text-[10px] mb-1 text-orange-400 font-bold italic">النسبة السابقة (توثيق)</label>
-                    <input type="text" id="prevDiscInput" oninput="sync()" class="w-full bg-slate-800 border-none rounded-xl p-2 text-xs"></div>
+                <div><label class="block text-[10px] mb-1 text-orange-400 font-bold italic">النسبة السابقة (اختيار)</label>
+                    <select id="prevDiscInput" onchange="sync()" class="w-full bg-slate-800 border-none rounded-xl p-2 text-xs font-bold"></select></div>
                 <div><label class="block text-[10px] mb-1 text-orange-400 font-bold italic">تاريخ آخر مطابقة</label>
                     <input type="date" id="lastMatchDate" oninput="sync()" class="w-full bg-slate-800 border-none rounded-xl p-2 text-xs uppercase"></div>
-                <div><label class="block text-[10px] mb-1 text-emerald-400 font-bold uppercase">نسبة المطابقة %</label>
+                <div><label class="block text-[10px] mb-1 text-emerald-400 font-bold uppercase">نسبة المطابقة الحالية %</label>
                     <select id="currDiscPerc" onchange="calculate()" class="w-full bg-slate-800 border-none rounded-xl p-2 text-xs font-bold text-emerald-400"></select></div>
             </div>
             
             <div class="flex gap-4">
-                <button onclick="document.getElementById('pdfFile').click()" class="flex-1 bg-indigo-600 p-3 rounded-xl text-xs font-black uppercase">رفع PDF</button>
+                <button onclick="document.getElementById('pdfFile').click()" class="flex-1 bg-indigo-600 p-3 rounded-xl text-xs font-black uppercase">رفع الكشف PDF</button>
                 <button onclick="window.print()" class="flex-[2] bg-emerald-600 p-3 rounded-xl text-xs font-black uppercase">طباعة المطابقة</button>
-                <button onclick="location.reload()" class="bg-red-900/40 px-4 rounded-xl text-[10px] font-bold text-red-400 uppercase">تصفير</button>
+                <button onclick="location.reload()" class="bg-red-900/40 px-4 rounded-xl text-[10px] font-bold text-red-400">تصفير</button>
             </div>
             <input type="file" id="pdfFile" class="hidden" accept=".pdf">
         </header>
@@ -54,39 +55,41 @@
         <div class="bg-white p-10 rounded-[3rem] report-container min-h-[1100px] flex flex-col border border-slate-200">
             <div class="flex justify-between items-start border-b-2 border-slate-900 pb-6 mb-8">
                 <div>
-                    <h1 class="text-3xl font-black text-slate-900">مكتب بيور العلمي</h1>
-                    <p class="text-[9px] font-bold text-slate-400 uppercase italic tracking-tighter">Trusted Partners in Health Solutions</p>
+                    <h1 class="text-3xl font-black text-slate-900 uppercase">مكتب بيور العلمي</h1>
+                    <p class="text-[9px] font-bold text-slate-400 uppercase italic">Pure Scientific Bureau</p>
                 </div>
                 <div class="text-left text-[10px] font-bold leading-relaxed">
                     <p>الموقع: <span id="outLoc" class="text-indigo-600 uppercase">..</span></p>
-                    <p>التاريخ: <span id="outDate">..</span></p>
+                    <p>تاريخ اليوم: <span id="outDate">..</span></p>
                     <p class="text-orange-600">آخر مطابقة: <span id="outLastMatch">..</span></p>
                 </div>
             </div>
 
             <div class="grid grid-cols-4 gap-2 mb-6 text-center">
-                <div class="bg-slate-50 p-3 rounded-xl border border-slate-100"><span class="block text-[7px] text-slate-400 font-bold mb-1 uppercase tracking-tighter">PREVIOUS AMOUNT</span><span id="outPrevAmt" class="text-[10px] font-black italic text-slate-600">0</span></div>
-                <div class="bg-slate-50 p-3 rounded-xl border border-slate-100"><span class="block text-[7px] text-slate-400 font-bold mb-1 uppercase tracking-tighter">PREVIOUS DISC %</span><span id="outPrevDisc" class="text-[10px] font-black italic text-slate-600">0%</span></div>
-                <div class="bg-slate-50 p-3 rounded-xl border border-slate-100"><span class="block text-[7px] text-slate-400 font-bold mb-1 uppercase tracking-tighter">ACCOUNTANT</span><span id="outMyName" class="text-[10px] font-black italic text-slate-600">..</span></div>
-                <div class="bg-slate-50 p-3 rounded-xl border border-slate-100"><span class="block text-[7px] font-bold mb-1 uppercase tracking-tighter text-emerald-500">CURRENT DISC %</span><span id="outCurrDisc" class="text-[10px] font-black italic text-emerald-600">0%</span></div>
+                <div class="bg-slate-50 p-3 rounded-xl border border-slate-100"><span class="block text-[7px] text-slate-400 font-bold mb-1 uppercase">PREV AMOUNT</span><span id="outPrevAmt" class="text-[10px] font-black italic text-slate-600">0</span></div>
+                <div class="bg-slate-50 p-3 rounded-xl border border-slate-100"><span class="block text-[7px] text-slate-400 font-bold mb-1 uppercase">PREV DISC</span><span id="outPrevDisc" class="text-[10px] font-black italic text-slate-600">0%</span></div>
+                <div class="bg-slate-50 p-3 rounded-xl border border-slate-100"><span class="block text-[7px] text-slate-400 font-bold mb-1 uppercase">ACCOUNTANT</span><span id="outMyName" class="text-[10px] font-black italic text-slate-600">..</span></div>
+                <div class="bg-slate-50 p-3 rounded-xl border border-slate-100"><span class="block text-[7px] font-bold mb-1 uppercase text-emerald-500">MATCH DISC</span><span id="outCurrDisc" class="text-[10px] font-black italic text-emerald-600">0%</span></div>
             </div>
 
-            <div class="mb-6 p-6 bg-slate-900 rounded-[2rem] text-white flex justify-between items-center shadow-lg">
+            <div class="mb-6 p-6 bg-slate-900 rounded-[2rem] text-white flex justify-between items-center shadow-lg relative">
                 <div class="flex-1">
-                    <p class="text-[9px] font-bold text-indigo-400 mb-1 italic uppercase tracking-widest">اسم العميل المعتمد / المذخر</p>
-                    <input type="text" id="outClient" placeholder="اكتب اسم الصيدلية..." class="text-2xl font-black bg-transparent border-none outline-none w-full">
+                    <p class="text-[9px] font-bold text-indigo-400 mb-1 italic uppercase">اسم العميل / المذخر</p>
+                    <input type="text" id="outClient" placeholder="اسم الصيدلية..." class="text-2xl font-black bg-transparent border-none outline-none w-full">
                 </div>
                 <div class="text-left border-r border-slate-700 pr-6">
-                    <p class="text-[8px] font-bold text-slate-500 mb-1 italic uppercase">TOTAL INVOICES:</p>
+                    <p class="text-[8px] font-bold text-slate-500 mb-1 italic uppercase tracking-tighter">SUB-TOTAL:</p>
                     <p id="outFullOrig" class="text-lg font-black text-slate-300">0 IQD</p>
                 </div>
             </div>
 
-            <div class="flex items-center gap-2 mb-4 no-print select-none cursor-pointer group" onclick="toggleAllBillsVisibility()">
-                <div id="toggleArrow" class="bg-slate-100 p-1 rounded-full group-hover:bg-indigo-100 transition-colors">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
-                </div>
-                <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest group-hover:text-indigo-600 transition-colors">إخفاء القائمة من الطباعة</span>
+            <div id="matchingMsgBox" class="bg-slate-50 p-4 rounded-2xl border border-slate-100 mb-6 text-center italic">
+                <p id="officialMsg" class="text-[11px] font-bold text-slate-700"></p>
+            </div>
+
+            <div class="flex items-center gap-2 mb-4 no-print select-none cursor-pointer" onclick="toggleAllBillsVisibility()">
+                <div id="toggleArrow" class="bg-slate-100 p-1 rounded-full"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></div>
+                <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest">إخفاء / إظهار التفاصيل</span>
             </div>
 
             <div id="billsList" class="space-y-2 mb-8"></div>
@@ -94,7 +97,7 @@
             <div class="border-t-2 border-slate-900 pt-8 mt-auto">
                 <div class="flex justify-between items-end">
                     <div class="flex-1">
-                        <p class="text-[10px] font-black text-slate-400 mb-1 italic uppercase tracking-widest">Final Amount / صافي المطابقة:</p>
+                        <p class="text-[10px] font-black text-slate-400 mb-1 italic uppercase">Final Amount / صافي المطابقة:</p>
                         <p id="resFinal" class="text-5xl font-black text-slate-900 tracking-tighter italic font-mono">0 IQD</p>
                         <p id="tafgeet" class="text-[11px] font-bold text-indigo-700 bg-indigo-50 px-5 py-2 rounded-xl border border-indigo-100 mt-4 inline-block italic">....</p>
                     </div>
@@ -109,20 +112,42 @@
 
     <script>
         let db = [];
+        // 1. قاعدة بيانات المحافظات العراقية كاملة
         const iraqGeo = {
-            "بغداد": ["الرصافة", "الكرخ", "الأعظمية", "المنصور", "الكرادة", "الكاظمية"],
-            "صلاح الدين": ["الشرقاط", "تكريت", "سامراء", "بيجي", "الدجيل", "بلد"],
-            "نينوى": ["الموصل", "تلعفر", "تلكيف", "الحمدانية", "سنجار"]
+            "بغداد": ["الرصافة", "الكرخ", "الأعظمية", "المنصور", "الكرادة", "الكاظمية", "الدورة", "بغداد الجديدة", "الشعلة", "المحمودية", "أبو غريب", "الطارمية"],
+            "صلاح الدين": ["الشرقاط", "تكريت", "سامراء", "بيجي", "بلد", "الدجيل", "الطوز", "العلم", "الضلوعية", "الإسحاقي"],
+            "نينوى": ["الموصل", "تلعفر", "تلكيف", "الحمدانية", "سنجار", "الشيخان", "البعاج", "الحضر", "مخمور"],
+            "البصرة": ["المركز", "الزبير", "القرنة", "أبو الخصيب", "الفاو", "شط العرب", "المدينة"],
+            "الأنبار": ["الرمادي", "الفلوجة", "هيت", "عنة", "راوة", "القائم", "الرطبة", "الحديثة"],
+            "بابل": ["الحلة", "المسيب", "المحاويل", "الهاشمية", "القاسم", "الإسكندرية"],
+            "كربلاء": ["المركز", "الهندية", "عين التمر", "الحر"],
+            "النجف": ["المركز", "الكوفة", "المناذرة", "المشخاب"],
+            "ذي قار": ["الناصرية", "الرفاعي", "الشطرة", "سوق الشيوخ", "الجبايش"],
+            "القادسية": ["الديوانية", "عفك", "الشامية", "الحمزة"],
+            "المثنى": ["السماوة", "الرميثة", "الخضر"],
+            "واسط": ["الكوت", "العزيزية", "الصويرة", "النعمانية"],
+            "ميسان": ["العمارة", "الميمونة", "المجر الكبير"],
+            "ديالى": ["بعقوبة", "المقدادية", "خانقين", "الخالص"],
+            "كركوك": ["المركز", "الحويجة", "دقوق", "دبس"],
+            "أربيل": ["المركز", "شقلاوة", "سوران", "كويسنجق"],
+            "السليمانية": ["المركز", "جمجمال", "دوكان", "حلبجة"],
+            "دهوك": ["المركز", "زاخو", "عمادية", "سميل"]
         };
 
         function initApp() {
             const pSel = document.getElementById('provInput');
-            pSel.innerHTML = '<option value="">المحافظة</option>';
+            pSel.innerHTML = '<option value="">اختيار محافظة</option>';
             Object.keys(iraqGeo).sort().forEach(p => pSel.innerHTML += `<option value="${p}">${p}</option>`);
-            const ds = document.getElementById('currDiscPerc');
-            ds.innerHTML = '<option value="0">0%</option>';
-            for(let i=1; i<=15; i++) ds.innerHTML += `<option value="${i}">${i}%</option>`;
-            const n = localStorage.getItem('pure_v10_name');
+
+            // 3. النسبة اختيار (Dropdown)
+            const discs = ['prevDiscInput', 'currDiscPerc'];
+            discs.forEach(id => {
+                const el = document.getElementById(id);
+                el.innerHTML = '<option value="0">0%</option>';
+                for(let i=1; i<=15; i++) el.innerHTML += `<option value="${i}">${i}%</option>`;
+            });
+
+            const n = localStorage.getItem('pure_final_name');
             if(n) { document.getElementById('myNameInput').value = n; sync(); }
             document.getElementById('outDate').innerText = new Date().toLocaleDateString('en-GB');
         }
@@ -134,12 +159,12 @@
             if(p && iraqGeo[p]) iraqGeo[p].sort().forEach(c => cSel.innerHTML += `<option value="${c}">${c}</option>`);
         }
 
-        function saveData() { localStorage.setItem('pure_v10_name', document.getElementById('myNameInput').value); }
+        function saveData() { localStorage.setItem('pure_final_name', document.getElementById('myNameInput').value); }
 
         function sync() {
             document.getElementById('outMyName').innerText = document.getElementById('myNameInput').value || '..';
             document.getElementById('outPrevAmt').innerText = (document.getElementById('prevInput').value || '0') + " IQD";
-            document.getElementById('outPrevDisc').innerText = (document.getElementById('prevDiscInput').value || '0') + "%";
+            document.getElementById('outPrevDisc').innerText = document.getElementById('prevDiscInput').value + "%";
             document.getElementById('outLastMatch').innerText = document.getElementById('lastMatchDate').value || '..';
             document.getElementById('outLoc').innerText = (document.getElementById('provInput').value || '..') + " - " + (document.getElementById('cityInput').value || '..');
             calculate();
@@ -160,13 +185,17 @@
                 if(client) document.getElementById('outClient').value = client;
                 items.forEach(item => {
                     if (/\d{2}\/\d{2}\/\d{4}/.test(item.str)) {
-                        let id = "000", remain = "0";
+                        let id = "000", total = "0", paid = "0", remain = "0";
                         const row = items.filter(it => Math.abs(it.transform[5] - item.transform[5]) < 5);
                         const nums = row.filter(r => /^-?\d{1,3}(,\d{3})*/.test(r.str) && r.str.includes(","));
-                        if(nums.length >= 1) remain = nums[nums.length-1].str;
+                        if(nums.length >= 2) { 
+                            total = nums[0].str; 
+                            paid = (nums.length === 3) ? nums[1].str : "0"; 
+                            remain = nums[nums.length-1].str; 
+                        }
                         const idItem = row.find(ri => /^\d{5,7}$/.test(ri.str));
                         if(idItem) id = idItem.str;
-                        db.push({ id, date: item.str, remain, status: 'ok' });
+                        db.push({ id, date: item.str, total, paid, remain, status: 'ok' });
                     }
                 });
             }
@@ -175,22 +204,35 @@
 
         function calculate() {
             const list = document.getElementById('billsList');
-            list.innerHTML = ""; let sumRem = 0;
+            list.innerHTML = ""; let sumRem = 0; let excluded = [];
             db.forEach((b, i) => {
                 const val = parseFloat(b.remain.replace(/,/g,'')) || 0;
                 const active = b.status === 'ok';
-                if (active) sumRem += val;
+                if (active) sumRem += val; else excluded.push(b.id);
+                // 4 & 5: إظهار المبالغ (الكلي شفاف والمدفوع مميز)
                 list.innerHTML += `
                     <div class="bill-card ${active ? 'is-active' : 'not-active'}" onclick="toggleStatus(${i})">
                         <div class="flex justify-between items-center">
-                            <span class="font-black italic text-slate-800">${b.remain} IQD</span>
+                            <div class="flex flex-col">
+                                <span class="font-black italic text-slate-800 text-sm">${b.remain} IQD</span>
+                                <div class="flex gap-2 mt-1">
+                                    <span class="amount-sub total-transparent italic">كلي: ${b.total}</span>
+                                    <span class="amount-sub paid-highlight italic">مدفوع: ${b.paid}</span>
+                                </div>
+                            </div>
                             <div class="text-right">
                                 <span class="text-[10px] font-black italic">#${b.id}</span>
-                                <span class="block text-[8px] font-bold text-slate-400">${b.date}</span>
+                                <span class="block text-[8px] font-bold text-slate-400 uppercase">${b.date}</span>
                             </div>
                         </div>
                     </div>`;
             });
+
+            // 2. رسالة المطابقة
+            let msg = `نود إعلامكم بأنه تمت مطابقة الحسابات بنجاح.`;
+            if(excluded.length > 0) msg = `نود إعلامكم بأنه تمت مطابقة الحسابات <span class="text-red-600">باستثناء الفواتير (#${excluded.join(', #')})</span>.`;
+            document.getElementById('officialMsg').innerHTML = msg;
+
             const cD = parseFloat(document.getElementById('currDiscPerc').value) || 0;
             const final = sumRem - (sumRem * (cD / 100));
             document.getElementById('outCurrDisc').innerText = cD + "%";
@@ -199,18 +241,10 @@
             document.getElementById('tafgeet').innerText = "فقط " + final.toLocaleString('ar-IQ') + " دينار عراقي لا غير";
         }
 
-        // اختيار يدوي (تفعيل/تعطيل فاتورة)
-        function toggleStatus(i) {
-            db[i].status = (db[i].status === 'ok' ? 'none' : 'ok');
-            calculate();
-        }
-
-        // إخفاء كل القائمة بالطباعة
+        function toggleStatus(i) { db[i].status = (db[i].status === 'ok' ? 'none' : 'ok'); calculate(); }
         function toggleAllBillsVisibility() {
-            const list = document.getElementById('billsList');
-            const arrow = document.getElementById('toggleArrow');
-            list.classList.toggle('is-hidden-all');
-            arrow.classList.toggle('rotate-180');
+            document.getElementById('billsList').classList.toggle('is-hidden-all');
+            document.getElementById('toggleArrow').classList.toggle('rotate-180');
         }
     </script>
 </body>
