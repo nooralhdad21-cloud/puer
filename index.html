@@ -2,174 +2,156 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>Pure Pharma AI | النظام الذكي للمطابقة</title>
+    <title>نظام مطابقة المذاخر | Pure Pharma</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Cairo', sans-serif; background-color: #f8fafc; scroll-behavior: smooth; }
-        .bill-card { transition: all 0.3s ease; }
-        .focus-box { border: 4px solid #4f46e5 !important; transform: scale(1.02); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); background: #eef2ff !important; }
-        .warning-row { background-color: #fff5f5; border-right: 5px solid #f56565 !important; }
-        .status-dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
-        .sticky-tools { position: sticky; top: 0; z-index: 100; background: rgba(255,255,255,0.9); backdrop-filter: blur(10px); border-bottom: 1px solid #e2e8f0; }
+        body { font-family: 'Cairo', sans-serif; background-color: #f1f5f9; }
+        .printable-area { background: white; padding: 40px; border-radius: 10px; box-shadow: 0 0 20px rgba(0,0,0,0.05); }
+        .stamp-box { border: 2px dashed #cbd5e1; width: 150px; height: 100px; display: flex; align-items: center; justify-content: center; color: #94a3b8; font-size: 12px; font-weight: bold; }
+        .bill-row { transition: 0.2s; border-right: 4px solid transparent; }
+        .is-confirmed { border-right-color: #10b981; background-color: #f0fdf4; }
+        .is-issue { border-right-color: #f59e0b; background-color: #fffbeb; }
+        @media print { 
+            .no-print { display: none !important; } 
+            body { background: white; padding: 0; }
+            .printable-area { box-shadow: none; border: none; width: 100%; }
+        }
     </style>
 </head>
-<body class="p-2 md:p-6">
+<body class="p-4 md:p-8">
 
-    <div class="max-w-5xl mx-auto">
-        <header class="sticky-tools p-4 rounded-3xl mb-6 shadow-sm no-print">
-            <div class="flex flex-col md:flex-row gap-4 items-center">
-                <div class="relative flex-1 w-full">
-                    <input type="text" id="smartSearch" oninput="aiSearch()" placeholder="اكتب رقم القائمة.. القفز والتركيز تلقائي" 
-                           class="w-full p-4 pr-12 rounded-2xl border-2 border-slate-100 focus:border-indigo-600 outline-none font-bold text-lg shadow-inner">
-                    <span class="absolute right-4 top-4 opacity-40">⚡</span>
-                </div>
-                
-                <div class="flex gap-2 w-full md:w-auto">
-                    <button onclick="document.getElementById('fileIn').click()" class="flex-1 bg-indigo-600 text-white px-6 py-4 rounded-2xl font-black shadow-lg hover:bg-indigo-700">رفع ملفات</button>
-                    <button onclick="document.getElementById('camIn').click()" class="bg-slate-800 text-white px-6 py-4 rounded-2xl font-black shadow-lg hover:bg-slate-700">📸</button>
-                </div>
+    <div class="max-w-4xl mx-auto">
+        <header class="no-print bg-slate-900 text-white p-6 rounded-[2rem] mb-8 shadow-2xl space-y-4">
+            <h1 class="text-xl font-black text-indigo-400 text-center mb-4">إعدادات التقرير الرسمي</h1>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <input type="text" id="myStoreName" placeholder="اسم مذخركم (مثلاً: مذخر الشرقاط العلمي)" class="p-3 rounded-xl bg-slate-800 border border-slate-700 outline-none focus:border-indigo-500">
+                <input type="date" id="reportDate" class="p-3 rounded-xl bg-slate-800 border border-slate-700 outline-none focus:border-indigo-500 text-white">
             </div>
-            
-            <div id="aiSummary" class="hidden mt-4 grid grid-cols-3 gap-2">
-                <div class="bg-green-50 p-3 rounded-xl border border-green-100 text-center">
-                    <p class="text-[10px] text-green-600 font-bold">جاهز للمطابقة</p>
-                    <p id="countOk" class="text-lg font-black text-green-700">0</p>
-                </div>
-                <div class="bg-orange-50 p-3 rounded-xl border border-orange-100 text-center">
-                    <p class="text-[10px] text-orange-600 font-bold">تحتاج مراجعة</p>
-                    <p id="countWarn" class="text-lg font-black text-orange-700">0</p>
-                </div>
-                <div class="bg-indigo-50 p-3 rounded-xl border border-indigo-100 text-center">
-                    <p class="text-[10px] text-indigo-600 font-bold">الإجمالي الصافي</p>
-                    <p id="sumTotal" class="text-lg font-black text-indigo-700">0</p>
-                </div>
+            <div class="flex gap-2">
+                <input type="file" id="pdfInput" class="hidden" accept=".pdf">
+                <button onclick="document.getElementById('pdfInput').click()" class="flex-1 bg-indigo-600 p-4 rounded-xl font-bold">رفع الكشف للمطابقة</button>
+                <button onclick="window.print()" class="bg-green-600 px-8 rounded-xl font-bold">حفظ وطباعة التقرير</button>
             </div>
-
-            <input type="file" id="fileIn" class="hidden" accept=".pdf, .xlsx, .xls">
-            <input type="file" id="camIn" class="hidden" accept="image/*" capture="environment">
         </header>
 
-        <div id="displayArea" class="space-y-8">
+        <div id="printArea" class="printable-area">
+            <div class="flex justify-between items-start border-b-4 border-slate-900 pb-6 mb-8">
+                <div>
+                    <h2 id="displayStoreName" class="text-2xl font-black text-slate-900">اسم المذخر يظهر هنا</h2>
+                    <p class="text-sm text-slate-500 font-bold mt-1">قسم الحسابات والمطابقة المالية</p>
+                </div>
+                <div class="text-left">
+                    <p class="text-sm font-bold">التاريخ: <span id="displayDate">--/--/----</span></p>
+                    <p class="text-sm font-bold mt-1">العميل: <span id="displayClientName" class="text-indigo-600 text-lg">بانتظار التحميل..</span></p>
+                </div>
             </div>
+
+            <div id="dataOutput" class="space-y-4 min-h-[400px]">
+                <p class="text-center text-slate-300 py-20 italic">يرجى رفع ملف PDF لعرض الفواتير هنا...</p>
+            </div>
+
+            <div class="mt-12 pt-8 border-t flex justify-between items-center">
+                <div class="text-sm">
+                    <p class="font-bold underline mb-2">ملاحظات التدقيق:</p>
+                    <p class="text-slate-500 italic">تمت مطابقة هذه القوائم إلكترونياً وبمراجعة محاسبية دقيقة.</p>
+                </div>
+                <div class="flex flex-col items-center gap-2">
+                    <div class="stamp-box">ختم المذخر الرسمي</div>
+                    <p class="text-[10px] font-bold">توقيع المسؤول</p>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
-        let dataStore = [];
+        let rawData = [];
 
-        document.getElementById('fileIn').onchange = handleFiles;
-        document.getElementById('camIn').onchange = handleFiles;
+        // تحديث البيانات تلقائياً عند الكتابة
+        document.getElementById('myStoreName').oninput = function() {
+            document.getElementById('displayStoreName').innerText = this.value || "اسم المذخر يظهر هنا";
+        };
+        document.getElementById('reportDate').onchange = function() {
+            document.getElementById('displayDate').innerText = this.value;
+        };
 
-        async function handleFiles(e) {
+        // تعيين تاريخ اليوم تلقائياً
+        document.getElementById('reportDate').valueAsDate = new Date();
+        document.getElementById('displayDate').innerText = new Date().toLocaleDateString('ar-EG');
+
+        document.getElementById('pdfInput').onchange = async (e) => {
             const file = e.target.files[0];
             if (!file) return;
-            const ext = file.name.split('.').pop().toLowerCase();
             
-            if (ext === 'pdf') {
-                const pdfJS = window['pdfjs-dist/build/pdf'];
-                pdfJS.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
-                const buffer = await file.arrayBuffer();
-                const pdf = await pdfJS.getDocument({data: buffer}).promise;
+            const pdfJS = window['pdfjs-dist/build/pdf'];
+            pdfJS.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+            const buffer = await file.arrayBuffer();
+            const pdf = await pdfJS.getDocument({data: buffer}).promise;
+            
+            rawData = [];
+            for (let i = 1; i <= pdf.numPages; i++) {
+                const page = await pdf.getPage(i);
+                const content = await page.getTextContent();
+                const items = content.items.map(it => it.str.trim());
                 
-                for (let i = 1; i <= pdf.numPages; i++) {
-                    const page = await pdf.getPage(i);
-                    const content = await page.getTextContent();
-                    const textItems = content.items.map(it => it.str).join(' ');
-                    processRawText(textItems, "كشف PDF صفحة " + i);
-                }
-            }
-            renderAll();
-        }
-
-        function processRawText(text, source) {
-            const bills = [];
-            const billMatches = text.match(/\d{5,7}/g) || [];
-            const priceMatches = text.match(/(\d{1,3}(,\d{3})*(\.\d{2}))/g) || [];
-
-            billMatches.forEach((id, idx) => {
-                const price = priceMatches[idx] || "0.00";
-                // ميزة ذكية: تنبيه تلقائي إذا كان السعر 0
-                const isSuspicious = parseFloat(price.replace(/,/g,'')) === 0;
+                let shop = items.find(t => t.length > 10 && !t.includes("بيور")) || "عميل غير معروف";
+                let bills = [];
                 
-                bills.push({
-                    id,
-                    price,
-                    status: 'none',
-                    note: isSuspicious ? 'تنبيه: المبلغ صفر!' : '',
-                    aiFlag: isSuspicious
-                });
-            });
-
-            if(bills.length > 0) dataStore.push({ name: source, bills });
-        }
-
-        function renderAll() {
-            const area = document.getElementById('displayArea');
-            area.innerHTML = "";
-            let totalConfirmed = 0;
-            let readyCount = 0;
-            let warnCount = 0;
-
-            dataStore.forEach((shop, sIdx) => {
-                const rows = shop.bills.map((b, bIdx) => {
-                    if (b.status === 'ok') {
-                        totalConfirmed += parseFloat(b.price.replace(/,/g,''));
-                        readyCount++;
+                content.items.forEach((item, idx) => {
+                    if (/\d{2}\/\d{2}\/\d{4}/.test(item.str)) {
+                        let id = "---", price = "0.00";
+                        // بحث بسيط عن الرقم والمبلغ
+                        for(let n=-5; n<=5; n++) {
+                            let val = content.items[idx+n]?.str || "";
+                            if(/^\d{5,7}$/.test(val)) id = val;
+                            if(/^(\d{1,3}(,\d{3})*(\.\d{2}))$/.test(val)) price = val;
+                        }
+                        bills.push({ id, date: item.str, price, status: 'none', note: '' });
                     }
-                    if (b.aiFlag || b.status === 'warn') warnCount++;
-
-                    return `
-                    <div id="bill-row-${b.id}" class="p-4 border-b flex items-center justify-between bill-card ${b.aiFlag ? 'warning-row' : ''}">
-                        <div class="flex items-center gap-3">
-                            <div class="flex gap-1 no-print">
-                                <button onclick="toggleStatus(${sIdx},${bIdx},'ok')" class="w-8 h-8 rounded-lg font-bold ${b.status === 'ok' ? 'bg-green-600 text-white' : 'bg-slate-100 text-slate-400'}">✓</button>
-                                <button onclick="toggleStatus(${sIdx},${bIdx},'warn')" class="w-8 h-8 rounded-lg font-bold ${b.status === 'warn' ? 'bg-red-500 text-white' : 'bg-slate-100 text-slate-400'}">!</button>
-                            </div>
-                            <div>
-                                <p class="font-black text-slate-800">#${b.id}</p>
-                                ${b.note ? `<p class="text-[10px] text-red-500 font-bold animate-pulse">${b.note}</p>` : ''}
-                            </div>
-                        </div>
-                        <p class="font-black text-lg ${b.status === 'ok' ? 'text-green-600' : 'text-slate-900'}">${b.price}</p>
-                    </div>
-                    `;
-                }).join('');
-
-                area.innerHTML += `
-                    <div class="bg-white rounded-[2rem] shadow-xl overflow-hidden border border-slate-100">
-                        <div class="bg-slate-900 p-5 text-white flex justify-between items-center">
-                            <h2 class="font-bold italic text-indigo-400 text-sm leading-tight">${shop.name}</h2>
-                        </div>
-                        <div>${rows}</div>
-                    </div>
-                `;
-            });
-
-            // تحديث الملخص الذكي
-            document.getElementById('aiSummary').classList.remove('hidden');
-            document.getElementById('countOk').innerText = readyCount;
-            document.getElementById('countWarn').innerText = warnCount;
-            document.getElementById('sumTotal').innerText = totalConfirmed.toLocaleString();
-        }
-
-        function toggleStatus(sIdx, bIdx, status) {
-            dataStore[sIdx].bills[bIdx].status = dataStore[sIdx].bills[bIdx].status === status ? 'none' : status;
-            renderAll();
-        }
-
-        function aiSearch() {
-            const val = document.getElementById('smartSearch').value.trim();
-            document.querySelectorAll('.bill-card').forEach(el => el.classList.remove('focus-box'));
-            
-            if (val.length >= 3) {
-                const target = document.getElementById('bill-row-' + val);
-                if (target) {
-                    target.classList.add('focus-box');
-                    target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }
+                });
+                if(bills.length > 0) rawData.push({ name: shop, bills });
             }
+            renderReport();
+        };
+
+        function renderReport() {
+            const output = document.getElementById('dataOutput');
+            output.innerHTML = "";
+            
+            if(rawData.length > 0) {
+                document.getElementById('displayClientName').innerText = rawData[0].name;
+            }
+
+            rawData.forEach((shop, sIdx) => {
+                let rows = shop.bills.map((b, bIdx) => `
+                    <div class="flex justify-between items-center p-3 border-b bill-row ${b.status === 'ok' ? 'is-confirmed' : ''} ${b.status === 'warn' ? 'is-issue' : ''}">
+                        <div class="flex items-center gap-3">
+                            <div class="no-print flex gap-1">
+                                <button onclick="setStatus(${sIdx},${bIdx},'ok')" class="w-6 h-6 rounded bg-slate-100 text-[10px] font-bold">✓</button>
+                                <button onclick="setStatus(${sIdx},${bIdx},'warn')" class="w-6 h-6 rounded bg-slate-100 text-[10px] font-bold">!</button>
+                            </div>
+                            <span class="font-bold text-sm">#${b.id}</span>
+                            <span class="text-[10px] text-slate-400">${b.date}</span>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            ${b.note ? `<span class="text-[10px] text-orange-600 font-bold bg-orange-50 px-2 rounded">${b.note}</span>` : ''}
+                            <span class="font-black text-slate-800">${b.price}</span>
+                        </div>
+                    </div>
+                `).join('');
+                output.innerHTML += `<div class="mb-6">${rows}</div>`;
+            });
+        }
+
+        function setStatus(s, b, st) {
+            rawData[s].bills[b].status = (rawData[s].bills[b].status === st) ? 'none' : st;
+            if(st === 'warn' && rawData[s].bills[b].status !== 'none') {
+                let note = prompt("اكتب الملاحظة (مثلاً: استرجاع، نقص):");
+                rawData[s].bills[b].note = note || "";
+            }
+            renderReport();
         }
     </script>
 </body>
