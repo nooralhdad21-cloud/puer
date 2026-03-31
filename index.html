@@ -2,153 +2,161 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>Pure Pharma | نظام القراءة المباشرة</title>
+    <title>نظام كشوفات بيور المطور</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Cairo', sans-serif; background: #f8fafc; }
-        .invoice-card { background: white; border-radius: 2rem; border: 1px solid #e2e8f0; margin-bottom: 2rem; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
-        @media print { .no-print { display: none !important; } .invoice-card { border: 2px solid #000; box-shadow: none; page-break-inside: avoid; } }
+        body { font-family: 'Cairo', sans-serif; background-color: #f1f5f9; }
+        .pharmacy-card { background: white; border-radius: 2rem; box-shadow: 0 10px 25px rgba(0,0,0,0.05); margin-bottom: 2rem; overflow: hidden; }
+        .bill-row { transition: all 0.3s ease; border-bottom: 1px solid #f1f5f9; }
+        .details-panel { display: none; background: #fafafa; border-top: 1px solid #edf2f7; }
+        .rotate-180 { transform: rotate(180deg); }
+        @media print { .no-print { display: none !important; } .details-panel { display: block !important; } .pharmacy-card { border: 2px solid #000; box-shadow: none; } }
     </style>
 </head>
 <body class="p-4 md:p-8">
 
     <div class="max-w-4xl mx-auto">
-        <header class="bg-slate-900 text-white p-8 rounded-[2.5rem] mb-10 text-center no-print shadow-2xl border-b-8 border-indigo-600">
-            <h1 class="text-3xl font-black mb-2 text-indigo-400">PURE PHARMA <span class="text-white">ULTRA</span></h1>
-            <p class="text-slate-400 text-sm mb-6 font-bold underline">نظام قراءة الملفات المشفرة (الشرقاط 2026)</p>
-            
-            <input type="file" id="pdfUpload" class="hidden" accept=".pdf">
-            <button onclick="document.getElementById('pdfUpload').click()" class="bg-indigo-600 hover:bg-indigo-500 px-12 py-4 rounded-2xl font-black text-xl transition-all shadow-xl">
-                ارفع الملف الآن
+        <header class="bg-slate-900 text-white p-8 rounded-[2.5rem] mb-8 text-center no-print shadow-xl">
+            <h1 class="text-2xl font-black mb-4 text-indigo-400 italic">PURE PHARMA <span class="text-white">SMART VIEW</span></h1>
+            <input type="file" id="pdfFile" class="hidden" accept=".pdf">
+            <button onclick="document.getElementById('pdfFile').click()" class="bg-indigo-600 hover:bg-indigo-500 px-12 py-4 rounded-2xl font-bold transition-all shadow-lg active:scale-95">
+                ارفع كشف الشرقاط PDF
             </button>
-            <div id="status" class="hidden mt-4 animate-pulse text-indigo-300 font-bold">جاري استخراج البيانات من المواقع المشفرة...</div>
+            <div id="status" class="hidden mt-4 animate-pulse text-indigo-300 font-bold text-sm italic">جاري فك التشفير وتنظيم الفواتير...</div>
         </header>
 
-        <div id="output" class="space-y-8">
-            <div class="text-center py-20 border-4 border-dashed border-slate-300 rounded-[3rem] text-slate-400 font-bold italic">
-                بانتظار الملف لسحب الأسماء والتفاصيل..
+        <div id="mainContainer" class="space-y-6">
             </div>
-        </div>
     </div>
 
     <script>
         const pdfJS = window['pdfjs-dist/build/pdf'];
         pdfJS.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
 
-        // وظيفة تنظيف احترافية لملفات "بيور"
-        function fixPureText(str) {
-            if (!str) return "";
-            // حذف الرموز الغريبة ودمج الكلمات المقطعة
-            return str.replace(/[ѧ\x00-\x1F\x7F-\x9F]/g, "").replace(/\s+/g, " ").trim();
-        }
+        function clean(s) { return s.replace(/[ѧ\x00-\x1F\x7F-\x9F]/g, "").replace(/\s+/g, " ").trim(); }
 
-        document.getElementById('pdfUpload').onchange = async (e) => {
+        document.getElementById('pdfFile').onchange = async (e) => {
             const file = e.target.files[0];
             if (!file) return;
             document.getElementById('status').classList.remove('hidden');
-            const container = document.getElementById('output');
+            const container = document.getElementById('mainContainer');
             container.innerHTML = "";
 
             const buffer = await file.arrayBuffer();
             const pdf = await pdfJS.getDocument({data: buffer}).promise;
-
-            let finalData = {};
+            let database = {};
 
             for (let i = 1; i <= pdf.numPages; i++) {
                 const page = await pdf.getPage(i);
                 const content = await page.getTextContent();
-                
-                // سحب النصوص مع الحفاظ على ترتيبها في الصفحة
-                const items = content.items.map(it => ({
-                    text: fixPureText(it.str),
-                    y: it.transform[5] // الارتفاع العمودي في الصفحة
-                })).filter(it => it.text.length > 0);
+                const items = content.items.map(it => ({ text: clean(it.str), y: it.transform[5] }));
 
-                let pageName = "غير معروف", pageAddr = "الشرقاط", pagePhone = "---";
-                let pageBills = [];
-
-                // 1. استخراج الاسم والعنوان (دائماً في أعلى الصفحة - إحداثيات Y عالية)
-                items.sort((a, b) => b.y - a.y); // ترتيب من الأعلى للأسفل
+                let pName = "غير معروف", pAddr = "الشرقاط", pPhone = "---";
                 
-                const topItems = items.slice(0, 15); // أول 15 نص في الصفحة
-                topItems.forEach((item, idx) => {
-                    // إذا وجدنا نصاً طويلاً ليس فيه "بيور" ولا أرقام، فهو الاسم
-                    if (item.text.length > 10 && !item.text.includes("بيور") && !item.text.includes("202")) {
-                        if (pageName === "غير معروف") pageName = item.text;
-                    }
-                    // إذا وجدنا نصاً يبدأ بـ 07 فهو الموبايل
-                    if (item.text.startsWith("07")) pagePhone = item.text;
-                    // إذا وجدنا نصاً يحتوي على "حي" أو "شارع" فهو العنوان
-                    if (item.text.includes("حي") || item.text.includes("شارع")) pageAddr = item.text;
+                // استخراج بيانات الرأس (الثابتة)
+                items.sort((a,b) => b.y - a.y);
+                items.slice(0, 20).forEach(item => {
+                    if (item.text.length > 10 && !item.text.includes("بيور") && !item.text.includes("202")) pName = item.text;
+                    if (item.text.startsWith("07")) pPhone = item.text;
+                    if (item.text.includes("حي") || item.text.includes("شارع")) pAddr = item.text;
                 });
 
-                // 2. استخراج الفواتير
+                if (!database[pName]) database[pName] = { name: pName, addr: pAddr, phone: pPhone, bills: [] };
+
+                // استخراج الفواتير
                 items.forEach((item, idx) => {
                     if (/\d{2}\/\d{2}\/\d{4}/.test(item.text)) {
-                        let date = item.text;
-                        let amt = 0, invId = "---";
-                        
-                        // البحث عن أقرب مبلغ ورقم قائمة
-                        for (let n = -8; n <= 8; n++) {
-                            let neighbor = items[idx + n];
-                            if (!neighbor) continue;
-                            if (/^(\d{1,3}(,\d{3})*(\.\d{2}))$/.test(neighbor.text)) amt = parseFloat(neighbor.text.replace(/,/g, ''));
-                            if (/^\d{5,7}$/.test(neighbor.text)) invId = neighbor.text;
+                        let bill = { date: item.text, id: "---", total: "0", paid: "0", remain: "0", currency: "دينار" };
+                        for (let n = -10; n <= 10; n++) {
+                            let val = items[idx + n]?.text;
+                            if (!val) continue;
+                            if (/^\d{5,7}$/.test(val)) bill.id = val;
+                            if (val.includes("دولار")) bill.currency = "دولار";
+                            if (/^(\d{1,3}(,\d{3})*(\.\d{2}))$/.test(val)) {
+                                if (bill.remain === "0") bill.remain = val;
+                                else if (bill.total === "0") bill.total = val;
+                            }
                         }
-
-                        if (amt > 100) {
-                            pageBills.push({ date, invId, amt });
-                        }
+                        database[pName].bills.push(bill);
                     }
                 });
-
-                if (pageBills.length > 0) {
-                    if (!finalData[pageName]) finalData[pageName] = { name: pageName, addr: pageAddr, phone: pagePhone, bills: [], total: 0 };
-                    pageBills.forEach(b => {
-                        if (!finalData[pageName].bills.find(x => x.invId === b.invId)) {
-                            finalData[pageName].bills.push(b);
-                            finalData[pageName].total += b.amt;
-                        }
-                    });
-                }
             }
 
-            // عرض النتائج
-            Object.values(finalData).forEach(shop => {
-                let rowsHtml = shop.bills.map(b => `
-                    <tr class="border-b border-slate-50">
-                        <td class="p-3 text-right font-bold text-slate-500">${b.date}</td>
-                        <td class="p-3 text-center text-indigo-600 font-black">${b.invId}</td>
-                        <td class="p-3 text-left font-black text-slate-800">${b.amt.toLocaleString()}</td>
-                    </tr>
+            // العرض البرمجي
+            Object.values(database).forEach(shop => {
+                let billsHtml = shop.bills.map((b, index) => `
+                    <div class="bill-row">
+                        <div onclick="toggleDetails('${shop.name}-${index}')" class="p-5 flex justify-between items-center cursor-pointer hover:bg-slate-50 transition-all">
+                            <div class="flex items-center gap-4">
+                                <span class="bg-indigo-100 text-indigo-700 w-8 h-8 rounded-full flex items-center justify-center text-xs font-black">${index + 1}</span>
+                                <div>
+                                    <p class="text-xs text-slate-400 font-bold uppercase">تاريخ القائمة</p>
+                                    <p class="font-bold text-slate-800">${b.date}</p>
+                                </div>
+                            </div>
+                            <div class="text-left flex items-center gap-4">
+                                <div class="hidden md:block">
+                                    <p class="text-[10px] text-slate-400 font-bold text-left">المتبقي</p>
+                                    <p class="font-black text-indigo-600">${b.remain}</p>
+                                </div>
+                                <svg id="icon-${shop.name}-${index}" class="w-6 h-6 text-slate-400 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                            </div>
+                        </div>
+                        
+                        <div id="details-${shop.name}-${index}" class="details-panel p-6">
+                            <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
+                                <div class="bg-white p-3 rounded-xl border border-slate-100">
+                                    <p class="text-[10px] text-slate-400 font-bold">رقم الفاتورة</p>
+                                    <p class="font-bold text-slate-700">${b.id}</p>
+                                </div>
+                                <div class="bg-white p-3 rounded-xl border border-slate-100">
+                                    <p class="text-[10px] text-slate-400 font-bold">قيمة الفاتورة</p>
+                                    <p class="font-bold text-slate-700">${b.total}</p>
+                                </div>
+                                <div class="bg-white p-3 rounded-xl border border-slate-100">
+                                    <p class="text-[10px] text-slate-400 font-bold">العملة</p>
+                                    <p class="font-bold text-slate-700">${b.currency}</p>
+                                </div>
+                            </div>
+                            <div class="mt-2">
+                                <p class="text-[10px] text-indigo-500 font-black mb-1">ملاحظات على الفاتورة:</p>
+                                <textarea class="w-full p-3 rounded-xl border-2 border-dashed border-slate-200 text-sm focus:border-indigo-400 outline-none transition-all" rows="2" placeholder="اكتب أي ملاحظة هنا..."></textarea>
+                            </div>
+                        </div>
+                    </div>
                 `).join('');
 
                 container.innerHTML += `
-                    <div class="invoice-card">
+                    <div class="pharmacy-card">
                         <div class="bg-slate-900 p-8 text-white">
                             <h2 class="text-3xl font-black mb-4 text-indigo-400">${shop.name}</h2>
-                            <div class="grid grid-cols-2 gap-4 text-xs opacity-70">
+                            <div class="flex flex-wrap gap-6 text-xs opacity-70">
                                 <span>📍 الموقع: ${shop.addr}</span>
-                                <span>📞 الموبايل: ${shop.phone}</span>
+                                <span>📞 الهاتف: ${shop.phone}</span>
                             </div>
                         </div>
-                        <table class="w-full text-sm">
-                            <thead class="bg-slate-50 text-[10px] font-black text-slate-400 uppercase border-b">
-                                <tr><th class="p-3 text-right">التاريخ</th><th class="p-3 text-center">القائمة</th><th class="p-3 text-left">المبلغ المتبقي</th></tr>
-                            </thead>
-                            <tbody>${rowsHtml}</tbody>
-                        </table>
-                        <div class="p-6 bg-indigo-50 flex justify-between items-center border-t border-indigo-100">
-                            <span class="font-black text-indigo-900 italic">مجموع الذمة النهائية:</span>
-                            <span class="text-3xl font-black text-indigo-700">${shop.total.toLocaleString()} <small class="text-xs">IQD</small></span>
+                        <div class="divide-y divide-slate-100">
+                            ${billsHtml}
                         </div>
                     </div>
                 `;
             });
             document.getElementById('status').classList.add('hidden');
         };
+
+        function toggleDetails(id) {
+            const panel = document.getElementById('details-' + id);
+            const icon = document.getElementById('icon-' + id);
+            if (panel.style.display === "block") {
+                panel.style.display = "none";
+                icon.classList.remove('rotate-180');
+            } else {
+                panel.style.display = "block";
+                icon.classList.add('rotate-180');
+            }
+        }
     </script>
 </body>
 </html>
