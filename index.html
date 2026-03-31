@@ -3,53 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pure Pharma | إدارة الحسابات والاستحصال</title>
-    
+    <title>Pure Pharma | نظام المحاسبة والاستحصال</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-slate-100">
-
-    <div class="max-w-7xl mx-auto p-4 md:p-10">
-        <header class="main-header no-print">
+<body class="bg-slate-50 text-slate-900">
+    <div class="max-w-7xl mx-auto p-4 md:p-8">
+        <header class="bg-indigo-900 text-white p-8 rounded-[2rem] shadow-xl mb-8 no-print border-b-4 border-indigo-500">
             <div class="flex flex-col md:flex-row justify-between items-center gap-6">
                 <div class="text-right">
-                    <h1 class="text-4xl font-black text-indigo-600">PURE PHARMA</h1>
-                    <p class="text-slate-500 font-bold mt-1">نظام الاستحصال والمحاسبة الذكي</p>
+                    <h1 class="text-3xl font-black italic">PURE PHARMA PRO</h1>
+                    <p class="text-indigo-300 font-bold text-sm">نظام تدقيق الحسابات واستحصال الديون</p>
                 </div>
                 <div class="flex flex-col items-center">
                     <input type="file" id="pdfInput" class="hidden" accept=".pdf">
-                    <button onclick="document.getElementById('pdfInput').click()" class="btn-main">
-                        📂 رفع ملف الكشوفات
+                    <button onclick="document.getElementById('pdfInput').click()" class="bg-white text-indigo-900 px-8 py-4 rounded-xl font-black hover:bg-indigo-50 transition-all shadow-lg">
+                        📂 رفع كشف الحسابات
                     </button>
-                    <div id="status" class="hidden mt-3 text-xs font-black animate-pulse text-indigo-500">جاري معالجة البيانات المحاسبية...</div>
+                    <div id="loader" class="hidden mt-3 text-xs font-bold animate-pulse text-indigo-400">جاري تحليل البيانات...</div>
                 </div>
             </div>
         </header>
 
-        <div class="no-print flex flex-col md:flex-row gap-4 mb-8">
-            <input type="text" id="search" onkeyup="filterData()" placeholder="بحث باسم الصيدلية أو رقم الحساب..." class="search-bar">
-            <button onclick="revealAll()" class="btn-secondary">إظهار العناصر المخفية 👁️</button>
+        <div class="no-print grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+            <input type="text" id="search" onkeyup="filterUI()" placeholder="بحث باسم الصيدلية..." class="md:col-span-3 p-5 rounded-2xl border-2 border-slate-200 outline-none font-bold shadow-sm focus:border-indigo-500 transition-all">
+            <button onclick="resetHidden()" class="bg-slate-200 text-slate-600 font-bold rounded-2xl hover:bg-slate-300 transition">إظهار المخفي 👁️</button>
         </div>
 
-        <div id="outputGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        <div id="mainGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
     </div>
 
-    <div id="detailsModal" class="modal-overlay hidden no-print">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button onclick="closeModal()" class="btn-close">✕</button>
+    <div id="modal" class="fixed inset-0 bg-slate-900/90 hidden z-50 flex items-center justify-center p-4 backdrop-blur-md no-print">
+        <div class="bg-white rounded-[2.5rem] w-full max-w-5xl max-h-[90vh] overflow-hidden shadow-2xl flex flex-col">
+            <div class="p-6 border-b flex justify-between items-center bg-slate-50">
+                <button onclick="closeModal()" class="text-red-500 font-black text-2xl w-10 h-10 bg-red-50 rounded-full hover:bg-red-500 hover:text-white transition">✕</button>
                 <div class="flex gap-2">
-                    <button onclick="window.print()" class="btn-print">طباعة كشف حساب</button>
-                    <button id="whatsappLink" class="btn-whatsapp">واتساب</button>
+                    <button onclick="window.print()" class="bg-indigo-600 text-white px-6 py-2 rounded-lg font-black text-xs hover:bg-indigo-700 shadow-md">🖨️ طباعة الكشف</button>
+                    <button id="waBtn" class="bg-green-600 text-white px-6 py-2 rounded-lg font-black text-xs hover:bg-green-700 shadow-md">📱 واتساب</button>
                 </div>
             </div>
-            <div id="modalBody" class="p-6 md:p-10 overflow-y-auto"></div>
+            <div id="modalBody" class="p-8 overflow-y-auto custom-scroll"></div>
         </div>
     </div>
-
     <script src="script.js"></script>
 </body>
 </html>
