@@ -2,33 +2,46 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>Pure Pharma | نظام المطابقة الاحترافي</title>
+    <title>Pure Pharma | Live Matcher & Management</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Cairo', sans-serif; background-color: #f3f4f6; }
-        .pharmacy-card { background: white; border-radius: 1.5rem; box-shadow: 0 4px 20px rgba(0,0,0,0.08); margin-bottom: 2rem; overflow: hidden; border: 1px solid #e5e7eb; }
-        .accordion-content { display: none; background-color: #f9fafb; border-top: 1px solid #eee; }
-        .rotate-icon { transition: transform 0.3s; }
-        .is-open .rotate-icon { transform: rotate(180deg); }
-        .is-open .accordion-content { display: block; }
-        @media print { .no-print { display: none !important; } .accordion-content { display: block !important; } }
+        body { font-family: 'Cairo', sans-serif; background-color: #f8fafc; }
+        .live-screen { background: #1a202c; color: #48bb78; font-family: monospace; border-left: 4px solid #48bb78; }
+        .status-badge { cursor: pointer; transition: all 0.2s; }
+        .is-open .details-box { display: block; }
+        .details-box { display: none; }
+        @media print { .no-print { display: none !important; } }
     </style>
 </head>
-<body class="p-4 md:p-8">
+<body class="p-4">
 
-    <div class="max-w-4xl mx-auto">
-        <header class="bg-slate-900 text-white p-8 rounded-[2rem] mb-10 text-center no-print shadow-2xl border-b-4 border-indigo-500">
-            <h1 class="text-2xl font-black mb-4">نظام كشوفات الشرقاط <span class="text-indigo-400">V4</span></h1>
-            <input type="file" id="pdfUpload" class="hidden" accept=".pdf">
-            <button onclick="document.getElementById('pdfUpload').click()" class="bg-indigo-600 hover:bg-indigo-500 px-10 py-4 rounded-xl font-bold transition-all shadow-lg active:scale-95">
-                اختر ملف الـ PDF للمطابقة
-            </button>
-            <p id="loader" class="hidden mt-4 animate-pulse text-indigo-300 font-bold">جاري استخراج البيانات والمطابقة...</p>
+    <div class="max-w-6xl mx-auto">
+        <header class="bg-white p-6 rounded-3xl shadow-xl mb-8 no-print border-b-4 border-indigo-600">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                <h1 class="text-2xl font-black text-slate-800 italic">PURE <span class="text-indigo-600">LIVE</span> MATCH</h1>
+                
+                <div class="flex flex-1 max-w-md w-full relative">
+                    <input type="text" id="searchInput" oninput="filterData()" placeholder="بحث باسم الصيدلية أو رقم الفاتورة..." class="w-full p-3 pr-10 rounded-xl border-2 border-slate-100 focus:border-indigo-500 outline-none">
+                    <span class="absolute left-3 top-3 opacity-30">🔍</span>
+                </div>
+
+                <div class="flex gap-2">
+                    <input type="file" id="pdfFile" class="hidden" accept=".pdf">
+                    <button onclick="document.getElementById('pdfFile').click()" class="bg-indigo-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-indigo-700 transition-all shadow-lg">ارفع الملف</button>
+                    <button onclick="window.print()" class="bg-slate-100 p-3 rounded-xl hover:bg-slate-200">🖨️</button>
+                </div>
+            </div>
+            <div id="loader" class="hidden mt-4 text-center text-indigo-600 font-bold animate-bounce text-sm italic">جاري المطابقة الحية...</div>
         </header>
 
-        <div id="displayArea" class="space-y-6">
+        <div id="liveScreen" class="hidden mb-8 p-4 rounded-2xl live-screen shadow-2xl overflow-hidden">
+            <p class="text-[10px] mb-2 text-slate-500 font-bold uppercase tracking-widest">// LIVE DATA MATCHING SYSTEM</p>
+            <div id="logStream" class="text-xs space-y-1 h-32 overflow-y-auto"></div>
+        </div>
+
+        <div id="cardsContainer" class="grid grid-cols-1 gap-8">
             </div>
     </div>
 
@@ -36,124 +49,124 @@
         const pdfJS = window['pdfjs-dist/build/pdf'];
         pdfJS.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
 
-        // وظيفة تجلب النص "كما هو" للعنوان
-        function rawText(s) { return s ? s.trim() : ""; }
-        
-        // وظيفة تنظف الأرقام فقط للمعالجة الحسابية
-        function cleanNum(s) { return s.replace(/[^\d.,]/g, "").trim(); }
+        let masterData = [];
 
-        document.getElementById('pdfUpload').onchange = async (e) => {
+        function log(msg, type = 'info') {
+            const stream = document.getElementById('logStream');
+            const entry = document.createElement('div');
+            entry.innerHTML = `<span class="opacity-50">[${new Date().toLocaleTimeString()}]</span> <span class="${type === 'match' ? 'text-white font-bold' : ''}">${msg}</span>`;
+            stream.prepend(entry);
+        }
+
+        document.getElementById('pdfFile').onchange = async (e) => {
             const file = e.target.files[0];
             if (!file) return;
             document.getElementById('loader').classList.remove('hidden');
-            const container = document.getElementById('displayArea');
-            container.innerHTML = "";
-
+            document.getElementById('liveScreen').classList.remove('hidden');
+            masterData = [];
+            
             const buffer = await file.arrayBuffer();
             const pdf = await pdfJS.getDocument({data: buffer}).promise;
-            let dataMap = {};
 
             for (let i = 1; i <= pdf.numPages; i++) {
                 const page = await pdf.getPage(i);
                 const content = await page.getTextContent();
                 const items = content.items.map(it => ({ text: it.str, y: it.transform[5] }));
 
-                // تحديد العنوان (الاسم والعنوان) كما هما بالملف
+                // تحديد الهوية الأصلية (كما هي في الموقع بالملف)
                 items.sort((a,b) => b.y - a.y);
-                let rawName = "غير محدد";
-                let rawAddr = "الشرقاط";
-                let rawPhone = "---";
+                let originalName = items.find(it => it.text.length > 10 && !it.text.includes("بيور"))?.text || "غير معروف";
+                
+                log(`جاري تحليل صفحة ${i}...`, 'info');
+                log(`تم العثور على: ${originalName}`, 'match');
 
-                items.slice(0, 15).forEach(item => {
-                    let txt = item.text.trim();
-                    if (txt.length > 8 && !txt.includes("بيور") && !txt.includes("202")) rawName = txt;
-                    if (txt.startsWith("07")) rawPhone = txt;
-                    if (txt.includes("حي") || txt.includes("شارع") || txt.includes("رقاط")) rawAddr = txt;
-                });
-
-                if (!dataMap[rawName]) dataMap[rawName] = { name: rawName, addr: rawAddr, phone: rawPhone, bills: [] };
-
-                // استخراج تفاصيل الفواتير (بدقة عالية)
+                let pageBills = [];
                 items.forEach((item, idx) => {
                     if (/\d{2}\/\d{2}\/\d{4}/.test(item.text)) {
-                        let b = { date: item.text, id: "---", owner: rawName, total: "0.00", paid: "0.00", remain: "0.00" };
-                        
-                        // البحث المحيطي عن الأرقام
-                        for (let n = -10; n <= 10; n++) {
-                            let val = items[idx + n]?.text || "";
-                            if (/^\d{5,7}$/.test(val)) b.id = val;
-                            if (/^(\d{1,3}(,\d{3})*(\.\d{2}))$/.test(val)) {
-                                if (b.remain === "0.00") b.remain = val;
-                                else if (b.paid === "0.00" && val !== "0.00") b.paid = val;
-                                else if (b.total === "0.00") b.total = val;
+                        let bill = { 
+                            id: "---", date: item.text, total: "0.00", paid: "0.00", remain: "0.00",
+                            status: 'none', statusNote: ''
+                        };
+                        for (let n = -12; n <= 12; n++) {
+                            let v = items[idx+n]?.text || "";
+                            if (/^\d{5,7}$/.test(v)) bill.id = v;
+                            if (/^(\d{1,3}(,\d{3})*(\.\d{2}))$/.test(v)) {
+                                if (bill.remain === "0.00") bill.remain = v;
+                                else if (bill.paid === "0.00") bill.paid = v;
+                                else if (bill.total === "0.00") bill.total = v;
                             }
                         }
-                        dataMap[rawName].bills.push(b);
+                        pageBills.push(bill);
                     }
                 });
+
+                masterData.push({ originalName, bills: pageBills });
             }
+            render();
+            document.getElementById('loader').classList.add('hidden');
+        };
 
-            // بناء الواجهة
-            Object.values(dataMap).forEach(shop => {
-                let billsHtml = shop.bills.map((b, idx) => `
-                    <div class="border-b border-gray-100 last:border-0" id="bill-parent-${idx}">
-                        <div onclick="this.parentElement.classList.toggle('is-open')" class="p-4 flex justify-between items-center cursor-pointer hover:bg-indigo-50 transition-all">
-                            <div class="flex items-center gap-3">
-                                <span class="text-indigo-600 font-bold">#${b.id}</span>
-                                <span class="text-gray-400 text-sm">| ${b.date}</span>
-                            </div>
-                            <div class="flex items-center gap-3">
-                                <span class="font-black text-slate-700">${b.remain}</span>
-                                <svg class="rotate-icon w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                            </div>
-                        </div>
-                        <div class="accordion-content p-6 space-y-4">
-                            <div class="grid grid-cols-2 gap-4">
-                                <div class="p-3 bg-white rounded-lg border border-gray-100">
-                                    <p class="text-[10px] font-bold text-gray-400 uppercase">صاحب الفاتورة</p>
-                                    <p class="text-sm font-bold text-slate-800">${b.owner}</p>
-                                </div>
-                                <div class="p-3 bg-white rounded-lg border border-gray-100">
-                                    <p class="text-[10px] font-bold text-gray-400 uppercase">قيمة الفاتورة</p>
-                                    <p class="text-sm font-bold text-slate-800">${b.total}</p>
-                                </div>
-                                <div class="p-3 bg-white rounded-lg border border-gray-100">
-                                    <p class="text-[10px] font-bold text-gray-400 uppercase">المبلغ المدفوع</p>
-                                    <p class="text-sm font-bold text-green-600">${b.paid}</p>
-                                </div>
-                                <div class="p-3 bg-white rounded-lg border border-gray-100">
-                                    <p class="text-[10px] font-bold text-gray-400 uppercase">المبلغ المتبقي</p>
-                                    <p class="text-sm font-bold text-red-600">${b.remain}</p>
-                                </div>
-                            </div>
+        function render(filtered = masterData) {
+            const container = document.getElementById('cardsContainer');
+            container.innerHTML = "";
+
+            filtered.forEach((shop, sIdx) => {
+                let shopHtml = `
+                    <div class="bg-white rounded-[2rem] shadow-lg border border-slate-200 overflow-hidden">
+                        <div class="bg-slate-900 p-6 text-white flex justify-between items-center">
                             <div>
-                                <label class="text-[10px] font-bold text-indigo-500 mb-1 block">ملاحظات الفاتورة:</label>
-                                <textarea class="w-full p-3 text-sm bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-400 outline-none" rows="2" placeholder="أضف ملاحظة هنا..."></textarea>
+                                <p class="text-[10px] text-indigo-400 font-black mb-1 uppercase">النص الأصلي في الموقع:</p>
+                                <h2 class="text-xl font-bold italic">${shop.originalName}</h2>
                             </div>
+                            <span class="bg-white/10 px-4 py-2 rounded-full text-xs font-bold">${shop.bills.length} فاتورة</span>
                         </div>
-                    </div>
-                `).join('');
-
-                container.innerHTML += `
-                    <div class="pharmacy-card">
-                        <div class="bg-slate-800 p-6 text-white border-b-4 border-indigo-500">
-                            <div class="flex justify-between items-start">
-                                <div>
-                                    <p class="text-[10px] text-indigo-300 font-bold mb-1">بيانات الهوية (مطابق للملف):</p>
-                                    <h2 class="text-2xl font-black leading-tight">${shop.name}</h2>
-                                    <p class="text-sm mt-2 opacity-80 font-bold italic">${shop.addr} | ${shop.phone}</p>
+                        <div class="divide-y divide-slate-100">
+                            ${shop.bills.map((b, bIdx) => `
+                                <div class="p-4 hover:bg-indigo-50 transition-all">
+                                    <div class="flex justify-between items-center">
+                                        <div class="flex items-center gap-4">
+                                            <button onclick="setStatus(${sIdx}, ${bIdx}, 'ok')" class="status-badge w-8 h-8 rounded-full flex items-center justify-center border-2 ${b.status === 'ok' ? 'bg-green-500 border-green-500 text-white' : 'border-slate-200 text-slate-300'}">✓</button>
+                                            <button onclick="setStatus(${sIdx}, ${bIdx}, 'warn')" class="status-badge w-8 h-8 rounded-full flex items-center justify-center border-2 ${b.status === 'warn' ? 'bg-orange-500 border-orange-500 text-white' : 'border-slate-200 text-slate-300'}">!</button>
+                                            <div>
+                                                <span class="text-sm font-black text-slate-700">#${b.id}</span>
+                                                <p class="text-[10px] text-slate-400 font-bold">${b.date}</p>
+                                            </div>
+                                        </div>
+                                        <div class="text-left">
+                                            <span class="font-black text-indigo-600 block">${b.remain}</span>
+                                            ${b.statusNote ? `<span class="text-[10px] bg-orange-100 text-orange-600 px-2 py-0.5 rounded font-bold">${b.statusNote}</span>` : ''}
+                                        </div>
+                                    </div>
+                                    <div id="note-input-${sIdx}-${bIdx}" class="${b.status === 'warn' ? 'block' : 'hidden'} mt-3">
+                                        <input type="text" onchange="saveNote(${sIdx}, ${bIdx}, this.value)" value="${b.statusNote}" placeholder="لماذا تعجب؟ (مثلاً: استرجاع، غير واصلة...)" class="w-full p-2 text-xs border-2 border-orange-200 rounded-lg outline-none focus:border-orange-500">
+                                    </div>
                                 </div>
-                                <button onclick="window.print()" class="no-print bg-white/10 p-3 rounded-lg hover:bg-white/20">🖨️</button>
-                            </div>
-                        </div>
-                        <div>
-                            ${billsHtml}
+                            `).join('')}
                         </div>
                     </div>
                 `;
+                container.innerHTML += shopHtml;
             });
-            document.getElementById('loader').classList.add('hidden');
-        };
+        }
+
+        function setStatus(sIdx, bIdx, status) {
+            masterData[sIdx].bills[bIdx].status = masterData[sIdx].bills[bIdx].status === status ? 'none' : status;
+            render();
+        }
+
+        function saveNote(sIdx, bIdx, note) {
+            masterData[sIdx].bills[bIdx].statusNote = note;
+            render();
+        }
+
+        function filterData() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = masterData.filter(shop => 
+                shop.originalName.toLowerCase().includes(query) || 
+                shop.bills.some(b => b.id.includes(query))
+            );
+            render(filtered);
+        }
     </script>
 </body>
 </html>
