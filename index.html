@@ -2,175 +2,193 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>نظام مطابقة مكتب بيور العلمي - النسخة الذكية</title>
+    <title>النظام المالي الرسمي - مكتب بيور العلمي</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Cairo', sans-serif; background-color: #1a1c23; color: #1e293b; }
-        .report-container { background: white; padding: 1.5cm 2cm; min-height: 297mm; display: flex; flex-direction: column; border-radius: 2rem; }
-        .bill-card { display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; border-bottom: 1px solid #f1f5f9; transition: 0.2s; cursor: pointer; }
-        .is-active { background: #f0fdf4; border-right: 6px solid #22c55e; }
-        .not-active { opacity: 0.3; background: #fef2f2; border-right: 6px solid #ef4444; text-decoration: line-through; }
-        .contact-bar { background: #111827; color: white; display: flex; justify-content: center; gap: 30px; padding: 15px; border-radius: 12px; margin-top: 20px; font-size: 12px; font-weight: bold; }
-        @media print { .no-print { display: none !important; } body { background: white; padding: 0; } .report-container { box-shadow: none; border: none; width: 100%; padding: 0; } }
+        body { font-family: 'Cairo', sans-serif; background-color: #f1f5f9; color: #1e293b; }
+        .report-container { 
+            background: white; padding: 2cm; border-radius: 2rem; 
+            box-shadow: 0 20px 50px rgba(0,0,0,0.05); position: relative;
+        }
+        /* الهوية البصرية الرسمية */
+        .brand-border { border-top: 6px solid #1e293b; border-bottom: 2px solid #e2e8f0; }
+        .bill-card { 
+            display: grid; grid-template-columns: 1fr auto; gap: 15px; 
+            padding: 12px 20px; background: #fff; border-radius: 12px; 
+            border: 1px solid #edf2f7; margin-bottom: 8px; transition: 0.2s;
+        }
+        .is-active { border-right: 6px solid #10b981; background: #f8fafc; }
+        .not-active { opacity: 0.3; filter: grayscale(1); border-right: 6px solid #ef4444; }
+        
+        .amount-remaining { font-size: 17px; font-weight: 900; color: #0f172a; }
+        .amount-paid { font-size: 10px; font-weight: 800; color: #059669; background: #ecfdf5; padding: 1px 8px; border-radius: 5px; }
+        .amount-total { font-size: 10px; font-weight: 600; color: rgba(100, 116, 139, 0.4); }
+
+        .official-footer { border-top: 1px solid #e2e8f0; margin-top: 40px; padding-top: 20px; }
+        .stamp-zone { border: 2px dashed #cbd5e1; border-radius: 1rem; width: 150px; height: 100px; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #94a3b8; font-weight: 700; text-align: center; }
+
+        @media print {
+            body { background: white; p: 0; }
+            .no-print { display: none !important; }
+            .report-container { box-shadow: none; border: none; width: 100%; padding: 0; }
+            .print-full-page { min-height: 290mm; }
+        }
     </style>
 </head>
 <body class="p-4 md:p-8" onload="initApp()">
 
-    <div class="max-w-5xl mx-auto">
-        <header class="no-print bg-[#24262d] text-white p-8 rounded-[2rem] mb-10 shadow-2xl border border-gray-700">
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-6">
-                <div>
-                    <label class="block text-[10px] text-gray-400 mb-2 font-bold uppercase italic">ACCOUNTANT / المحاسب</label>
-                    <input type="text" id="myNameInput" oninput="saveData()" placeholder="نورالدين صباح" class="w-full bg-[#2f313a] border-none rounded-xl p-3 text-sm text-white">
-                </div>
-                <div>
-                    <label class="block text-[10px] text-gray-400 mb-2 font-bold uppercase italic">REPRESENTATIVE / المندوب</label>
-                    <input type="text" id="repInput" oninput="sync()" placeholder="اسم المندوب" class="w-full bg-[#2f313a] border-none rounded-xl p-3 text-sm text-white">
-                </div>
-                <div>
-                    <label class="block text-[10px] text-gray-400 mb-2 font-bold uppercase italic">PROVINCE / المحافظة</label>
-                    <select id="provInput" onchange="sync()" class="w-full bg-[#2f313a] border-none rounded-xl p-3 text-sm text-white">
-                        <option value="صلاح الدين">صلاح الدين</option>
-                        <option value="بغداد">بغداد</option>
-                        <option value="نينوى">نينوى</option>
-                        <option value="كركوك">كركوك</option>
-                        <option value="ديالى">ديالى</option>
-                        <option value="الأنبار">الأنبار</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-[10px] text-gray-400 mb-2 font-bold uppercase italic">CITY / المدينة</label>
-                    <select id="cityInput" onchange="sync()" class="w-full bg-[#2f313a] border-none rounded-xl p-3 text-sm text-white">
-                        <option value="الشرقاط">الشرقاط</option>
-                        <option value="تكريت">تكريت</option>
-                        <option value="بيجي">بيجي</option>
-                        <option value="سامراء">سامراء</option>
-                        <option value="بلد">بلد</option>
-                    </select>
-                </div>
+    <div class="max-w-4xl mx-auto">
+        <header class="no-print bg-[#1e293b] text-white p-6 rounded-3xl mb-8 shadow-xl">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                <div><label class="block text-[10px] text-slate-400 font-bold mb-1">المحاسب المسؤول</label><input type="text" id="myNameInput" oninput="saveAndSync()" class="w-full bg-slate-800 border-none rounded-lg p-2 text-xs"></div>
+                <div><label class="block text-[10px] text-slate-400 font-bold mb-1">المندوب</label><input type="text" id="repInput" oninput="sync()" class="w-full bg-slate-800 border-none rounded-lg p-2 text-xs"></div>
+                <div><label class="block text-[10px] text-slate-400 font-bold mb-1">المحافظة</label><select id="provInput" onchange="updateCities(); sync()" class="w-full bg-slate-800 border-none rounded-lg p-2 text-xs"></select></div>
+                <div><label class="block text-[10px] text-slate-400 font-bold mb-1">المدينة</label><select id="cityInput" onchange="sync()" class="w-full bg-slate-800 border-none rounded-lg p-2 text-xs"></select></div>
             </div>
-
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-6 items-end border-t border-gray-700 pt-6">
-                <div>
-                    <label class="block text-[10px] text-orange-400 mb-2 font-bold uppercase">المبلغ السابق (IQD)</label>
-                    <input type="number" id="prevIn" oninput="calculate()" class="w-full bg-[#2f313a] border-none rounded-xl p-3 text-sm text-white">
-                </div>
-                <div>
-                    <label class="block text-[10px] text-orange-400 mb-2 font-bold uppercase">خصم سابق %</label>
-                    <input type="number" id="prevDiscIn" oninput="calculate()" class="w-full bg-[#2f313a] border-none rounded-xl p-3 text-sm text-white">
-                </div>
-                <div>
-                    <label class="block text-[10px] text-emerald-400 mb-2 font-bold uppercase">خصم المطابقة %</label>
-                    <select id="matchDiscInput" onchange="calculate()" class="w-full bg-[#2f313a] border-none rounded-xl p-3 text-sm text-white">
-                        <option value="0">بدون خصم (0%)</option>
-                        <option value="2">خصم (2%)</option>
-                        <option value="3">خصم (3%)</option>
-                        <option value="5">خصم (5%)</option>
-                    </select>
-                </div>
-                <div class="flex gap-2">
-                    <button onclick="document.getElementById('pdfFile').click()" class="flex-1 bg-indigo-600 hover:bg-indigo-500 p-3 rounded-xl text-xs font-black uppercase shadow-lg shadow-indigo-900/20">رفع PDF</button>
-                    <button onclick="window.print()" class="flex-1 bg-emerald-600 hover:bg-emerald-500 p-3 rounded-xl text-xs font-black uppercase shadow-lg shadow-emerald-900/20">طباعة</button>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 border-t border-slate-700 pt-4">
+                <div><label class="block text-[10px] text-orange-400 font-bold mb-1">مبلغ سابق</label><input type="number" id="prevIn" oninput="calculate()" class="w-full bg-slate-800 border-none rounded-lg p-2 text-xs"></div>
+                <div><label class="block text-[10px] text-orange-400 font-bold mb-1">خصم سابق %</label><input type="number" id="prevDiscIn" oninput="calculate()" class="w-full bg-slate-800 border-none rounded-lg p-2 text-xs"></div>
+                <div><label class="block text-[10px] text-emerald-400 font-bold mb-1">خصم المطابقة %</label><select id="currDiscPerc" onchange="calculate()" class="w-full bg-slate-800 border-none rounded-lg p-2 text-xs"></select></div>
+                <div class="flex items-end gap-2">
+                    <button onclick="document.getElementById('pdfFile').click()" class="flex-1 bg-indigo-600 p-2 rounded-lg text-[10px] font-black">رفع ملف PDF</button>
+                    <button onclick="window.print()" class="bg-emerald-600 p-2 rounded-lg text-[10px] font-black">طباعة</button>
                 </div>
             </div>
             <input type="file" id="pdfFile" class="hidden" accept=".pdf">
         </header>
 
-        <div class="report-container shadow-2xl">
-            <div class="flex justify-between items-start border-b-4 border-black pb-6 mb-8">
+        <div class="report-container print-full-page flex flex-col">
+            <div class="brand-border pb-6 mb-8 flex justify-between items-center">
                 <div>
-                    <h1 class="text-4xl font-black text-black leading-none uppercase">Pure Scientific Bureau</h1>
-                    <h2 class="text-xl font-bold text-gray-700 mt-2">مكتب بيور العلمي</h2>
-                    <p class="text-[10px] font-bold text-indigo-600 tracking-widest mt-1 uppercase italic">Trusted Partners in Health Solutions</p>
+                    <h1 class="text-3xl font-black text-slate-900 tracking-tighter uppercase">Pure Scientific Bureau</h1>
+                    <h2 class="text-xl font-bold text-slate-700">مكتب بيور العلمي</h2>
+                    <p class="text-[9px] text-slate-400 font-bold mt-1">TRUSTED PARTNERS IN HEALTH SOLUTIONS</p>
                 </div>
-                <div class="text-left text-[11px] font-black space-y-1">
-                    [span_0](start_span)<p>التاريخ: <span id="outDate">31/03/2026</span>[span_0](end_span)</p>
-                    [span_1](start_span)<p>الموقع: <span id="outLoc" class="text-indigo-600 italic">صلاح الدين / الشرقاط</span>[span_1](end_span)</p>
-                    <p>المرجع: <span class="text-gray-400">PB-FIN-2026</span></p>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-                <div class="md:col-span-2 bg-[#111827] p-8 rounded-[2.5rem] text-white flex justify-between items-center relative overflow-hidden">
-                    <div class="relative z-10">
-                        <p class="text-[10px] text-indigo-400 font-black mb-2 uppercase italic tracking-widest">Client Name / اسم العميل المعتمد</p>
-                        [span_2](start_span)<textarea id="outClient" placeholder="مذخر السلطان الحديث" rows="1" class="text-2xl font-black bg-transparent border-none outline-none resize-none w-full placeholder:text-gray-700"></textarea>[span_2](end_span)
-                    </div>
-                </div>
-                <div class="bg-gray-50 border-2 border-gray-100 p-6 rounded-[2rem] text-center">
-                    <p class="text-[10px] text-gray-400 font-bold uppercase mb-2">إجمالي الفواتير</p>
-                    [span_3](start_span)<p id="outFullOrig" class="text-xl font-black text-black tracking-tighter">IQD 48,800,150</p>[span_3](end_span)
+                <div class="text-left text-[10px] font-bold text-slate-800 leading-relaxed">
+                    <p>التاريخ: <span id="outDate">--/--/----</span></p>
+                    <p>الموقع: <span id="outLoc" class="text-indigo-600">....</span></p>
+                    <p>المرجع: <span class="text-slate-400">PB-FIN-2026</span></p>
                 </div>
             </div>
 
-            <div id="billsList" class="flex-grow space-y-2 mb-10">
+            <div class="flex gap-4 mb-8 no-print-flex">
+                <div class="flex-1 bg-slate-50 p-3 rounded-xl border border-slate-100 flex items-center gap-3">
+                    <div class="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 text-xs italic">@</div>
+                    <span class="text-[10px] font-bold text-slate-600">info@pure-pharma.com</span>
                 </div>
+                <div class="flex-1 bg-slate-50 p-3 rounded-xl border border-slate-100 flex items-center gap-3">
+                    <div class="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-600 text-xs">📞</div>
+                    <span class="text-[10px] font-bold text-slate-600">+964 750 426 5555</span>
+                </div>
+            </div>
 
-            <div class="mt-auto border-top-2 border-black pt-8">
+            <div class="grid grid-cols-4 gap-4 mb-8">
+                <div class="bg-slate-900 text-white p-4 rounded-2xl col-span-2">
+                    <p class="text-[9px] text-indigo-300 font-bold mb-1 italic">اسم العميل / المذخر المعتمد</p>
+                    <textarea id="outClient" placeholder="اكتب الاسم هنا..." rows="1" class="text-xl font-black bg-transparent border-none outline-none resize-none w-full placeholder:text-slate-700"></textarea>
+                </div>
+                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                    <p class="text-[9px] text-slate-400 font-bold mb-1">المندوب المسؤول</p>
+                    <p id="outRep" class="text-xs font-black text-slate-800">....</p>
+                </div>
+                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 text-left">
+                    <p class="text-[9px] text-slate-400 font-bold mb-1">إجمالي الفواتير</p>
+                    <p id="outFullOrig" class="text-xs font-black text-slate-800">0 IQD</p>
+                </div>
+            </div>
+
+            <div class="no-print flex items-center gap-2 mb-4 cursor-pointer opacity-60 hover:opacity-100 transition-all" onclick="toggleBills()">
+                <div id="arrowIcon" class="w-6 h-6 bg-slate-200 rounded-full flex items-center justify-center text-[10px]">▼</div>
+                <span id="toggleText" class="text-[9px] font-bold uppercase">إخفاء تفاصيل الفواتير للطباعة المختصرة</span>
+            </div>
+
+            <div id="billsSection" class="space-y-2 mb-8">
+                <div id="billsList"></div>
+            </div>
+
+            <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 mb-8 text-center">
+                <p id="officialMessage" class="text-[11px] font-bold text-slate-500 italic">بانتظار سحب البيانات من ملف الـ PDF...</p>
+            </div>
+
+            <div class="mt-auto official-footer">
                 <div class="flex justify-between items-end">
-                    <div class="flex gap-6">
+                    <div class="space-y-4">
+                        <div>
+                            <p class="text-[10px] font-black text-slate-400 uppercase">صافي مبلغ المطابقة النهائي:</p>
+                            <p id="resFinal" class="text-5xl font-black text-slate-900 tracking-tighter">0 IQD</p>
+                        </div>
+                        <p id="tafgeet" class="text-[11px] font-bold text-indigo-700 bg-indigo-50 px-4 py-2 rounded-lg border border-indigo-100 inline-block">....</p>
+                    </div>
+                    <div class="flex gap-4">
                         <div class="text-center">
-                            <div class="w-36 h-24 border-2 border-dashed border-gray-200 rounded-2xl mb-2 flex items-center justify-center italic text-[10px] text-gray-300 font-bold">ختم وتوقيع<br>مكتب بيور العلمي</div>
-                            [span_4](start_span)<p class="text-[9px] font-bold text-gray-400">المحاسب: <span id="outMyName" class="text-black underline">نورالدين صباح</span></p>[span_4](end_span)
+                            <div class="stamp-zone italic mb-2">ختم وتوقيع<br>مكتب بيور العلمي</div>
+                            <p class="text-[9px] font-bold text-slate-400">قسم المحاسبة: <span id="outMyName" class="text-slate-600">..</span></p>
                         </div>
                         <div class="text-center">
-                            <div class="w-36 h-24 border-2 border-dashed border-gray-200 rounded-2xl mb-2 flex items-center justify-center italic text-[10px] text-gray-300 font-bold">ختم وتوقيع<br>الجهة المستلمة</div>
-                            <p class="text-[9px] font-bold text-gray-400">توقيع المستلم</p>
+                            <div class="stamp-zone italic mb-2">ختم وتوقيع<br>الجهة المستلمة</div>
+                            <p class="text-[9px] font-bold text-slate-400">توقيع المستلم</p>
                         </div>
                     </div>
-                    <div class="text-left">
-                        <p class="text-[11px] font-black text-gray-400 uppercase italic mb-1">Net Total / الصافي النهائي:</p>
-                        [span_5](start_span)<p id="resFinal" class="text-6xl font-black text-black tracking-tighter leading-none">IQD 43,277,393</p>[span_5](end_span)
-                        [span_6](start_span)<div id="tafgeet" class="bg-indigo-50 text-indigo-700 text-[12px] font-black px-6 py-3 rounded-2xl border-2 border-indigo-100 mt-4 inline-block italic">فقط ٤٣,٢٧٧,٣٩٢,٥ دينار لا غير</div>[span_6](end_span)
-                    </div>
                 </div>
-
-                <div class="contact-bar shadow-xl">
-                    <span>📞 +964 750 426 5555</span>
-                    <span>📧 info@pure-pharma.com</span>
-                    <span>🌐 www.pure-pharma.com</span>
-                </div>
-                <p class="text-center text-[9px] font-bold text-gray-300 mt-6 uppercase tracking-[0.5em] italic">Pure Pharma Bureau - Official Statement 2026</p>
+                <p class="text-center text-[8px] text-slate-300 font-bold mt-10 border-t pt-4">© 2026 Pure Pharma Bureau. This is an official financial document.</p>
             </div>
         </div>
     </div>
 
     <script>
-        let db = [];
+        let db = []; let billsVisible = true;
+        const iraqData = { "صلاح الدين": ["الشرقاط", "بيجي", "تكرت", "سامراء"], "بغداد": ["الكرادة", "المنصور", "الأعظمية"], "نينوى": ["الموصل", "القيارة"], "الأنبار": ["الرمادي", "الفلوجة"] };
+
         function initApp() {
-            const n = localStorage.getItem('p_name'); if(n) document.getElementById('myNameInput').value = n;
-            sync();
+            const pSel = document.getElementById('provInput'); pSel.innerHTML = '<option value="">المحافظة</option>';
+            Object.keys(iraqData).forEach(p => pSel.innerHTML += `<option value="${p}">${p}</option>`);
+            const dSel = document.getElementById('currDiscPerc'); let opts = '<option value="0">0%</option>';
+            for(let i=1; i<=100; i++) opts += `<option value="${i}">${i}%</option>`;
+            dSel.innerHTML = opts; loadSavedName(); document.getElementById('outDate').innerText = new Date().toLocaleDateString('en-GB');
         }
-        function saveData() { localStorage.setItem('p_name', document.getElementById('myNameInput').value); sync(); }
+
+        function updateCities() {
+            const p = document.getElementById('provInput').value; const cSel = document.getElementById('cityInput');
+            cSel.innerHTML = '<option value="">المدينة</option>'; if(p && iraqData[p]) iraqData[p].forEach(c => cSel.innerHTML += `<option value="${c}">${c}</option>`);
+        }
+
+        function saveAndSync() { localStorage.setItem('pure_admin', document.getElementById('myNameInput').value); sync(); }
+        function loadSavedName() { const n = localStorage.getItem('pure_admin'); if(n) { document.getElementById('myNameInput').value = n; sync(); } }
+
         function sync() {
-            document.getElementById('outMyName').innerText = document.getElementById('myNameInput').value || 'نورالدين صباح';
-            document.getElementById('outLoc').innerText = document.getElementById('provInput').value + " / " + document.getElementById('cityInput').value;
+            document.getElementById('outMyName').innerText = document.getElementById('myNameInput').value || '....';
+            document.getElementById('outRep').innerText = document.getElementById('repInput').value || '....';
+            document.getElementById('outLoc').innerText = (document.getElementById('provInput').value || '..') + " / " + (document.getElementById('cityInput').value || '..');
             calculate();
+        }
+
+        function toggleBills() {
+            billsVisible = !billsVisible; const sec = document.getElementById('billsSection'), icon = document.getElementById('arrowIcon'), txt = document.getElementById('toggleText');
+            if(!billsVisible) { sec.classList.add('hidden'); icon.style.transform = 'rotate(180deg)'; txt.innerText = "إظهار التفاصيل"; }
+            else { sec.classList.remove('hidden'); icon.style.transform = 'rotate(0deg)'; txt.innerText = "إخفاء التفاصيل للطباعة المختصرة"; }
         }
 
         document.getElementById('pdfFile').onchange = async (e) => {
             const file = e.target.files[0]; if (!file) return;
-            const pdfJS = window['pdfjs-dist/build/pdf'];
-            pdfJS.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
-            const buffer = await file.arrayBuffer();
-            const pdf = await pdfJS.getDocument({data: buffer}).promise;
-            db = [];
+            const pdfJS = window['pdfjs-dist/build/pdf']; pdfJS.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+            const buffer = await file.arrayBuffer(); const pdf = await pdfJS.getDocument({data: buffer}).promise; db = [];
+
             for (let i = 1; i <= pdf.numPages; i++) {
-                const page = await pdf.getPage(i);
-                const content = await page.getTextContent();
-                const items = content.items.sort((a, b) => b.transform[5] - a.transform[5]);
-                let client = items.map(it => it.str).find(t => t.length > 12 && !t.includes("بيور")) || "";
-                if(client && i === 1) document.getElementById('outClient').value = client;
+                const page = await pdf.getPage(i); const content = await page.getTextContent();
+                const items = content.items.sort((a, b) => b.transform[5] - a.transform[5] || a.transform[4] - b.transform[4]);
+                let client = items.map(it => it.str).find(t => t.length > 10 && !t.includes("بيور")) || "";
+                if(client) document.getElementById('outClient').value = client;
+
                 items.forEach(item => {
                     if (/\d{2}\/\d{2}\/\d{4}/.test(item.str)) {
-                        let id = "000000", total = "0", remain = "0";
+                        let id = "000000", total = "0", paid = "0", remain = "0";
                         const row = items.filter(it => Math.abs(it.transform[5] - item.transform[5]) < 5);
                         const nums = row.filter(r => /^-?\d{1,3}(,\d{3})*(\.\d{2})?$/.test(r.str) && r.str.includes(","));
-                        if(nums.length >= 1) { remain = nums[nums.length-1].str; total = nums[0].str; }
+                        if(nums.length >= 2) { total = nums[0].str; paid = (nums.length === 3) ? nums[1].str : "0"; remain = nums[nums.length-1].str; }
                         const idItem = row.find(ri => /^\d{5,7}$/.test(ri.str)); if(idItem) id = idItem.str;
-                        db.push({ id, date: item.str, total, remain, status: 'ok' });
+                        db.push({ id, date: item.str, total, paid, remain, status: 'ok' });
                     }
                 });
             }
@@ -178,32 +196,32 @@
         };
 
         function calculate() {
-            const list = document.getElementById('billsList'); list.innerHTML = ""; let sumRem = 0;
+            const list = document.getElementById('billsList'); list.innerHTML = ""; let sumRem = 0; let excluded = [];
             db.forEach((b, i) => {
                 const val = parseFloat(b.remain.replace(/,/g,'')) || 0;
-                if (b.status === 'ok') sumRem += val;
+                if (b.status === 'ok') sumRem += val; else excluded.push(b.id);
                 list.innerHTML += `
                     <div onclick="db[${i}].status=(db[${i}].status==='ok'?'none':'ok');calculate();" class="bill-card ${b.status === 'ok' ? 'is-active' : 'not-active'}">
-                        <div class="flex items-center gap-6">
-                            <span class="text-lg font-black text-gray-800 font-mono">${b.remain}</span>
-                            <span class="text-[10px] font-bold text-gray-300 italic uppercase">Invoice Total: ${b.total}</span>
-                        </div>
-                        <div class="text-right">
-                            <p class="text-xs font-black text-gray-700 italic">#${b.id}</p>
-                            <p class="text-[9px] font-bold text-gray-400">${b.date}</p>
-                        </div>
+                        <div><span class="amount-remaining">${b.remain} IQD</span><div class="flex gap-3"><span class="amount-paid">مدفوع: ${b.paid}</span><span class="amount-total">قيمة الفاتورة: ${b.total}</span></div></div>
+                        <div class="text-left flex flex-col justify-center"><span class="text-[10px] font-black text-slate-800">#${b.id}</span><span class="text-[8px] font-bold text-slate-400">${b.date}</span></div>
                     </div>`;
             });
-            const pA = parseFloat(document.getElementById('prevIn').value) || 0;
-            const pD = parseFloat(document.getElementById('prevDiscIn').value) || 0;
-            const mD = parseFloat(document.getElementById('matchDiscInput').value) || 0;
-            
-            let final = (pA - (pA * (pD/100))) + sumRem;
-            final = final - (final * (mD/100)); // تطبيق خصم المطابقة على الصافي
 
-            document.getElementById('outFullOrig').innerText = "IQD " + sumRem.toLocaleString();
-            document.getElementById('resFinal').innerText = "IQD " + final.toLocaleString(undefined, {maximumFractionDigits: 0});
-            document.getElementById('tafgeet').innerText = "فقط " + final.toLocaleString('ar-IQ', {maximumFractionDigits: 0}) + " دينار عراقي لا غير";
+            const prevAmt = parseFloat(document.getElementById('prevIn').value) || 0;
+            const prevDisc = parseFloat(document.getElementById('prevDiscIn').value) || 0;
+            const currDisc = parseFloat(document.getElementById('currDiscPerc').value) || 0;
+            const prevNet = prevAmt - (prevAmt * (prevDisc / 100));
+            const currNet = sumRem - (sumRem * (currDisc / 100));
+            const finalTotal = prevNet + currNet;
+
+            document.getElementById('outFullOrig').innerText = sumRem.toLocaleString() + " IQD";
+            document.getElementById('resFinal').innerText = finalTotal.toLocaleString(undefined, {maximumFractionDigits:0}) + " IQD";
+            document.getElementById('tafgeet').innerText = "فقط " + finalTotal.toLocaleString('ar-IQ') + " دينار لا غير";
+
+            const start = db.length > 0 ? db[0].id : '..', end = db.length > 0 ? db[db.length-1].id : '..';
+            let m = `مطابقة رسمية للفواتير من #${start} إلى #${end}.`;
+            if(excluded.length > 0) m += ` تم استثناء: (${excluded.join('-')}).`;
+            document.getElementById('officialMessage').innerHTML = m;
         }
     </script>
 </body>
