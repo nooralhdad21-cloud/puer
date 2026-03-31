@@ -3,66 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pure Pharma PRO | النظام المحاسبي الشامل</title>
+    <title>Pure Pharma PRO | Universal Finance</title>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-slate-50 text-slate-800 antialiased custom-scroll">
+<body class="bg-[#f8fafc] text-slate-900 font-['Cairo'] antialiased">
 
-    <main class="max-w-7xl mx-auto p-4 md:p-8">
-        <header class="bg-gradient-to-br from-slate-900 to-indigo-950 text-white p-8 md:p-12 rounded-[2.5rem] shadow-2xl mb-8 no-print border-b-[6px] border-indigo-500 relative overflow-hidden">
-            <div class="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full blur-3xl -mr-20 -mt-20"></div>
-            <div class="relative z-10 flex flex-col md:flex-row justify-between items-center gap-8">
-                <div class="text-center md:text-right">
-                    <h1 class="text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-300 to-white italic tracking-tight mb-2">PURE PHARMA PRO</h1>
-                    <p class="text-indigo-200 font-semibold text-lg">نظام التدقيق واستحصال الديون المتقدم</p>
+    <div class="max-w-7xl mx-auto p-4 lg:p-10">
+        <header class="relative bg-slate-900 rounded-[3rem] p-10 shadow-2xl overflow-hidden mb-10 no-print">
+            <div class="relative z-10 flex flex-col lg:flex-row justify-between items-center gap-8">
+                <div class="text-center lg:text-right">
+                    <div class="inline-block bg-indigo-500 text-[10px] font-bold px-3 py-1 rounded-full text-white mb-4 tracking-widest uppercase">Global Enterprise Edition</div>
+                    <h1 class="text-5xl font-black text-white italic mb-2">PURE PHARMA <span class="text-indigo-400">PRO</span></h1>
+                    <p class="text-slate-400 font-medium italic">يدعم: الأصيل، الأمين، QuickBooks، وملفات الإكسل العالمية</p>
                 </div>
-                <div class="flex flex-col items-center w-full md:w-auto">
-                    <input type="file" id="pdfUpload" class="hidden" accept=".pdf">
-                    <button onclick="document.getElementById('pdfUpload').click()" class="w-full md:w-auto bg-indigo-600 hover:bg-indigo-500 text-white px-10 py-4 rounded-2xl font-black shadow-[0_8px_30px_rgb(79,70,229,0.3)] transition-all transform active:scale-95 flex justify-center items-center gap-3 text-lg border border-indigo-400/30">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
-                        رفع كشف حساب (PDF)
+                
+                <div class="flex flex-col items-center">
+                    <input type="file" id="universalUpload" class="hidden" accept=".pdf, .xlsx, .xls, .csv">
+                    <button onclick="document.getElementById('universalUpload').click()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-12 py-5 rounded-2xl font-black shadow-xl transition-all transform active:scale-95 text-xl flex items-center gap-4">
+                        <span>رفع كشف الحساب</span>
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                     </button>
-                    <div id="loader" class="hidden mt-4 flex items-center gap-2 text-indigo-300 font-bold text-sm bg-indigo-900/50 px-4 py-2 rounded-full backdrop-blur-sm">
-                        <div class="w-4 h-4 border-2 border-indigo-300 border-t-transparent rounded-full animate-spin"></div>
-                        جاري معالجة البيانات...
-                    </div>
+                    <div id="loader" class="hidden mt-4 text-indigo-400 font-bold animate-pulse">جاري فحص وتوافق البيانات...</div>
                 </div>
             </div>
         </header>
 
-        <div class="no-print mb-8 relative">
-            <div class="absolute inset-y-0 right-0 pr-6 flex items-center pointer-events-none text-slate-400">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+        <div class="flex flex-col md:flex-row gap-4 mb-8 no-print">
+            <input type="text" id="searchInput" placeholder="ابحث باسم الصيدلية، المعرف، أو رقم القائمة..." class="flex-grow p-5 rounded-2xl border-2 border-white shadow-sm focus:border-indigo-500 outline-none font-bold transition-all bg-white">
+            <div class="bg-white px-6 py-4 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-3">
+                <span class="text-slate-400 font-bold text-sm">الحسابات المكتشفة:</span>
+                <span id="accCount" class="text-indigo-600 font-black text-xl">0</span>
             </div>
-            <input type="text" id="searchInput" placeholder="ابحث باسم الحساب، أو رقم المعرف..." class="w-full pl-6 pr-16 py-5 rounded-2xl border-2 border-slate-200 outline-none font-bold text-lg shadow-sm focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all bg-white">
         </div>
 
-        <div id="gridArea" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div class="col-span-full text-center py-24 text-slate-400 font-bold text-lg border-2 border-dashed border-slate-300 rounded-[2.5rem] bg-slate-100/50 flex flex-col items-center justify-center gap-4">
-                <svg class="w-16 h-16 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                النظام جاهز. بانتظار رفع ملف الكشف للبدء...
+        <div id="mainGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             </div>
-        </div>
-    </main>
-
-    <div id="modalOverlay" class="fixed inset-0 bg-slate-900/80 opacity-0 pointer-events-none transition-opacity duration-300 z-50 flex items-center justify-center p-4 backdrop-blur-sm no-print">
-        <div class="bg-white rounded-[2rem] w-full max-w-5xl max-h-[90vh] overflow-hidden shadow-2xl flex flex-col transform scale-95 transition-transform duration-300" id="modalContent">
-            <div class="px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/80">
-                <button onclick="closeModal()" class="w-10 h-10 flex items-center justify-center rounded-full text-slate-400 hover:text-white hover:bg-rose-500 font-black text-xl transition-all">✕</button>
-                <div class="flex gap-3">
-                    <button onclick="window.print()" class="bg-slate-800 text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-black transition-colors shadow-md flex items-center gap-2">🖨️ طباعة</button>
-                    <button id="waBtn" class="bg-emerald-600 text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-emerald-700 transition-colors shadow-md flex items-center gap-2">📱 إرسال</button>
-                </div>
-            </div>
-            <div id="modalBody" class="p-8 md:p-10 overflow-y-auto custom-scroll flex-grow bg-white"></div>
-        </div>
     </div>
 
-    <div id="toastContainer" class="fixed bottom-6 left-6 z-[60] flex flex-col gap-3 no-print"></div>
+    <div id="modalOverlay" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md opacity-0 pointer-events-none transition-all duration-300 z-50 flex items-center justify-center p-4 no-print">
+        <div class="bg-white rounded-[2.5rem] w-full max-w-5xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
+            <div class="p-6 border-b flex justify-between items-center bg-slate-50">
+                <button onclick="closeModal()" class="w-12 h-12 rounded-full bg-white shadow-sm flex items-center justify-center font-bold hover:bg-rose-500 hover:text-white transition-all text-xl">✕</button>
+                <div class="flex gap-4">
+                    <button onclick="window.print()" class="bg-slate-900 text-white px-8 py-3 rounded-xl font-bold hover:bg-black transition-all">طباعة الكشف</button>
+                    <button id="whatsappBtn" class="bg-emerald-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-emerald-700 transition-all flex items-center gap-2">WhatsApp</button>
+                </div>
+            </div>
+            <div id="modalBody" class="p-8 lg:p-12 overflow-y-auto"></div>
+        </div>
+    </div>
 
     <script src="script.js"></script>
 </body>
