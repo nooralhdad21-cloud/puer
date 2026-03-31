@@ -2,125 +2,148 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>نظام مطابقة مكاتب بيور العلمي</title>
+    <title>نظام مطابقة مكاتب بيور العلمي - النسخة الاحترافية</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Cairo', sans-serif; background-color: #f4f6f9; }
-        .pure-header { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); }
-        .bill-card { transition: 0.3s ease; border-right: 5px solid transparent; }
-        .is-confirmed { border-right-color: #10b981; background-color: #ffffff; }
-        .is-ignored { opacity: 0.25; filter: grayscale(1); } /* مبلغ شفاف للفواتير المستبعدة */
-        .stamp-area { border: 2px dashed #e2e8f0; border-radius: 15px; }
+        body { font-family: 'Cairo', sans-serif; background-color: #f1f5f9; }
+        .pure-dark { background: #0f172a; border-radius: 0 0 2rem 2rem; }
+        .bill-card { transition: 0.3s; border-right: 6px solid transparent; }
+        .is-confirmed { border-right-color: #10b981; background-color: #f0fdf4; }
+        .is-warn { border-right-color: #f59e0b; background-color: #fffbeb; opacity: 0.6; }
+        .stamp-box { border: 2px dashed #cbd5e1; border-radius: 15px; width: 150px; height: 110px; display: flex; align-items: center; justify-content: center; color: #94a3b8; font-size: 11px; font-weight: bold; text-align: center; }
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
         @media print { 
             .no-print { display: none !important; } 
-            body { background: white; }
-            .print-container { box-shadow: none; border: none; width: 100%; padding: 0; }
+            body { background: white; padding: 0; }
+            .report-container { box-shadow: none; border: none; width: 100%; padding: 0; }
         }
     </style>
 </head>
 <body class="p-2 md:p-6">
 
     <div class="max-w-4xl mx-auto">
-        <header class="no-print pure-header text-white p-6 rounded-[2rem] mb-6 shadow-2xl">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <div>
-                    <label class="text-[10px] text-indigo-300 font-bold">اسم المذخر / المكتب</label>
-                    <input type="text" id="officeName" value="مكتب بيور العلمي" class="w-full bg-slate-800 p-3 rounded-xl border border-slate-700 outline-none">
+        <header class="no-print pure-dark text-white p-6 mb-6 shadow-2xl space-y-6">
+            <h1 class="text-xl font-black text-indigo-400 text-center border-b border-slate-700 pb-4">إعدادات المطابقة والخصومات</h1>
+            
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold text-slate-400">المبلغ السابق (مدور)</label>
+                    <input type="number" id="prevBalance" value="0" oninput="render()" class="w-full p-2 rounded-lg bg-slate-800 border border-slate-700 outline-none text-indigo-300 font-bold">
                 </div>
-                <div>
-                    <label class="text-[10px] text-indigo-300 font-bold">اسم المندوب التجاري</label>
-                    <input type="text" id="repName" placeholder="أدخل اسم المندوب" class="w-full bg-slate-800 p-3 rounded-xl border border-slate-700 outline-none">
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold text-slate-400">نسبة خصم سابق %</label>
+                    <input type="number" id="prevDiscount" value="0" oninput="render()" class="w-full p-2 rounded-lg bg-slate-800 border border-slate-700 outline-none text-orange-400 font-bold">
                 </div>
-                <div>
-                    <label class="text-[10px] text-indigo-300 font-bold">المسؤول عن المطابقة (العميل)</label>
-                    <input type="text" id="clientContact" placeholder="اسم الشخص السائل" class="w-full bg-slate-800 p-3 rounded-xl border border-slate-700 outline-none">
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold text-slate-400">نسبة خصم حالي %</label>
+                    <input type="number" id="currDiscount" value="0" oninput="render()" class="w-full p-2 rounded-lg bg-slate-800 border border-slate-700 outline-none text-green-400 font-bold">
                 </div>
-                <div>
-                    <label class="text-[10px] text-indigo-300 font-bold">تاريخ التقرير</label>
-                    <input type="date" id="repDate" class="w-full bg-slate-800 p-3 rounded-xl border border-slate-700 outline-none">
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold text-slate-400">اسم المندوب</label>
+                    <input type="text" id="repInput" oninput="syncText()" class="w-full p-2 rounded-lg bg-slate-800 border border-slate-700 outline-none">
                 </div>
             </div>
+
             <div class="flex gap-2">
-                <input type="file" id="pdfUpload" class="hidden" accept=".pdf">
-                <button onclick="document.getElementById('pdfUpload').click()" class="flex-1 bg-indigo-500 p-4 rounded-2xl font-black shadow-lg">رفع كشف الحساب</button>
-                <button onclick="window.print()" class="bg-green-600 px-8 rounded-2xl font-black">طباعة التقرير الرسمي</button>
+                <input type="file" id="pdfFile" class="hidden" accept=".pdf">
+                <button onclick="document.getElementById('pdfFile').click()" class="flex-1 bg-indigo-600 p-4 rounded-2xl font-black hover:bg-indigo-700 transition">رفع كشف الحساب</button>
+                <button onclick="window.print()" class="bg-green-600 px-10 rounded-2xl font-black hover:bg-green-700 transition">طباعة التقرير</button>
             </div>
         </header>
 
-        <div id="printableReport" class="bg-white p-8 rounded-3xl shadow-sm border border-slate-100 print-container">
-            <div class="flex justify-between items-center border-b-2 border-slate-900 pb-6 mb-6">
+        <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-100 report-container">
+            
+            <div class="flex justify-between items-start border-b-4 border-slate-900 pb-6 mb-8">
                 <div>
-                    <h1 id="outOfficeName" class="text-2xl font-black text-slate-900 leading-tight">مكتب بيور العلمي</h1>
+                    <h1 class="text-2xl font-black text-slate-900">مكتب بيور العلمي</h1>
                     <p class="text-xs font-bold text-slate-500">للمستلزمات الطبية والأدوية</p>
                 </div>
                 <div class="text-left text-sm font-bold space-y-1">
-                    <p>التاريخ: <span id="outDate">--/--/----</span></p>
-                    <p>المندوب: <span id="outRep" class="text-indigo-600">......</span></p>
+                    <div class="flex items-center gap-2">
+                        <span>التاريخ:</span>
+                        <input type="date" id="reportDate" class="border-b border-slate-300 outline-none p-1 w-32 font-bold">
+                    </div>
+                    <p>المندوب: <span id="outRep" class="text-indigo-600 italic">......</span></p>
                 </div>
             </div>
 
-            <div class="bg-slate-50 p-4 rounded-2xl mb-6 flex justify-between items-center border border-slate-100">
-                <div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
                     <p class="text-[10px] font-black text-slate-400">اسم الصيدلية / العميل:</p>
-                    <h2 id="outClientName" class="text-xl font-black text-slate-800 italic">بانتظار البيانات...</h2>
+                    <h2 id="outClient" class="text-lg font-black text-slate-800 italic">بانتظار البيانات..</h2>
                 </div>
-                <div class="text-left">
-                    <p class="text-[10px] font-black text-slate-400">المسؤول عن المطابقة:</p>
-                    <p id="outContact" class="font-bold text-slate-700">......</p>
+                <div class="bg-indigo-50 p-4 rounded-2xl border border-indigo-100 flex justify-between items-center">
+                    <div>
+                        <p class="text-[10px] font-black text-indigo-400">إجمالي الذمة في الكشف:</p>
+                        <p id="originalTotal" class="text-xl font-black text-slate-400">0.00 IQD</p>
+                    </div>
                 </div>
             </div>
 
-            <div class="space-y-2 mb-8" id="billsList">
+            <div id="billsList" class="space-y-1 mb-8">
                 </div>
 
-            <div id="aiSummary" class="hidden bg-indigo-50 p-6 rounded-[2rem] border-2 border-indigo-100 mb-8">
-                <p id="aiMessage" class="text-center font-bold text-indigo-900 leading-relaxed">
-                    </p>
+            <div id="aiSummary" class="hidden bg-slate-50 p-6 rounded-[2rem] border-2 border-slate-100 mb-8 text-center">
+                <p id="aiMessage" class="font-bold text-slate-700 leading-relaxed text-sm"></p>
             </div>
 
-            <div class="flex justify-between items-end mt-12">
-                <div class="text-sm font-bold">
-                    <p class="mb-1">مجموع مبلغ المطابقة (✓):</p>
-                    <p id="finalTotal" class="text-3xl font-black text-green-600">0.00 IQD</p>
+            <div class="grid grid-cols-2 gap-8 border-t pt-8">
+                <div class="space-y-3">
+                    <div class="flex justify-between text-xs font-bold text-slate-500">
+                        <span>المبلغ السابق المضاف:</span>
+                        <span id="outPrevVal">0.00</span>
+                    </div>
+                    <div class="flex justify-between text-xs font-bold text-orange-500">
+                        <span>خصم سابق مستقطع:</span>
+                        <span id="outPrevDisc">0.00</span>
+                    </div>
+                    <div class="flex justify-between text-xs font-bold text-green-600">
+                        <span>خصم حالي مستقطع:</span>
+                        <span id="outCurrDisc">0.00</span>
+                    </div>
+                    <div class="pt-2 border-t border-slate-100">
+                        <p class="text-[10px] font-black text-slate-400 uppercase">صافي مبلغ المطابقة النهائي:</p>
+                        <p id="finalTotal" class="text-3xl font-black text-green-600">0.00 IQD</p>
+                    </div>
                 </div>
-                <div class="flex flex-col items-center gap-2">
-                    <div class="stamp-area w-32 h-24 flex items-center justify-center text-[10px] text-slate-300 font-bold">ختم المكتب الرسمي</div>
-                    <p class="text-xs font-bold">توقيع المدير المالي</p>
+
+                <div class="flex flex-col items-center justify-between">
+                    <div class="w-full">
+                        <p class="text-[10px] font-black text-slate-400 mb-1">توقيع المسؤول عن المطابقة:</p>
+                        <input type="text" placeholder="اكتب الاسم هنا.." class="w-full border-b border-slate-200 outline-none font-bold text-sm">
+                    </div>
+                    <div class="stamp-box">ختم مكتب بيور الرسمي</div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        let storeData = [];
-        document.getElementById('repDate').valueAsDate = new Date();
+        let data = [];
+        document.getElementById('reportDate').valueAsDate = new Date();
 
-        // تحديث البيانات حياً
-        const sync = (id, outId) => document.getElementById(id).oninput = (e) => document.getElementById(outId).innerText = e.target.value;
-        sync('officeName', 'outOfficeName');
-        sync('repName', 'outRep');
-        sync('clientContact', 'outContact');
-        document.getElementById('repDate').onchange = (e) => document.getElementById('outDate').innerText = e.target.value;
+        function syncText() {
+            document.getElementById('outRep').innerText = document.getElementById('repInput').value || '......';
+        }
 
-        document.getElementById('pdfUpload').onchange = async (e) => {
+        document.getElementById('pdfFile').onchange = async (e) => {
             const file = e.target.files[0];
             if (!file) return;
-            
             const pdfJS = window['pdfjs-dist/build/pdf'];
             pdfJS.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
             const buffer = await file.arrayBuffer();
             const pdf = await pdfJS.getDocument({data: buffer}).promise;
             
-            storeData = [];
+            data = [];
+            let totalOrig = 0;
+
             for (let i = 1; i <= pdf.numPages; i++) {
                 const page = await pdf.getPage(i);
                 const content = await page.getTextContent();
                 const items = content.items.map(it => it.str.trim());
-                
                 let client = items.find(t => t.length > 10 && !t.includes("بيور")) || "عميل غير معروف";
-                let bills = [];
                 
                 content.items.forEach((item, idx) => {
                     if (/\d{2}\/\d{2}\/\d{4}/.test(item.str)) {
@@ -128,70 +151,75 @@
                         for(let n=-6; n<=6; n++){
                             let v = content.items[idx+n]?.str || "";
                             if(/^\d{5,7}$/.test(v)) id = v;
-                            if(/^(\d{1,3}(,\d{3})*(\.\d{2}))$/.test(v)) price = v;
+                            if(/^(\d{1,3}(,\d{3})*(\.\d.2}))/.test(v) || /^(\d{1,3}(,\d{3})*)/.test(v)) {
+                                if(v.includes(",") || v.length > 3) price = v;
+                            }
                         }
-                        bills.push({ id, date: item.str, price, status: 'none' });
+                        data.push({ id, date: item.str, price, status: 'none', note: '', client });
+                        totalOrig += parseFloat(price.replace(/,/g,'')) || 0;
                     }
                 });
-                if(bills.length > 0) storeData.push({ client, bills });
             }
+            document.getElementById('originalTotal').innerText = totalOrig.toLocaleString() + " IQD";
             render();
         };
 
         function render() {
             const list = document.getElementById('billsList');
             list.innerHTML = "";
-            let totalMatch = 0;
-            let confirmedIds = [];
+            let sumOk = 0;
+            let okIds = [];
+            let warnIds = [];
 
-            if(storeData.length > 0) {
-                document.getElementById('outClientName').innerText = storeData[0].client;
-            }
+            if(data.length > 0) document.getElementById('outClient').innerText = data[0].client;
 
-            storeData.forEach((group, gIdx) => {
-                group.bills.forEach((b, bIdx) => {
-                    if (b.status === 'ok') {
-                        totalMatch += parseFloat(b.price.replace(/,/g,''));
-                        confirmedIds.push(parseInt(b.id));
-                    }
+            data.forEach((b, idx) => {
+                const val = parseFloat(b.price.replace(/,/g,'')) || 0;
+                if (b.status === 'ok') { sumOk += val; okIds.push(parseInt(b.id)); }
+                if (b.status === 'warn') warnIds.push(b.id);
 
-                    list.innerHTML += `
-                        <div class="bill-card flex justify-between items-center p-3 border-b border-slate-50 ${b.status === 'ok' ? 'is-confirmed' : ''} ${b.status === 'warn' ? 'is-ignored' : ''}">
-                            <div class="flex items-center gap-4">
-                                <div class="no-print flex gap-1">
-                                    <button onclick="setStatus(${gIdx},${bIdx},'ok')" class="w-7 h-7 rounded-lg font-bold bg-slate-100 text-slate-400 ${b.status === 'ok' ? '!bg-green-600 !text-white' : ''}">✓</button>
-                                    <button onclick="setStatus(${gIdx},${bIdx},'warn')" class="w-7 h-7 rounded-lg font-bold bg-slate-100 text-slate-400 ${b.status === 'warn' ? '!bg-amber-500 !text-white' : ''}">!</button>
-                                </div>
-                                <div>
-                                    <p class="font-black text-sm text-slate-800">#${b.id}</p>
-                                    <p class="text-[9px] text-slate-400 font-bold">${b.date}</p>
-                                </div>
+                list.innerHTML += `
+                    <div class="bill-card flex justify-between items-center p-2 border-b border-slate-50 ${b.status === 'ok' ? 'is-confirmed' : ''} ${b.status === 'warn' ? 'is-warn' : ''}">
+                        <div class="flex items-center gap-3">
+                            <div class="no-print flex gap-1">
+                                <button onclick="setStatus(${idx},'ok')" class="w-7 h-7 rounded bg-slate-100 ${b.status === 'ok' ? 'bg-green-600 text-white' : ''}">✓</button>
+                                <button onclick="setStatus(${idx},'warn')" class="w-7 h-7 rounded bg-slate-100 ${b.status === 'warn' ? 'bg-amber-500 text-white' : ''}">!</button>
                             </div>
-                            <div class="text-left">
-                                <p class="font-black ${b.status === 'ok' ? 'text-green-600 text-lg' : 'text-slate-400 text-sm'}">${b.price}</p>
-                            </div>
+                            <span class="font-black text-xs">#${b.id}</span>
                         </div>
-                    `;
-                });
+                        <div class="text-left flex items-center gap-4">
+                            ${b.status === 'warn' ? `<input type="text" placeholder="السبب؟" onchange="saveNote(${idx},this.value)" value="${b.note}" class="text-[10px] border-b border-amber-300 outline-none w-24 bg-transparent text-amber-700">` : ''}
+                            <span class="font-black text-sm">${b.price}</span>
+                        </div>
+                    </div>
+                `;
             });
 
-            document.getElementById('finalTotal').innerText = totalMatch.toLocaleString(undefined, {minimumFractionDigits: 2}) + " IQD";
-            
-            // توليد الرسالة الاحترافية
-            if(confirmedIds.length > 0) {
+            // الحسابات النهائية
+            const prevBal = parseFloat(document.getElementById('prevBalance').value) || 0;
+            const prevDiscPerc = parseFloat(document.getElementById('prevDiscount').value) || 0;
+            const currDiscPerc = parseFloat(document.getElementById('currDiscount').value) || 0;
+
+            const prevDiscVal = prevBal * (prevDiscPerc / 100);
+            const currDiscVal = sumOk * (currDiscPerc / 100);
+            const final = (sumOk - currDiscVal) + (prevBal - prevDiscVal);
+
+            document.getElementById('outPrevVal').innerText = prevBal.toLocaleString() + " IQD";
+            document.getElementById('outPrevDisc').innerText = "- " + prevDiscVal.toLocaleString() + " IQD";
+            document.getElementById('outCurrDisc').innerText = "- " + currDiscVal.toLocaleString() + " IQD";
+            document.getElementById('finalTotal').innerText = final.toLocaleString(undefined, {minimumFractionDigits: 2}) + " IQD";
+
+            // الرسالة التلقائية
+            if(okIds.length > 0) {
                 document.getElementById('aiSummary').classList.remove('hidden');
-                let first = Math.min(...confirmedIds);
-                let last = Math.max(...confirmedIds);
-                document.getElementById('aiMessage').innerText = `نود إعلامكم بأنه تمت مطابقة الحسابات بنجاح من فاتورة رقم (${first}) إلى آخر فاتورة رقم (${last})، باستثناء القوائم المشار إليها بعلامة تعجب، حيث تم استبعادها من صافي مبلغ المطابقة الحالي.`;
-            } else {
-                document.getElementById('aiSummary').classList.add('hidden');
+                let range = `من فاتورة رقم (${Math.min(...okIds)}) إلى رقم (${Math.max(...okIds)})`;
+                let excludes = warnIds.length > 0 ? ` باستثناء الفواتير (${warnIds.join(' , ')})` : "";
+                document.getElementById('aiMessage').innerText = `نحيطكم علماً بأنه تمت مطابقة الحسابات لـ ${range}${excludes}. وتم احتساب الخصومات المتفق عليها ليصبح الصافي كما هو موضح أدناه.`;
             }
         }
 
-        function setStatus(g, b, st) {
-            storeData[g].bills[b].status = (storeData[g].bills[b].status === st) ? 'none' : st;
-            render();
-        }
+        function setStatus(idx, st) { data[idx].status = data[idx].status === st ? 'none' : st; render(); }
+        function saveNote(idx, note) { data[idx].note = note; }
     </script>
 </body>
 </html>
