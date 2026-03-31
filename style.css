@@ -1,32 +1,44 @@
-body { font-family: 'Cairo', sans-serif; transition: 0.3s; }
+/* تحسين الخطوط والألوان */
+body { font-family: 'Cairo', sans-serif; transition: background 0.3s; }
 
-/* تصميم الهيدر */
-.main-header { background: white; padding: 2.5rem; border-radius: 2.5rem; box-shadow: 0 10px 30px rgba(0,0,0,0.05); margin-bottom: 2rem; border-bottom: 5px solid #4f46e5; }
+/* بطاقات الصيدليات الذكية */
+.pharmacy-card { 
+    background: white; 
+    border-radius: 2.5rem; 
+    padding: 2rem; 
+    border: 1.5px solid #f1f5f9; 
+    transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+    position: relative;
+    cursor: pointer;
+}
 
-/* أزرار النظام */
-.btn-main { background: #4f46e5; color: white; padding: 1.2rem 2.5rem; border-radius: 1.2rem; font-weight: 900; transition: 0.3s; border: none; cursor: pointer; }
-.btn-main:hover { background: #4338ca; transform: scale(1.05); }
+.pharmacy-card:hover { 
+    transform: translateY(-12px) scale(1.02); 
+    border-color: #6366f1; 
+    box-shadow: 0 30px 60px -12px rgba(99, 102, 241, 0.15); 
+}
 
-.btn-secondary { background: #e2e8f0; color: #475569; padding: 1rem 2rem; border-radius: 1.2rem; font-weight: 700; transition: 0.3s; }
+/* حالة الفواتير المسددة */
+.row-paid { 
+    background-color: #f8fafc !important; 
+    opacity: 0.4; 
+    text-decoration: line-through; 
+    filter: grayscale(1);
+    pointer-events: none;
+}
 
-/* شريط البحث */
-.search-bar { flex-grow: 1; padding: 1.2rem; border-radius: 1.5rem; border: 2px solid #e2e8f0; outline: none; font-weight: 700; transition: 0.3s; }
-.search-bar:focus { border-color: #4f46e5; box-shadow: 0 0 20px rgba(79, 70, 229, 0.1); }
+.hidden-item { display: none !important; }
 
-/* البطاقات */
-.acc-card { background: white; border-radius: 2rem; padding: 1.5rem; border: 1px solid #f1f5f9; position: relative; transition: 0.4s; cursor: pointer; }
-.acc-card:hover { transform: translateY(-10px); box-shadow: 0 20px 40px rgba(0,0,0,0.1); border-color: #4f46e5; }
-.hidden-node { display: none !important; }
+/* السكرول بار الأنيق */
+.custom-scroll::-webkit-scrollbar { width: 5px; }
+.custom-scroll::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
 
-/* المودال */
-.modal-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.9); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 1rem; backdrop-filter: blur(10px); }
-.modal-content { background: white; width: 100%; max-width: 60rem; max-height: 90vh; border-radius: 3rem; overflow: hidden; display: flex; flex-direction: column; }
-.btn-whatsapp { background: #25d366; color: white; padding: 0.7rem 1.5rem; border-radius: 0.8rem; font-weight: 900; font-size: 0.8rem; }
-.btn-print { background: #1e293b; color: white; padding: 0.7rem 1.5rem; border-radius: 0.8rem; font-weight: 900; font-size: 0.8rem; }
-
+/* إعدادات الطباعة للتقارير الرسمية */
 @media print {
     .no-print { display: none !important; }
-    body { background: white; }
-    .modal-overlay { position: static; background: white; padding: 0; }
-    .modal-content { max-height: none; width: 100%; }
+    body { background: white !important; }
+    .modal-card { border: none !important; box-shadow: none !important; width: 100%; position: absolute; top: 0; }
+    table { width: 100% !important; border: 1px solid #eee; }
+    th { background: #f8fafc !important; color: black !important; }
+    .total-box { background: #000 !important; color: white !important; -webkit-print-color-adjust: exact; }
 }
