@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>نظام مطابقة بيور العلمي - الإصدار النهائي</title>
+    <title>نظام مطابقة بيور العلمي - الإصدار الحسابي الدقيق</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
@@ -13,8 +13,8 @@
         .not-active { border-right: 6px solid #ef4444; background-color: #fff1f2; opacity: 0.7; }
         .is-hidden-all { display: none !important; }
         .amount-sub { font-size: 10px; font-weight: 700; }
-        .total-transparent { color: #94a3b8; opacity: 0.8; } /* مبلغ الفاتورة الكلي شفاف صغير */
-        .paid-highlight { color: #0ea5e9; background: #f0f9ff; padding: 1px 4px; border-radius: 4px; } /* المبلغ المدفوع مميز */
+        .total-transparent { color: #94a3b8; opacity: 0.8; }
+        .paid-highlight { color: #0ea5e9; background: #f0f9ff; padding: 1px 4px; border-radius: 4px; }
         @media print { .no-print { display: none !important; } .report-container { border: none !important; width: 100%; padding: 0; } }
     </style>
 </head>
@@ -23,30 +23,30 @@
     <div class="max-w-5xl mx-auto">
         <header class="no-print bg-[#1e293b] text-white p-6 rounded-[2rem] mb-6 shadow-xl">
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                <div><label class="block text-[10px] mb-1 text-slate-400 font-bold uppercase">المحاسب</label>
+                <div><label class="block text-[10px] mb-1 text-slate-400 font-bold uppercase tracking-widest">المحاسب</label>
                     <input type="text" id="myNameInput" oninput="saveData(); sync();" class="w-full bg-slate-800 border-none rounded-xl p-2 text-xs"></div>
                 <div><label class="block text-[10px] mb-1 text-indigo-400 font-bold">المحافظة</label>
                     <select id="provInput" onchange="updateCities(); sync();" class="w-full bg-slate-800 border-none rounded-xl p-2 text-xs font-bold"></select></div>
                 <div><label class="block text-[10px] mb-1 text-indigo-400 font-bold">القضاء / الناحية</label>
                     <select id="cityInput" onchange="sync()" class="w-full bg-slate-800 border-none rounded-xl p-2 text-xs font-bold"></select></div>
-                <div><label class="block text-[10px] mb-1 text-slate-400 font-bold">المندوب</label>
+                <div><label class="block text-[10px] mb-1 text-slate-400 font-bold tracking-widest uppercase">المندوب</label>
                     <input type="text" id="repInput" oninput="sync()" class="w-full bg-slate-800 border-none rounded-xl p-2 text-xs"></div>
             </div>
 
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 border-t border-slate-700 pt-4 mb-4">
-                <div><label class="block text-[10px] mb-1 text-orange-400 font-bold italic">المبلغ السابق (توثيق)</label>
+                <div><label class="block text-[10px] mb-1 text-orange-400 font-bold italic tracking-tighter">المبلغ السابق (توثيق)</label>
                     <input type="text" id="prevInput" oninput="sync()" class="w-full bg-slate-800 border-none rounded-xl p-2 text-xs"></div>
-                <div><label class="block text-[10px] mb-1 text-orange-400 font-bold italic">النسبة السابقة (اختيار)</label>
+                <div><label class="block text-[10px] mb-1 text-orange-400 font-bold italic tracking-tighter">النسبة السابقة (اختيار)</label>
                     <select id="prevDiscInput" onchange="sync()" class="w-full bg-slate-800 border-none rounded-xl p-2 text-xs font-bold"></select></div>
-                <div><label class="block text-[10px] mb-1 text-orange-400 font-bold italic">تاريخ آخر مطابقة</label>
+                <div><label class="block text-[10px] mb-1 text-orange-400 font-bold italic tracking-tighter">تاريخ آخر مطابقة</label>
                     <input type="date" id="lastMatchDate" oninput="sync()" class="w-full bg-slate-800 border-none rounded-xl p-2 text-xs uppercase"></div>
-                <div><label class="block text-[10px] mb-1 text-emerald-400 font-bold uppercase">نسبة المطابقة الحالية %</label>
+                <div><label class="block text-[10px] mb-1 text-emerald-400 font-bold uppercase tracking-widest">خصم المطابقة %</label>
                     <select id="currDiscPerc" onchange="calculate()" class="w-full bg-slate-800 border-none rounded-xl p-2 text-xs font-bold text-emerald-400"></select></div>
             </div>
             
             <div class="flex gap-4">
-                <button onclick="document.getElementById('pdfFile').click()" class="flex-1 bg-indigo-600 p-3 rounded-xl text-xs font-black uppercase">رفع الكشف PDF</button>
-                <button onclick="window.print()" class="flex-[2] bg-emerald-600 p-3 rounded-xl text-xs font-black uppercase">طباعة المطابقة</button>
+                <button onclick="document.getElementById('pdfFile').click()" class="flex-1 bg-indigo-600 p-3 rounded-xl text-xs font-black uppercase tracking-widest">رفع الكشف PDF</button>
+                <button onclick="window.print()" class="flex-[2] bg-emerald-600 p-3 rounded-xl text-xs font-black uppercase tracking-widest">إصدار وطباعة التقرير</button>
                 <button onclick="location.reload()" class="bg-red-900/40 px-4 rounded-xl text-[10px] font-bold text-red-400">تصفير</button>
             </div>
             <input type="file" id="pdfFile" class="hidden" accept=".pdf">
@@ -60,21 +60,22 @@
                 </div>
                 <div class="text-left text-[10px] font-bold leading-relaxed">
                     <p>الموقع: <span id="outLoc" class="text-indigo-600 uppercase">..</span></p>
-                    <p>تاريخ اليوم: <span id="outDate">..</span></p>
+                    <p>التاريخ: <span id="outDate">..</span></p>
                     <p class="text-orange-600">آخر مطابقة: <span id="outLastMatch">..</span></p>
                 </div>
             </div>
 
-            <div class="grid grid-cols-4 gap-2 mb-6 text-center">
-                <div class="bg-slate-50 p-3 rounded-xl border border-slate-100"><span class="block text-[7px] text-slate-400 font-bold mb-1 uppercase">PREV AMOUNT</span><span id="outPrevAmt" class="text-[10px] font-black italic text-slate-600">0</span></div>
-                <div class="bg-slate-50 p-3 rounded-xl border border-slate-100"><span class="block text-[7px] text-slate-400 font-bold mb-1 uppercase">PREV DISC</span><span id="outPrevDisc" class="text-[10px] font-black italic text-slate-600">0%</span></div>
-                <div class="bg-slate-50 p-3 rounded-xl border border-slate-100"><span class="block text-[7px] text-slate-400 font-bold mb-1 uppercase">ACCOUNTANT</span><span id="outMyName" class="text-[10px] font-black italic text-slate-600">..</span></div>
-                <div class="bg-slate-50 p-3 rounded-xl border border-slate-100"><span class="block text-[7px] font-bold mb-1 uppercase text-emerald-500">MATCH DISC</span><span id="outCurrDisc" class="text-[10px] font-black italic text-emerald-600">0%</span></div>
+            <div class="grid grid-cols-5 gap-2 mb-6 text-center">
+                <div class="bg-slate-50 p-3 rounded-xl border border-slate-100"><span class="block text-[7px] text-slate-400 font-bold mb-1 uppercase tracking-tighter">PREV AMOUNT</span><span id="outPrevAmt" class="text-[10px] font-black italic text-slate-600">0</span></div>
+                <div class="bg-slate-50 p-3 rounded-xl border border-slate-100"><span class="block text-[7px] text-slate-400 font-bold mb-1 uppercase tracking-tighter">PREV DISC</span><span id="outPrevDisc" class="text-[10px] font-black italic text-slate-600">0%</span></div>
+                <div class="bg-slate-50 p-3 rounded-xl border border-slate-100"><span class="block text-[7px] text-slate-400 font-bold mb-1 uppercase tracking-tighter">ACCOUNTANT</span><span id="outMyName" class="text-[10px] font-black italic text-slate-600">..</span></div>
+                <div class="bg-slate-50 p-3 rounded-xl border border-slate-100"><span class="block text-[7px] text-slate-400 font-bold mb-1 uppercase tracking-tighter">REPRESENTATIVE</span><span id="outRep" class="text-[10px] font-black italic text-slate-600">..</span></div>
+                <div class="bg-slate-50 p-3 rounded-xl border border-slate-100"><span class="block text-[7px] font-bold mb-1 uppercase tracking-tighter text-emerald-500">MATCH DISC</span><span id="outCurrDisc" class="text-[10px] font-black italic text-emerald-600">0%</span></div>
             </div>
 
             <div class="mb-6 p-6 bg-slate-900 rounded-[2rem] text-white flex justify-between items-center shadow-lg relative">
                 <div class="flex-1">
-                    <p class="text-[9px] font-bold text-indigo-400 mb-1 italic uppercase">اسم العميل / المذخر</p>
+                    <p class="text-[9px] font-bold text-indigo-400 mb-1 italic uppercase tracking-widest">اسم العميل المعتمد / المذخر</p>
                     <input type="text" id="outClient" placeholder="اسم الصيدلية..." class="text-2xl font-black bg-transparent border-none outline-none w-full">
                 </div>
                 <div class="text-left border-r border-slate-700 pr-6">
@@ -84,12 +85,12 @@
             </div>
 
             <div id="matchingMsgBox" class="bg-slate-50 p-4 rounded-2xl border border-slate-100 mb-6 text-center italic">
-                <p id="officialMsg" class="text-[11px] font-bold text-slate-700"></p>
+                <p id="officialMsg" class="text-[11px] font-bold text-slate-700">نود إعلامكم بأنه تمت مطابقة الحسابات بنجاح.</p>
             </div>
 
             <div class="flex items-center gap-2 mb-4 no-print select-none cursor-pointer" onclick="toggleAllBillsVisibility()">
-                <div id="toggleArrow" class="bg-slate-100 p-1 rounded-full"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></div>
-                <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest">إخفاء / إظهار التفاصيل</span>
+                <div id="toggleArrow" class="bg-slate-100 p-1 rounded-full transition-transform"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></div>
+                <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest">إخفاء / إظهار تفاصيل الفواتير</span>
             </div>
 
             <div id="billsList" class="space-y-2 mb-8"></div>
@@ -97,13 +98,13 @@
             <div class="border-t-2 border-slate-900 pt-8 mt-auto">
                 <div class="flex justify-between items-end">
                     <div class="flex-1">
-                        <p class="text-[10px] font-black text-slate-400 mb-1 italic uppercase">Final Amount / صافي المطابقة:</p>
+                        <p class="text-[10px] font-black text-slate-400 mb-1 italic uppercase tracking-widest">Final Amount / صافي مبلغ المطابقة النهائي:</p>
                         <p id="resFinal" class="text-5xl font-black text-slate-900 tracking-tighter italic font-mono">0 IQD</p>
                         <p id="tafgeet" class="text-[11px] font-bold text-indigo-700 bg-indigo-50 px-5 py-2 rounded-xl border border-indigo-100 mt-4 inline-block italic">....</p>
                     </div>
                     <div class="grid grid-cols-2 gap-4 text-center">
-                        <div><div class="w-32 h-20 border-2 border-dashed border-slate-200 rounded-xl mb-1 mx-auto"></div><p class="text-[8px] font-black text-slate-400 italic">ختم وتوقيع المكتب</p></div>
-                        <div><div class="w-32 h-20 border-2 border-dashed border-slate-200 rounded-xl mb-1 mx-auto"></div><p class="text-[8px] font-black text-slate-400 italic">توقيع العميل</p></div>
+                        <div><div class="w-32 h-20 border-2 border-dashed border-slate-200 rounded-xl mb-1 mx-auto"></div><p class="text-[8px] font-black text-slate-400 italic uppercase">توقيع مسؤول مطابقة المكتب</p></div>
+                        <div><div class="w-32 h-20 border-2 border-dashed border-slate-200 rounded-xl mb-1 mx-auto"></div><p class="text-[8px] font-black text-slate-400 italic uppercase">توقيع العميل / الصيدلية</p></div>
                     </div>
                 </div>
             </div>
@@ -112,7 +113,6 @@
 
     <script>
         let db = [];
-        // 1. قاعدة بيانات المحافظات العراقية كاملة
         const iraqGeo = {
             "بغداد": ["الرصافة", "الكرخ", "الأعظمية", "المنصور", "الكرادة", "الكاظمية", "الدورة", "بغداد الجديدة", "الشعلة", "المحمودية", "أبو غريب", "الطارمية"],
             "صلاح الدين": ["الشرقاط", "تكريت", "سامراء", "بيجي", "بلد", "الدجيل", "الطوز", "العلم", "الضلوعية", "الإسحاقي"],
@@ -139,7 +139,6 @@
             pSel.innerHTML = '<option value="">اختيار محافظة</option>';
             Object.keys(iraqGeo).sort().forEach(p => pSel.innerHTML += `<option value="${p}">${p}</option>`);
 
-            // 3. النسبة اختيار (Dropdown)
             const discs = ['prevDiscInput', 'currDiscPerc'];
             discs.forEach(id => {
                 const el = document.getElementById(id);
@@ -147,7 +146,7 @@
                 for(let i=1; i<=15; i++) el.innerHTML += `<option value="${i}">${i}%</option>`;
             });
 
-            const n = localStorage.getItem('pure_final_name');
+            const n = localStorage.getItem('pure_final_v11');
             if(n) { document.getElementById('myNameInput').value = n; sync(); }
             document.getElementById('outDate').innerText = new Date().toLocaleDateString('en-GB');
         }
@@ -159,14 +158,15 @@
             if(p && iraqGeo[p]) iraqGeo[p].sort().forEach(c => cSel.innerHTML += `<option value="${c}">${c}</option>`);
         }
 
-        function saveData() { localStorage.setItem('pure_final_name', document.getElementById('myNameInput').value); }
+        function saveData() { localStorage.setItem('pure_final_v11', document.getElementById('myNameInput').value); }
 
         function sync() {
             document.getElementById('outMyName').innerText = document.getElementById('myNameInput').value || '..';
+            document.getElementById('outRep').innerText = document.getElementById('repInput').value || '..';
             document.getElementById('outPrevAmt').innerText = (document.getElementById('prevInput').value || '0') + " IQD";
             document.getElementById('outPrevDisc').innerText = document.getElementById('prevDiscInput').value + "%";
             document.getElementById('outLastMatch').innerText = document.getElementById('lastMatchDate').value || '..';
-            document.getElementById('outLoc').innerText = (document.getElementById('provInput').value || '..') + " - " + (document.getElementById('cityInput').value || '..');
+            document.getElementById('outLoc').innerText = (document.getElementById('provInput').value || '..') + " / " + (document.getElementById('cityInput').value || '..');
             calculate();
         }
 
@@ -187,7 +187,7 @@
                     if (/\d{2}\/\d{2}\/\d{4}/.test(item.str)) {
                         let id = "000", total = "0", paid = "0", remain = "0";
                         const row = items.filter(it => Math.abs(it.transform[5] - item.transform[5]) < 5);
-                        const nums = row.filter(r => /^-?\d{1,3}(,\d{3})*/.test(r.str) && r.str.includes(","));
+                        const nums = row.filter(r => /^-?\d{1,3}(,\d{3})*(\.\d+)?/.test(r.str) && r.str.includes(","));
                         if(nums.length >= 2) { 
                             total = nums[0].str; 
                             paid = (nums.length === 3) ? nums[1].str : "0"; 
@@ -204,20 +204,26 @@
 
         function calculate() {
             const list = document.getElementById('billsList');
-            list.innerHTML = ""; let sumRem = 0; let excluded = [];
+            list.innerHTML = ""; let sumFinalRemain = 0; let excluded = [];
+            
             db.forEach((b, i) => {
-                const val = parseFloat(b.remain.replace(/,/g,'')) || 0;
+                // استخراج القيم العددية بدقة مع مراعاة الفواصل العشرية
+                const valTotal = parseFloat(b.total.replace(/,/g,'')) || 0;
+                const valPaid = parseFloat(b.paid.replace(/,/g,'')) || 0;
+                const valRemain = parseFloat(b.remain.replace(/,/g,'')) || 0;
+                
                 const active = b.status === 'ok';
-                if (active) sumRem += val; else excluded.push(b.id);
-                // 4 & 5: إظهار المبالغ (الكلي شفاف والمدفوع مميز)
+                // الحساب الصحيح: جمع (المتبقي الفعلي) لكل فاتورة
+                if (active) sumFinalRemain += valRemain; else excluded.push(b.id);
+
                 list.innerHTML += `
                     <div class="bill-card ${active ? 'is-active' : 'not-active'}" onclick="toggleStatus(${i})">
                         <div class="flex justify-between items-center">
                             <div class="flex flex-col">
                                 <span class="font-black italic text-slate-800 text-sm">${b.remain} IQD</span>
                                 <div class="flex gap-2 mt-1">
-                                    <span class="amount-sub total-transparent italic">كلي: ${b.total}</span>
-                                    <span class="amount-sub paid-highlight italic">مدفوع: ${b.paid}</span>
+                                    <span class="amount-sub total-transparent italic">قيمة الفاتورة: ${b.total}</span>
+                                    <span class="amount-sub paid-highlight italic">المدفوع: ${b.paid}</span>
                                 </div>
                             </div>
                             <div class="text-right">
@@ -228,17 +234,17 @@
                     </div>`;
             });
 
-            // 2. رسالة المطابقة
             let msg = `نود إعلامكم بأنه تمت مطابقة الحسابات بنجاح.`;
             if(excluded.length > 0) msg = `نود إعلامكم بأنه تمت مطابقة الحسابات <span class="text-red-600">باستثناء الفواتير (#${excluded.join(', #')})</span>.`;
             document.getElementById('officialMsg').innerHTML = msg;
 
             const cD = parseFloat(document.getElementById('currDiscPerc').value) || 0;
-            const final = sumRem - (sumRem * (cD / 100));
+            const finalResult = sumFinalRemain - (sumFinalRemain * (cD / 100));
+            
             document.getElementById('outCurrDisc').innerText = cD + "%";
-            document.getElementById('outFullOrig').innerText = sumRem.toLocaleString() + " IQD";
-            document.getElementById('resFinal').innerText = final.toLocaleString() + " IQD";
-            document.getElementById('tafgeet').innerText = "فقط " + final.toLocaleString('ar-IQ') + " دينار عراقي لا غير";
+            document.getElementById('outFullOrig').innerText = sumFinalRemain.toLocaleString(undefined, {minimumFractionDigits: 2}) + " IQD";
+            document.getElementById('resFinal').innerText = finalResult.toLocaleString(undefined, {minimumFractionDigits: 2}) + " IQD";
+            document.getElementById('tafgeet').innerText = "فقط " + finalResult.toLocaleString('ar-IQ', {minimumFractionDigits: 2}) + " دينار عراقي لا غير";
         }
 
         function toggleStatus(i) { db[i].status = (db[i].status === 'ok' ? 'none' : 'ok'); calculate(); }
