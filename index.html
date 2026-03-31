@@ -2,184 +2,173 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>Pure Pharma | النظام الشامل للمطابقة</title>
+    <title>Pure Pharma AI | النظام الذكي للمطابقة</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.21/mammoth.browser.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Cairo', sans-serif; background-color: #f1f5f9; scroll-behavior: smooth; }
-        .bill-card { transition: all 0.3s ease; border: 3px solid transparent; }
-        .is-ignored { opacity: 0.3; filter: grayscale(0.7); }
-        .focus-highlight { 
-            border-color: #4f46e5 !important; 
-            transform: scale(1.03); 
-            box-shadow: 0 0 40px rgba(79, 70, 229, 0.3);
-            background-color: #f5f7ff !important;
-        }
-        .status-btn { width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-weight: 900; }
-        .sticky-nav { position: sticky; top: 0; z-index: 1000; background: rgba(255,255,255,0.9); backdrop-filter: blur(10px); }
+        body { font-family: 'Cairo', sans-serif; background-color: #f8fafc; scroll-behavior: smooth; }
+        .bill-card { transition: all 0.3s ease; }
+        .focus-box { border: 4px solid #4f46e5 !important; transform: scale(1.02); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); background: #eef2ff !important; }
+        .warning-row { background-color: #fff5f5; border-right: 5px solid #f56565 !important; }
+        .status-dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+        .sticky-tools { position: sticky; top: 0; z-index: 100; background: rgba(255,255,255,0.9); backdrop-filter: blur(10px); border-bottom: 1px solid #e2e8f0; }
     </style>
 </head>
-<body class="p-4">
+<body class="p-2 md:p-6">
 
-    <div class="max-w-4xl mx-auto">
-        <header class="sticky-nav p-6 rounded-[2rem] shadow-xl mb-8 border-2 border-indigo-50 flex flex-col gap-4 no-print">
-            <div class="flex flex-wrap items-center gap-3">
-                <div class="flex-1 relative">
-                    <input type="text" id="searchInput" oninput="doSearch()" placeholder="بحث سريع برقم القائمة..." 
-                           class="w-full p-4 pr-12 rounded-2xl border-2 border-slate-100 focus:border-indigo-600 outline-none font-black text-lg">
-                    <span class="absolute right-4 top-4 text-xl">🔍</span>
+    <div class="max-w-5xl mx-auto">
+        <header class="sticky-tools p-4 rounded-3xl mb-6 shadow-sm no-print">
+            <div class="flex flex-col md:flex-row gap-4 items-center">
+                <div class="relative flex-1 w-full">
+                    <input type="text" id="smartSearch" oninput="aiSearch()" placeholder="اكتب رقم القائمة.. القفز والتركيز تلقائي" 
+                           class="w-full p-4 pr-12 rounded-2xl border-2 border-slate-100 focus:border-indigo-600 outline-none font-bold text-lg shadow-inner">
+                    <span class="absolute right-4 top-4 opacity-40">⚡</span>
                 </div>
                 
-                <div class="flex gap-2">
-                    <button onclick="triggerInput('fileInput')" class="bg-indigo-600 text-white px-6 py-4 rounded-2xl font-bold shadow-lg hover:bg-indigo-700 transition-all flex items-center gap-2">
-                         <span>رفع (PDF, Excel, Word)</span>
-                    </button>
-                    <button onclick="triggerInput('cameraInput')" class="bg-slate-800 text-white px-6 py-4 rounded-2xl font-bold shadow-lg hover:bg-slate-700 transition-all">
-                        📸 كاميرا/صور
-                    </button>
+                <div class="flex gap-2 w-full md:w-auto">
+                    <button onclick="document.getElementById('fileIn').click()" class="flex-1 bg-indigo-600 text-white px-6 py-4 rounded-2xl font-black shadow-lg hover:bg-indigo-700">رفع ملفات</button>
+                    <button onclick="document.getElementById('camIn').click()" class="bg-slate-800 text-white px-6 py-4 rounded-2xl font-black shadow-lg hover:bg-slate-700">📸</button>
                 </div>
             </div>
             
-            <input type="file" id="fileInput" class="hidden" accept=".pdf, .xlsx, .xls, .docx">
-            <input type="file" id="cameraInput" class="hidden" accept="image/*" capture="environment">
-            
-            <div id="loader" class="hidden text-center text-indigo-600 font-bold animate-pulse text-sm">جاري سحب البيانات من المستند...</div>
+            <div id="aiSummary" class="hidden mt-4 grid grid-cols-3 gap-2">
+                <div class="bg-green-50 p-3 rounded-xl border border-green-100 text-center">
+                    <p class="text-[10px] text-green-600 font-bold">جاهز للمطابقة</p>
+                    <p id="countOk" class="text-lg font-black text-green-700">0</p>
+                </div>
+                <div class="bg-orange-50 p-3 rounded-xl border border-orange-100 text-center">
+                    <p class="text-[10px] text-orange-600 font-bold">تحتاج مراجعة</p>
+                    <p id="countWarn" class="text-lg font-black text-orange-700">0</p>
+                </div>
+                <div class="bg-indigo-50 p-3 rounded-xl border border-indigo-100 text-center">
+                    <p class="text-[10px] text-indigo-600 font-bold">الإجمالي الصافي</p>
+                    <p id="sumTotal" class="text-lg font-black text-indigo-700">0</p>
+                </div>
+            </div>
+
+            <input type="file" id="fileIn" class="hidden" accept=".pdf, .xlsx, .xls">
+            <input type="file" id="camIn" class="hidden" accept="image/*" capture="environment">
         </header>
 
-        <div id="mainContainer" class="space-y-8">
-            <div class="text-center py-20 text-slate-400 font-bold italic">ارفع أي ملف (صورة، إكسل، وورد، أو PDF) للبدء بالمطابقة..</div>
-        </div>
+        <div id="displayArea" class="space-y-8">
+            </div>
     </div>
 
     <script>
-        let allData = [];
+        let dataStore = [];
 
-        function triggerInput(id) { document.getElementById(id).click(); }
+        document.getElementById('fileIn').onchange = handleFiles;
+        document.getElementById('camIn').onchange = handleFiles;
 
-        // معالجة الملفات المرفوعة
-        document.getElementById('fileInput').onchange = handleFile;
-        document.getElementById('cameraInput').onchange = handleFile;
-
-        async function handleFile(e) {
+        async function handleFiles(e) {
             const file = e.target.files[0];
             if (!file) return;
-            document.getElementById('loader').classList.remove('hidden');
             const ext = file.name.split('.').pop().toLowerCase();
-
-            if (ext === 'pdf') await processPDF(file);
-            else if (ext === 'xlsx' || ext === 'xls') await processExcel(file);
-            else if (ext === 'docx') await processWord(file);
-            else if (file.type.startsWith('image/')) await processImage(file);
-
-            render();
-            document.getElementById('loader').classList.add('hidden');
-        }
-
-        // 1. معالجة PDF
-        async function processPDF(file) {
-            const pdfJS = window['pdfjs-dist/build/pdf'];
-            pdfJS.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
-            const buffer = await file.arrayBuffer();
-            const pdf = await pdfJS.getDocument({data: buffer}).promise;
             
-            for (let i = 1; i <= pdf.numPages; i++) {
-                const page = await pdf.getPage(i);
-                const content = await page.getTextContent();
-                extractFromText(content.items.map(it => it.str).join(' '));
-            }
-        }
-
-        // 2. معالجة Excel
-        async function processExcel(file) {
-            const data = await file.arrayBuffer();
-            const workbook = XLSX.read(data);
-            const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-            const json = XLSX.utils.sheet_to_json(firstSheet, {header: 1});
-            extractFromText(json.flat().join(' '));
-        }
-
-        // 3. معالجة Word
-        async function processWord(file) {
-            const arrayBuffer = await file.arrayBuffer();
-            const result = await mammoth.extractRawText({arrayBuffer});
-            extractFromText(result.value);
-        }
-
-        // 4. معالجة الصور (محاكاة سريعة - يفضل استخدام OCR خارجي للصور المعقدة)
-        async function processImage(file) {
-            alert("تم استقبال الصورة. في النسخة الاحترافية، يتم هنا تفعيل محرك OCR لقراءة النصوص من الكاميرا.");
-            // ملاحظة: قراءة النصوص من الصور برمجياً تحتاج مكتبة Tesseract.js
-        }
-
-        function extractFromText(rawText) {
-            // منطق ذكي لاستخراج أرقام الفواتير والمبالغ من أي نص
-            const billPattern = /\d{5,7}/g;
-            const pricePattern = /(\d{1,3}(,\d{3})*(\.\d{2}))/g;
-            
-            let foundIds = rawText.match(billPattern) || [];
-            let foundPrices = rawText.match(pricePattern) || [];
-
-            let bills = foundIds.map((id, index) => ({
-                id,
-                date: new Date().toLocaleDateString('en-GB'),
-                remain: foundPrices[index] || "0.00",
-                status: 'none',
-                note: ''
-            }));
-
-            if(bills.length > 0) {
-                allData.push({ name: "مستند مستورد حديثاً", bills });
-            }
-        }
-
-        function render() {
-            const container = document.getElementById('mainContainer');
-            container.innerHTML = "";
-
-            allData.forEach((shop, sIdx) => {
-                let totalSafe = shop.bills.filter(b => b.status === 'ok').reduce((sum, b) => sum + parseFloat(b.remain.replace(/,/g,'')), 0);
+            if (ext === 'pdf') {
+                const pdfJS = window['pdfjs-dist/build/pdf'];
+                pdfJS.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+                const buffer = await file.arrayBuffer();
+                const pdf = await pdfJS.getDocument({data: buffer}).promise;
                 
-                let rows = shop.bills.map((b, bIdx) => `
-                    <div id="bill-${b.id}" class="bill-card p-5 bg-white border-b border-slate-50 flex items-center justify-between ${b.status === 'warn' ? 'is-ignored' : ''}">
-                        <div class="flex items-center gap-4">
-                            <div class="flex gap-2">
-                                <div onclick="setStatus(${sIdx},${bIdx},'ok')" class="status-btn ${b.status === 'ok' ? 'bg-green-600 text-white' : 'bg-slate-100 text-slate-400'}">✓</div>
-                                <div onclick="setStatus(${sIdx},${bIdx},'warn')" class="status-btn ${b.status === 'warn' ? 'bg-orange-500 text-white' : 'bg-slate-100 text-slate-400'}">!</div>
-                            </div>
-                            <div><p class="font-black text-slate-800 text-lg">#${b.id}</p></div>
-                        </div>
-                        <div class="text-left font-black text-xl ${b.status === 'ok' ? 'text-green-600' : 'text-slate-900'}">${b.remain}</div>
-                    </div>
-                `).join('');
+                for (let i = 1; i <= pdf.numPages; i++) {
+                    const page = await pdf.getPage(i);
+                    const content = await page.getTextContent();
+                    const textItems = content.items.map(it => it.str).join(' ');
+                    processRawText(textItems, "كشف PDF صفحة " + i);
+                }
+            }
+            renderAll();
+        }
 
-                container.innerHTML += `
-                    <div class="rounded-[2.5rem] bg-white shadow-xl overflow-hidden mb-8">
-                        <div class="bg-slate-900 p-6 text-white flex justify-between items-center">
-                            <h2 class="font-bold italic text-indigo-400 text-xl">${shop.name}</h2>
-                            <div class="text-left"><p class="text-[10px] opacity-50 uppercase">المؤكد</p><p class="text-2xl font-black text-green-400">${totalSafe.toLocaleString()}</p></div>
+        function processRawText(text, source) {
+            const bills = [];
+            const billMatches = text.match(/\d{5,7}/g) || [];
+            const priceMatches = text.match(/(\d{1,3}(,\d{3})*(\.\d{2}))/g) || [];
+
+            billMatches.forEach((id, idx) => {
+                const price = priceMatches[idx] || "0.00";
+                // ميزة ذكية: تنبيه تلقائي إذا كان السعر 0
+                const isSuspicious = parseFloat(price.replace(/,/g,'')) === 0;
+                
+                bills.push({
+                    id,
+                    price,
+                    status: 'none',
+                    note: isSuspicious ? 'تنبيه: المبلغ صفر!' : '',
+                    aiFlag: isSuspicious
+                });
+            });
+
+            if(bills.length > 0) dataStore.push({ name: source, bills });
+        }
+
+        function renderAll() {
+            const area = document.getElementById('displayArea');
+            area.innerHTML = "";
+            let totalConfirmed = 0;
+            let readyCount = 0;
+            let warnCount = 0;
+
+            dataStore.forEach((shop, sIdx) => {
+                const rows = shop.bills.map((b, bIdx) => {
+                    if (b.status === 'ok') {
+                        totalConfirmed += parseFloat(b.price.replace(/,/g,''));
+                        readyCount++;
+                    }
+                    if (b.aiFlag || b.status === 'warn') warnCount++;
+
+                    return `
+                    <div id="bill-row-${b.id}" class="p-4 border-b flex items-center justify-between bill-card ${b.aiFlag ? 'warning-row' : ''}">
+                        <div class="flex items-center gap-3">
+                            <div class="flex gap-1 no-print">
+                                <button onclick="toggleStatus(${sIdx},${bIdx},'ok')" class="w-8 h-8 rounded-lg font-bold ${b.status === 'ok' ? 'bg-green-600 text-white' : 'bg-slate-100 text-slate-400'}">✓</button>
+                                <button onclick="toggleStatus(${sIdx},${bIdx},'warn')" class="w-8 h-8 rounded-lg font-bold ${b.status === 'warn' ? 'bg-red-500 text-white' : 'bg-slate-100 text-slate-400'}">!</button>
+                            </div>
+                            <div>
+                                <p class="font-black text-slate-800">#${b.id}</p>
+                                ${b.note ? `<p class="text-[10px] text-red-500 font-bold animate-pulse">${b.note}</p>` : ''}
+                            </div>
+                        </div>
+                        <p class="font-black text-lg ${b.status === 'ok' ? 'text-green-600' : 'text-slate-900'}">${b.price}</p>
+                    </div>
+                    `;
+                }).join('');
+
+                area.innerHTML += `
+                    <div class="bg-white rounded-[2rem] shadow-xl overflow-hidden border border-slate-100">
+                        <div class="bg-slate-900 p-5 text-white flex justify-between items-center">
+                            <h2 class="font-bold italic text-indigo-400 text-sm leading-tight">${shop.name}</h2>
                         </div>
                         <div>${rows}</div>
                     </div>
                 `;
             });
+
+            // تحديث الملخص الذكي
+            document.getElementById('aiSummary').classList.remove('hidden');
+            document.getElementById('countOk').innerText = readyCount;
+            document.getElementById('countWarn').innerText = warnCount;
+            document.getElementById('sumTotal').innerText = totalConfirmed.toLocaleString();
         }
 
-        function setStatus(sIdx, bIdx, status) {
-            allData[sIdx].bills[bIdx].status = (allData[sIdx].bills[bIdx].status === status) ? 'none' : status;
-            render();
+        function toggleStatus(sIdx, bIdx, status) {
+            dataStore[sIdx].bills[bIdx].status = dataStore[sIdx].bills[bIdx].status === status ? 'none' : status;
+            renderAll();
         }
 
-        function doSearch() {
-            const term = document.getElementById('searchInput').value.trim();
-            document.querySelectorAll('.bill-card').forEach(el => el.classList.remove('focus-highlight'));
-            if (!term) return;
-            const target = document.getElementById('bill-' + term);
-            if (target) {
-                target.classList.add('focus-highlight');
-                target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        function aiSearch() {
+            const val = document.getElementById('smartSearch').value.trim();
+            document.querySelectorAll('.bill-card').forEach(el => el.classList.remove('focus-box'));
+            
+            if (val.length >= 3) {
+                const target = document.getElementById('bill-row-' + val);
+                if (target) {
+                    target.classList.add('focus-box');
+                    target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
             }
         }
     </script>
