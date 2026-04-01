@@ -14,7 +14,6 @@
         .note-input { width: 100%; margin-top: 10px; border: 1px dashed #cbd5e1; border-radius: 10px; padding: 6px 12px; font-size: 11px; outline: none; background: #fefefe; }
         .note-input:focus { border-color: #6366f1; background: #fff; }
         
-        /* تدوير السهم عند الإغلاق */
         .arrow-rotate { transition: transform 0.3s ease; }
         .collapsed .arrow-rotate { transform: rotate(180deg); }
 
@@ -41,14 +40,16 @@
                     <input type="text" id="repInput" oninput="sync()" class="w-full bg-slate-800 border-none rounded-xl p-3 text-xs"></div>
             </div>
 
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-6 border-t border-slate-700 pt-6 mb-6">
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-4 border-t border-slate-700 pt-6 mb-6">
                 <div><label class="block text-[10px] mb-2 text-orange-400 font-black italic">المبلغ السابق (IQD)</label>
                     <input type="text" id="prevInput" oninput="sync()" class="w-full bg-slate-800 border-none rounded-xl p-3 text-xs font-mono"></div>
                 <div><label class="block text-[10px] mb-2 text-orange-400 font-black italic">النسبة السابقة</label>
                     <select id="prevDiscInput" onchange="sync()" class="w-full bg-slate-800 border-none rounded-xl p-3 text-xs font-bold"></select></div>
                 <div><label class="block text-[10px] mb-2 text-orange-400 font-black italic">تاريخ المطابقة</label>
                     <input type="date" id="matchDateInput" oninput="sync()" class="w-full bg-slate-800 border-none rounded-xl p-3 text-xs text-white"></div>
-                <div><label class="block text-[10px] mb-2 text-emerald-400 font-black uppercase">خصم المطابقة الحالية %</label>
+                <div><label class="block text-[10px] mb-2 text-red-400 font-black italic">آخر مطابقة</label>
+                    <input type="date" id="lastMatchInput" oninput="sync()" class="w-full bg-slate-800 border-none rounded-xl p-3 text-xs text-white border border-red-900/30"></div>
+                <div><label class="block text-[10px] mb-2 text-emerald-400 font-black uppercase">خصم المطابقة %</label>
                     <select id="currDiscPerc" onchange="calculate()" class="w-full bg-slate-800 border-none rounded-xl p-3 text-xs font-bold text-emerald-400"></select></div>
             </div>
             
@@ -70,6 +71,7 @@
                 <div class="text-left text-[11px] font-bold leading-relaxed space-y-1">
                     <p>الموقع: <span id="outLoc" class="text-indigo-600 uppercase font-black">..</span></p>
                     <p>التاريخ: <span id="outDate" class="font-mono">..</span></p>
+                    <p class="text-red-600 font-black">آخر مطابقة: <span id="outLastMatch" class="font-mono">..</span></p>
                 </div>
             </div>
 
@@ -147,7 +149,6 @@
             "بابل": ["الحلة", "المحاويل", "المسيب", "الهاشمية"],
             "النجف": ["المركز", "الكوفة", "المناذرة"],
             "كربلاء": ["المركز", "الهندية"]
-            // يمكن إضافة المزيد من المحافظات هنا
         };
 
         function initApp() {
@@ -186,8 +187,14 @@
             document.getElementById('outRep').innerText = document.getElementById('repInput').value || '..';
             document.getElementById('outPrevAmt').innerText = (document.getElementById('prevInput').value || '0') + " IQD";
             document.getElementById('outCurrDisc').innerText = document.getElementById('currDiscPerc').value + "%";
+            
             const d = document.getElementById('matchDateInput').value;
             document.getElementById('outDate').innerText = d ? d.split('-').reverse().join('/') : '..';
+            
+            // مزامنة تاريخ آخر مطابقة 
+            const ld = document.getElementById('lastMatchInput').value;
+            document.getElementById('outLastMatch').innerText = ld ? ld.split('-').reverse().join('/') : '..';
+
             document.getElementById('outLoc').innerText = (document.getElementById('provInput').value || '..') + " / " + (document.getElementById('cityInput').value || '..');
             calculate();
         }
