@@ -12,50 +12,32 @@
         .is-active { border-right: 8px solid #10b981; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
         .not-active { border-right: 8px solid #ef4444; background-color: #fff1f2; opacity: 0.7; }
         .note-input { width: 100%; margin-top: 10px; border: 1px dashed #cbd5e1; border-radius: 10px; padding: 6px 12px; font-size: 11px; outline: none; background: #fefefe; }
+        .note-input:focus { border-color: #6366f1; background: #fff; }
+        
         .arrow-rotate { transition: transform 0.3s ease; }
         .collapsed .arrow-rotate { transform: rotate(180deg); }
-        #dropZone.dragover { border-color: #6366f1; background-color: #1e293b; scale: 1.02; }
 
         @media print { 
-            @page { size: A4; margin: 0; }
+            @page { size: A4; margin: 8mm; }
             .no-print { display: none !important; } 
-            body { background-color: white !important; padding: 0 !important; } 
-            .report-container { border: none !important; width: 100% !important; padding: 10mm !important; margin: 0 !important; box-shadow: none !important; border-radius: 0 !important; } 
-            .shadow-sm, .shadow-xl { box-shadow: none !important; }
+            body { background-color: white !important; zoom: 82%; } 
+            .report-container { border: none !important; width: 100% !important; padding: 0 !important; margin: 0 !important; box-shadow: none !important; } 
         }
     </style>
 </head>
 <body class="p-4" onload="initApp()">
 
     <div class="max-w-5xl mx-auto">
-        <div class="no-print mb-4 flex gap-2 relative">
-            <input type="text" id="searchInput" oninput="searchArchive()" placeholder="بحث في الأرشيف (اسم العميل أو التاريخ)..." class="flex-1 p-3 rounded-xl border-none shadow-sm text-xs focus:ring-2 focus:ring-indigo-500 outline-none">
-            <div id="searchResult" class="hidden absolute mt-12 w-full bg-white shadow-xl rounded-xl z-50 max-h-60 overflow-y-auto border border-slate-200 p-2"></div>
-        </div>
-
         <header class="no-print bg-[#1e293b] text-white p-8 rounded-[2.5rem] mb-8 shadow-2xl border-b-4 border-indigo-500">
             <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-6">
                 <div><label class="block text-[10px] mb-2 text-slate-400 font-black uppercase">المحاسب المسؤول</label>
-                    <input type="text" id="myNameInput" oninput="saveAccountant(); sync();" class="w-full bg-slate-800 border-none rounded-xl p-3 text-xs"></div>
+                    <input type="text" id="myNameInput" oninput="saveData(); sync();" class="w-full bg-slate-800 border-none rounded-xl p-3 text-xs"></div>
                 <div><label class="block text-[10px] mb-2 text-indigo-400 font-black">المحافظة</label>
                     <select id="provInput" onchange="updateCities(); sync();" class="w-full bg-slate-800 border-none rounded-xl p-3 text-xs font-bold"></select></div>
                 <div><label class="block text-[10px] mb-2 text-indigo-400 font-black">القضاء / الناحية</label>
                     <select id="cityInput" onchange="sync()" class="w-full bg-slate-800 border-none rounded-xl p-3 text-xs font-bold"></select></div>
                 <div><label class="block text-[10px] mb-2 text-slate-400 font-black uppercase">المندوب</label>
                     <input type="text" id="repInput" oninput="sync()" class="w-full bg-slate-800 border-none rounded-xl p-3 text-xs"></div>
-            </div>
-
-            <div id="dropZone" class="relative border-2 border-dashed border-slate-600 rounded-[2rem] p-6 mb-6 transition-all cursor-pointer text-center hover:bg-slate-800/50">
-                <input type="file" id="pdfFile" class="hidden" accept=".pdf" multiple>
-                <div id="uploadUi">
-                    <p class="text-xs font-black text-indigo-400 italic">اسحب الملفات هنا أو اضغط للرفع (يدعم ملفات متعددة)</p>
-                </div>
-                <div id="progressCont" class="hidden w-full mt-2">
-                    <div class="w-full bg-slate-700 h-1.5 rounded-full overflow-hidden">
-                        <div id="progressBar" class="bg-indigo-500 h-full w-0 transition-all"></div>
-                    </div>
-                    <p id="progressTxt" class="text-[9px] text-slate-400 mt-1 italic uppercase">Processing...</p>
-                </div>
             </div>
 
             <div class="grid grid-cols-2 md:grid-cols-5 gap-4 border-t border-slate-700 pt-6 mb-6">
@@ -72,14 +54,15 @@
             </div>
             
             <div class="flex gap-4">
-                <button onclick="saveToArchive()" class="flex-1 bg-blue-600 hover:bg-blue-700 p-4 rounded-2xl text-xs font-black uppercase transition-all shadow-lg">حفظ في الأرشيف</button>
-                <button onclick="window.print()" class="flex-[2] bg-emerald-600 hover:bg-emerald-700 p-4 rounded-2xl text-xs font-black uppercase transition-all shadow-lg">إصدار وطباعة التقرير</button>
-                <button onclick="shareWhatsApp()" class="flex-1 bg-green-600 hover:bg-green-700 p-4 rounded-2xl text-xs font-black uppercase transition-all shadow-lg">WhatsApp</button>
+                <button onclick="document.getElementById('pdfFile').click()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 p-4 rounded-2xl text-xs font-black uppercase tracking-widest transition-all">رفع كشف الحساب PDF</button>
+                <button onclick="window.print()" class="flex-[2] bg-emerald-600 hover:bg-emerald-700 p-4 rounded-2xl text-xs font-black uppercase tracking-widest transition-all">إصدار وطباعة التقرير النهائي</button>
                 <button onclick="location.reload()" class="bg-red-900/40 hover:bg-red-900/60 px-6 rounded-2xl text-[10px] font-bold text-red-400">تصفير</button>
             </div>
+            <input type="file" id="pdfFile" class="hidden" accept=".pdf">
         </header>
 
         <div class="bg-white p-10 rounded-[3rem] report-container min-h-[1000px] flex flex-col border border-slate-200 shadow-sm">
+            
             <div class="flex justify-between items-start border-b-4 border-slate-900 pb-8 mb-10">
                 <div>
                     <h1 class="text-4xl font-black text-slate-900 uppercase">مكتب بيور العلمي</h1>
@@ -135,8 +118,8 @@
                             <p class="text-[10px] font-black text-indigo-600 mb-1 italic uppercase">الصافي النهائي للمطابقة:</p>
                             <p id="resFinal" class="text-3xl font-black text-indigo-800 tracking-tighter italic font-mono">0.00 IQD</p>
                         </div>
-                        <div class="block mt-6">
-                            <p id="tafgeet" class="text-[11px] font-black text-indigo-700 bg-indigo-50 px-6 py-3 rounded-2xl border-2 border-indigo-100 inline-block italic shadow-sm"></p>
+                        <div class="block">
+                            <p id="tafgeet" class="text-[11px] font-black text-indigo-700 bg-indigo-50 px-6 py-3 rounded-2xl border-2 border-indigo-100 mt-6 inline-block italic">....</p>
                         </div>
                     </div>
                     <div class="flex gap-8 items-center">
@@ -180,31 +163,118 @@
             document.getElementById('matchDateInput').value = today;
             document.getElementById('myNameInput').value = localStorage.getItem('pure_pro_name') || '';
             
-            initDragAndDrop();
             updateCities();
             sync();
         }
 
-        function initDragAndDrop() {
-            const zone = document.getElementById('dropZone');
-            const input = document.getElementById('pdfFile');
-            zone.onclick = () => input.click();
-            zone.ondragover = (e) => { e.preventDefault(); zone.classList.add('dragover'); };
-            zone.ondragleave = () => zone.classList.remove('dragover');
-            zone.ondrop = (e) => {
-                e.preventDefault();
-                zone.classList.remove('dragover');
-                handleFiles(e.dataTransfer.files);
-            };
-            input.onchange = (e) => handleFiles(e.target.files);
+        function updateCities() {
+            const p = document.getElementById('provInput').value;
+            const cSel = document.getElementById('cityInput');
+            cSel.innerHTML = '<option value="">القضاء</option>';
+            if(p && iraqGeo[p]) iraqGeo[p].sort().forEach(c => cSel.innerHTML += `<option value="${c}">${c}</option>`);
+            sync();
         }
 
-        async function handleFiles(files) {
-            if (!files.length) return;
-            const bar = document.getElementById('progressBar');
-            const cont = document.getElementById('progressCont');
-            const txt = document.getElementById('progressTxt');
+        function toggleBills() {
+            const list = document.getElementById('billsList');
+            const btn = document.getElementById('toggleBtn');
+            list.classList.toggle('hidden');
+            btn.classList.toggle('collapsed');
+        }
+
+        function sync() {
+            document.getElementById('outMyName').innerText = document.getElementById('myNameInput').value || '..';
+            document.getElementById('outRep').innerText = document.getElementById('repInput').value || '..';
+            document.getElementById('outPrevAmt').innerText = (document.getElementById('prevInput').value || '0') + " IQD";
+            document.getElementById('outCurrDisc').innerText = document.getElementById('currDiscPerc').value + "%";
             
+            const d = document.getElementById('matchDateInput').value;
+            document.getElementById('outDate').innerText = d ? d.split('-').reverse().join('/') : '..';
+            
+            // مزامنة تاريخ آخر مطابقة 
+            const ld = document.getElementById('lastMatchInput').value;
+            document.getElementById('outLastMatch').innerText = ld ? ld.split('-').reverse().join('/') : '..';
+
+            document.getElementById('outLoc').innerText = (document.getElementById('provInput').value || '..') + " / " + (document.getElementById('cityInput').value || '..');
+            calculate();
+        }
+
+        function saveData() { localStorage.setItem('pure_pro_name', document.getElementById('myNameInput').value); }
+
+        document.getElementById('pdfFile').onchange = async (e) => {
+            const file = e.target.files[0]; if (!file) return;
             db = [];
-            cont.classList.remove('hidden');
-            const pdfJS =
+            const pdfJS = window['pdfjs-dist/build/pdf'];
+            pdfJS.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+            const pdf = await pdfJS.getDocument({data: await file.arrayBuffer()}).promise;
+            
+            for (let i = 1; i <= pdf.numPages; i++) {
+                const page = await pdf.getPage(i);
+                const text = await page.getTextContent();
+                const items = text.items.sort((a,b) => b.transform[5] - a.transform[5]);
+                let client = items.map(it => it.str).find(t => t.includes("مذخر") || t.includes("صيدلية")) || "";
+                if(client) document.getElementById('outClient').value = client;
+
+                items.forEach(item => {
+                    if (/\d{2}\/\d{2}\/\d{4}/.test(item.str)) {
+                        let row = items.filter(it => Math.abs(it.transform[5] - item.transform[5]) < 5);
+                        row.sort((a,b) => b.transform[4] - a.transform[4]);
+                        const nums = row.filter(r => /[\d,]+\.\d{2}/.test(r.str));
+                        if (nums.length >= 2) {
+                            let id = row.find(ri => /^\d{5,7}$/.test(ri.str))?.str || "000";
+                            db.push({ id, date: item.str, total: nums[0].str, paid: nums.length >= 3 ? nums[1].str : "0.00", remain: nums[nums.length-1].str, status: 'ok', note: '' });
+                        }
+                    }
+                });
+            }
+            renderList();
+        };
+
+        function renderList() {
+            const list = document.getElementById('billsList');
+            list.innerHTML = "";
+            db.forEach((b, i) => {
+                list.innerHTML += `
+                    <div class="bill-card ${b.status === 'ok' ? 'is-active' : 'not-active'}">
+                        <div class="flex justify-between items-center text-right italic">
+                            <div onclick="toggleStatus(${i})" class="flex-1 cursor-pointer">
+                                <span class="font-black text-slate-900 text-lg font-mono">${b.remain} IQD</span>
+                                <div class="flex gap-3 mt-1 amount-sub italic font-mono">Total: ${b.total} | Paid: ${b.paid}</div>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <div class="border-r border-slate-200 pr-3"><span class="text-xs font-black text-slate-900">#${b.id}</span><span class="block text-[8px] font-bold text-slate-400 font-mono italic">${b.date}</span></div>
+                                <div class="no-print cursor-pointer p-2" onclick="showNote(${i})">⚠️</div>
+                            </div>
+                        </div>
+                        <input type="text" id="note-${i}" class="note-input no-print ${b.note ? '' : 'hidden'}" placeholder="أضف ملاحظة..." value="${b.note}" oninput="updateNote(${i}, this.value)">
+                    </div>`;
+            });
+            calculate();
+        }
+
+        function calculate() {
+            let sumRem = 0; let excluded = [];
+            const notesSum = document.getElementById('notesSummary');
+            notesSum.innerHTML = "";
+            db.forEach(b => {
+                const valRem = parseFloat(b.remain.replace(/,/g,'')) || 0;
+                if (b.status === 'ok') sumRem += valRem; else excluded.push(b.id);
+                if(b.note.trim()) notesSum.innerHTML += `<p class="text-[11px] text-indigo-700 font-bold bg-white p-2 rounded-lg border border-indigo-100 italic">• فاتورة #${b.id}: ${b.note}</p>`;
+            });
+            document.getElementById('officialMsg').innerHTML = excluded.length ? `تمت المطابقة بنجاح <span class="text-red-600 font-black underline">باستثناء الفواتير (#${excluded.join(', #')})</span>.` : "نود إعلامكم بأنه تمت مطابقة الحسابات بنجاح.";
+            const disc = parseFloat(document.getElementById('currDiscPerc').value) || 0;
+            const dAmt = sumRem * (disc / 100); 
+            const final = sumRem - dAmt;
+            document.getElementById('outFullOrig').innerText = sumRem.toLocaleString(undefined, {minimumFractionDigits:2}) + " IQD";
+            document.getElementById('resTotalDisplay').innerText = sumRem.toLocaleString(undefined, {minimumFractionDigits:2}) + " IQD";
+            document.getElementById('resDiscAmount').innerText = "- " + dAmt.toLocaleString(undefined, {minimumFractionDigits:2}) + " IQD";
+            document.getElementById('resFinal').innerText = final.toLocaleString(undefined, {minimumFractionDigits:2}) + " IQD";
+            document.getElementById('tafgeet').innerText = "فقط " + final.toLocaleString('ar-IQ', {minimumFractionDigits:2}) + " دينار عراقي لا غير";
+        }
+
+        function updateNote(i, val) { db[i].note = val; calculate(); }
+        function toggleStatus(i) { db[i].status = (db[i].status === 'ok' ? 'none' : 'ok'); renderList(); }
+        function showNote(i) { document.getElementById(`note-${i}`).classList.toggle('hidden'); }
+    </script>
+</body>
+</html>
