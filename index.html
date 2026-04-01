@@ -14,11 +14,14 @@
         .note-input { width: 100%; margin-top: 10px; border: 1px dashed #cbd5e1; border-radius: 10px; padding: 6px 12px; font-size: 11px; outline: none; background: #fefefe; }
         .note-input:focus { border-color: #6366f1; background: #fff; }
         
-        /* إعدادات الطباعة لضمان ورقة واحدة */
+        /* تدوير السهم عند الإغلاق */
+        .arrow-rotate { transition: transform 0.3s ease; }
+        .collapsed .arrow-rotate { transform: rotate(180deg); }
+
         @media print { 
             @page { size: A4; margin: 8mm; }
             .no-print { display: none !important; } 
-            body { background-color: white !important; zoom: 82%; } /* تصغير المحتوى بنسبة بسيطة ليناسب صفحة واحدة */
+            body { background-color: white !important; zoom: 82%; } 
             .report-container { border: none !important; width: 100% !important; padding: 0 !important; margin: 0 !important; box-shadow: none !important; } 
         }
     </style>
@@ -57,7 +60,7 @@
             <input type="file" id="pdfFile" class="hidden" accept=".pdf">
         </header>
 
-        <div class="bg-white p-10 rounded-[3rem] report-container min-h-[1000px] flex flex-col border border-slate-200 shadow-sm overflow-hidden">
+        <div class="bg-white p-10 rounded-[3rem] report-container min-h-[1000px] flex flex-col border border-slate-200 shadow-sm">
             
             <div class="flex justify-between items-start border-b-4 border-slate-900 pb-8 mb-10">
                 <div>
@@ -93,6 +96,14 @@
                 <div id="notesSummary" class="mt-4 space-y-2 border-t border-slate-200 pt-4"></div>
             </div>
 
+            <div class="flex justify-between items-center mb-4 no-print">
+                <h3 class="text-[11px] font-black text-slate-400 uppercase italic tracking-widest">قائمة الفواتير المشمولة</h3>
+                <button id="toggleBtn" onclick="toggleBills()" class="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 px-4 py-2 rounded-xl text-[10px] font-bold text-slate-600 transition-all">
+                    <span>إخفاء / إظهار</span>
+                    <svg id="arrowIcon" class="arrow-rotate w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </button>
+            </div>
+
             <div id="billsList" class="space-y-3 mb-10 no-print"></div>
 
             <div class="border-t-4 border-slate-900 pt-10 mt-auto">
@@ -100,19 +111,15 @@
                     <div class="flex-1">
                         <p class="text-[11px] font-black text-slate-400 mb-1 italic uppercase tracking-widest">المبلغ الكلي قبل الخصم:</p>
                         <p id="resTotalDisplay" class="text-4xl font-black text-slate-900 tracking-tighter italic font-mono mb-2">0.00 IQD</p>
-                        
                         <p class="text-[11px] font-bold text-red-500 mb-6 italic">مبلغ الخصم المستقطع: <span id="resDiscAmount" class="font-mono">0.00 IQD</span></p>
-                        
                         <div class="bg-indigo-50 border-r-4 border-indigo-600 p-4 rounded-2xl inline-block shadow-sm">
                             <p class="text-[10px] font-black text-indigo-600 mb-1 italic uppercase">الصافي النهائي للمطابقة:</p>
                             <p id="resFinal" class="text-3xl font-black text-indigo-800 tracking-tighter italic font-mono">0.00 IQD</p>
                         </div>
-                        
                         <div class="block">
                             <p id="tafgeet" class="text-[11px] font-black text-indigo-700 bg-indigo-50 px-6 py-3 rounded-2xl border-2 border-indigo-100 mt-6 inline-block italic">....</p>
                         </div>
                     </div>
-                    
                     <div class="flex gap-8 items-center">
                         <div class="text-center">
                             <div class="w-32 h-20 border-2 border-dashed border-slate-300 rounded-[1.2rem] mb-2 mx-auto bg-slate-50/50"></div>
@@ -130,43 +137,29 @@
 
     <script>
         let db = [];
-        // قاعدة بيانات المحافظات والأقضية العراقية الشاملة
         const iraqGeo = {
-            "بغداد": ["الرصافة", "الكرخ", "الأعظمية", "المنصور", "الكرادة", "الدورة", "مدينة الصدر", "الحسينية", "الكاظمية", "أبو غريب", "المحمودية"],
+            "بغداد": ["الرصافة", "الكرخ", "الأعظمية", "المنصور", "الكرادة", "الدورة", "مدينة الصدر", "الكاظمية", "المحمودية"],
             "صلاح الدين": ["تكريت", "سامراء", "بيجي", "الدور", "الشرقاط", "طوزخورماتو", "بلد", "الضلوعية"],
-            "نينوى": ["الموصل", "تلعفر", "تلكيف", "الحمدانية", "سنجار", "البعاج", "الحضر", "الشيخان"],
-            "البصرة": ["المركز", "الزبير", "القرنة", "الفاو", "شط العرب", "أبو الخصيب", "المدينة"],
-            "أربيل": ["المركز", "شقلاوة", "كوي سنجق", "سوران", "رواندز", "خبات"],
-            "النجف": ["المركز", "الكوفة", "المناذرة", "المشخاب"],
-            "كربلاء": ["المركز", "الهندية", "عين التمر"],
-            "ذي قار": ["الناصرية", "الشطرة", "الرفاعي", "سوق الشيوخ", "الجبايش"],
-            "بابل": ["الحلة", "المحاويل", "المسيب", "الهاشمية", "القاسم"],
-            "الأنبار": ["الرمادي", "الفلوجة", "هيت", "عنة", "راوة", "القائم", "الرطبة", "الخالدية"],
-            "ديالى": ["بعقوبة", "المقدادية", "خانقين", "الخالص", "بلدروز"],
-            "ميسان": ["العمارة", "المجر الكبير", "قلعة صالح", "الكحلاء", "الميمونة"],
-            "المثنى": ["السماوة", "الرميثة", "الخضر", "الوركاء"],
-            "كركوك": ["المركز", "الحويجة", "دقوق", "دبس"],
-            "واسط": ["الكوت", "الصويرة", "العزيزية", "النعمانية", "الحي"],
-            "دهوك": ["المركز", "سميل", "زاخو", "العمادية", "عقرة"],
-            "السليمانية": ["المركز", "جمجمال", "دوكان", "رانية", "قلعة دزة", "حلبجة"],
-            "القادسية": ["الديوانية", "عفك", "الشامية", "الحمزة"]
+            "نينوى": ["الموصل", "تلعفر", "تلكيف", "الحمدانية", "سنجار"],
+            "البصرة": ["المركز", "الزبير", "القرنة", "الفاو", "شط العرب"],
+            "ذي قار": ["الناصرية", "الشطرة", "الرفاعي", "سوق الشيوخ"],
+            "الأنبار": ["الرمادي", "الفلوجة", "هيت", "عنة", "القائم"],
+            "بابل": ["الحلة", "المحاويل", "المسيب", "الهاشمية"],
+            "النجف": ["المركز", "الكوفة", "المناذرة"],
+            "كربلاء": ["المركز", "الهندية"]
+            // يمكن إضافة المزيد من المحافظات هنا
         };
 
         function initApp() {
-            // تحميل قائمة المحافظات
             const pSel = document.getElementById('provInput');
-            pSel.innerHTML = '<option value="">اختر المحافظة</option>';
+            pSel.innerHTML = '<option value="">المحافظة</option>';
             Object.keys(iraqGeo).sort().forEach(p => pSel.innerHTML += `<option value="${p}">${p}</option>`);
             
-            // تحميل النسب المئوية
             const discs = ['prevDiscInput', 'currDiscPerc'];
             discs.forEach(id => { for(let i=0; i<=15; i++) document.getElementById(id).innerHTML += `<option value="${i}">${i}%</option>`; });
             
-            // التاريخ التلقائي لليوم
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('matchDateInput').value = today;
-            
-            // استرجاع الاسم المحفوظ
             document.getElementById('myNameInput').value = localStorage.getItem('pure_pro_name') || '';
             
             updateCities();
@@ -176,9 +169,16 @@
         function updateCities() {
             const p = document.getElementById('provInput').value;
             const cSel = document.getElementById('cityInput');
-            cSel.innerHTML = '<option value="">اختر القضاء</option>';
+            cSel.innerHTML = '<option value="">القضاء</option>';
             if(p && iraqGeo[p]) iraqGeo[p].sort().forEach(c => cSel.innerHTML += `<option value="${c}">${c}</option>`);
             sync();
+        }
+
+        function toggleBills() {
+            const list = document.getElementById('billsList');
+            const btn = document.getElementById('toggleBtn');
+            list.classList.toggle('hidden');
+            btn.classList.toggle('collapsed');
         }
 
         function sync() {
@@ -186,10 +186,8 @@
             document.getElementById('outRep').innerText = document.getElementById('repInput').value || '..';
             document.getElementById('outPrevAmt').innerText = (document.getElementById('prevInput').value || '0') + " IQD";
             document.getElementById('outCurrDisc').innerText = document.getElementById('currDiscPerc').value + "%";
-            
-            const dateVal = document.getElementById('matchDateInput').value;
-            document.getElementById('outDate').innerText = dateVal ? dateVal.split('-').reverse().join('/') : '..';
-            
+            const d = document.getElementById('matchDateInput').value;
+            document.getElementById('outDate').innerText = d ? d.split('-').reverse().join('/') : '..';
             document.getElementById('outLoc').innerText = (document.getElementById('provInput').value || '..') + " / " + (document.getElementById('cityInput').value || '..');
             calculate();
         }
@@ -251,22 +249,18 @@
             let sumRem = 0; let excluded = [];
             const notesSum = document.getElementById('notesSummary');
             notesSum.innerHTML = "";
-
             db.forEach(b => {
                 const valRem = parseFloat(b.remain.replace(/,/g,'')) || 0;
                 if (b.status === 'ok') sumRem += valRem; else excluded.push(b.id);
                 if(b.note.trim()) notesSum.innerHTML += `<p class="text-[11px] text-indigo-700 font-bold bg-white p-2 rounded-lg border border-indigo-100 italic">• فاتورة #${b.id}: ${b.note}</p>`;
             });
-
             document.getElementById('officialMsg').innerHTML = excluded.length ? `تمت المطابقة بنجاح <span class="text-red-600 font-black underline">باستثناء الفواتير (#${excluded.join(', #')})</span>.` : "نود إعلامكم بأنه تمت مطابقة الحسابات بنجاح.";
-            
-            const discPerc = parseFloat(document.getElementById('currDiscPerc').value) || 0;
-            const discAmount = sumRem * (discPerc / 100); 
-            const final = sumRem - discAmount;
-            
+            const disc = parseFloat(document.getElementById('currDiscPerc').value) || 0;
+            const dAmt = sumRem * (disc / 100); 
+            const final = sumRem - dAmt;
             document.getElementById('outFullOrig').innerText = sumRem.toLocaleString(undefined, {minimumFractionDigits:2}) + " IQD";
             document.getElementById('resTotalDisplay').innerText = sumRem.toLocaleString(undefined, {minimumFractionDigits:2}) + " IQD";
-            document.getElementById('resDiscAmount').innerText = "- " + discAmount.toLocaleString(undefined, {minimumFractionDigits:2}) + " IQD";
+            document.getElementById('resDiscAmount').innerText = "- " + dAmt.toLocaleString(undefined, {minimumFractionDigits:2}) + " IQD";
             document.getElementById('resFinal').innerText = final.toLocaleString(undefined, {minimumFractionDigits:2}) + " IQD";
             document.getElementById('tafgeet').innerText = "فقط " + final.toLocaleString('ar-IQ', {minimumFractionDigits:2}) + " دينار عراقي لا غير";
         }
