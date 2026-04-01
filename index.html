@@ -13,8 +13,14 @@
         .not-active { border-right: 8px solid #ef4444; background-color: #fff1f2; opacity: 0.7; }
         .note-input { width: 100%; margin-top: 10px; border: 1px dashed #cbd5e1; border-radius: 10px; padding: 6px 12px; font-size: 11px; outline: none; background: #fefefe; }
         .note-input:focus { border-color: #6366f1; background: #fff; }
-        .amount-sub { font-size: 10px; font-weight: 800; opacity: 0.4; } 
-        @media print { .no-print { display: none !important; } .report-container { border: none !important; width: 100%; padding: 0; margin: 0; } }
+        
+        /* إعدادات الطباعة لضمان ورقة واحدة */
+        @media print { 
+            @page { size: A4; margin: 8mm; }
+            .no-print { display: none !important; } 
+            body { background-color: white !important; zoom: 82%; } /* تصغير المحتوى بنسبة بسيطة ليناسب صفحة واحدة */
+            .report-container { border: none !important; width: 100% !important; padding: 0 !important; margin: 0 !important; box-shadow: none !important; } 
+        }
     </style>
 </head>
 <body class="p-4" onload="initApp()">
@@ -37,8 +43,8 @@
                     <input type="text" id="prevInput" oninput="sync()" class="w-full bg-slate-800 border-none rounded-xl p-3 text-xs font-mono"></div>
                 <div><label class="block text-[10px] mb-2 text-orange-400 font-black italic">النسبة السابقة</label>
                     <select id="prevDiscInput" onchange="sync()" class="w-full bg-slate-800 border-none rounded-xl p-3 text-xs font-bold"></select></div>
-                <div><label class="block text-[10px] mb-2 text-orange-400 font-black italic">آخر مطابقة</label>
-                    <input type="date" id="lastMatchDate" oninput="sync()" class="w-full bg-slate-800 border-none rounded-xl p-3 text-xs"></div>
+                <div><label class="block text-[10px] mb-2 text-orange-400 font-black italic">تاريخ المطابقة</label>
+                    <input type="date" id="matchDateInput" oninput="sync()" class="w-full bg-slate-800 border-none rounded-xl p-3 text-xs text-white"></div>
                 <div><label class="block text-[10px] mb-2 text-emerald-400 font-black uppercase">خصم المطابقة الحالية %</label>
                     <select id="currDiscPerc" onchange="calculate()" class="w-full bg-slate-800 border-none rounded-xl p-3 text-xs font-bold text-emerald-400"></select></div>
             </div>
@@ -51,7 +57,7 @@
             <input type="file" id="pdfFile" class="hidden" accept=".pdf">
         </header>
 
-        <div class="bg-white p-12 rounded-[3.5rem] report-container min-h-[1200px] flex flex-col border border-slate-200 shadow-sm">
+        <div class="bg-white p-10 rounded-[3rem] report-container min-h-[1000px] flex flex-col border border-slate-200 shadow-sm overflow-hidden">
             
             <div class="flex justify-between items-start border-b-4 border-slate-900 pb-8 mb-10">
                 <div>
@@ -61,13 +67,11 @@
                 <div class="text-left text-[11px] font-bold leading-relaxed space-y-1">
                     <p>الموقع: <span id="outLoc" class="text-indigo-600 uppercase font-black">..</span></p>
                     <p>التاريخ: <span id="outDate" class="font-mono">..</span></p>
-                    <p class="text-orange-600">آخر مطابقة: <span id="outLastMatch" class="font-mono">..</span></p>
                 </div>
             </div>
 
-            <div class="grid grid-cols-5 gap-3 mb-8 text-center">
+            <div class="grid grid-cols-4 gap-3 mb-8 text-center">
                 <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100"><span class="block text-[8px] text-slate-400 font-black mb-1 uppercase">PREV AMOUNT</span><span id="outPrevAmt" class="text-xs font-black italic text-slate-700">0</span></div>
-                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100"><span class="block text-[8px] text-slate-400 font-black mb-1 uppercase">PREV DISC</span><span id="outPrevDisc" class="text-xs font-black italic text-slate-700">0%</span></div>
                 <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100"><span class="block text-[8px] text-slate-400 font-black mb-1 uppercase">ACCOUNTANT</span><span id="outMyName" class="text-xs font-black italic text-slate-700">..</span></div>
                 <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100"><span class="block text-[8px] text-slate-400 font-black mb-1 uppercase">REPRESENTATIVE</span><span id="outRep" class="text-xs font-black italic text-slate-700">..</span></div>
                 <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100"><span class="block text-[8px] font-black mb-1 uppercase text-emerald-500">MATCH DISC</span><span id="outCurrDisc" class="text-xs font-black italic text-emerald-600">0%</span></div>
@@ -76,7 +80,7 @@
             <div class="mb-8 p-8 bg-slate-900 rounded-[2.5rem] text-white flex justify-between items-center shadow-xl relative overflow-hidden">
                 <div class="flex-1 relative z-10 text-right">
                     <p class="text-[10px] font-black text-indigo-400 mb-2 italic uppercase">اسم العميل / الصيدلية / المذخر</p>
-                    <input type="text" id="outClient" placeholder="يرجى إدخال اسم العميل هنا..." class="text-3xl font-black bg-transparent border-none outline-none w-full">
+                    <input type="text" id="outClient" placeholder="اسم العميل..." class="text-3xl font-black bg-transparent border-none outline-none w-full">
                 </div>
                 <div class="text-left border-r border-slate-700 pl-4 pr-8 relative z-10">
                     <p class="text-[9px] font-black text-slate-500 mb-1 italic uppercase">Sub-Total:</p>
@@ -89,38 +93,34 @@
                 <div id="notesSummary" class="mt-4 space-y-2 border-t border-slate-200 pt-4"></div>
             </div>
 
-            <div class="flex justify-between items-center mb-4 no-print">
-                <h3 class="text-[11px] font-black text-slate-400 uppercase italic">قائمة الفواتير المشمولة</h3>
-                <button onclick="document.getElementById('billsList').classList.toggle('hidden')" class="bg-slate-100 hover:bg-slate-200 px-4 py-2 rounded-xl text-[10px] font-bold text-slate-600 transition-all">إخفاء / إظهار القائمة</button>
-            </div>
-
-            <div id="billsList" class="space-y-3 mb-12"></div>
+            <div id="billsList" class="space-y-3 mb-10 no-print"></div>
 
             <div class="border-t-4 border-slate-900 pt-10 mt-auto">
                 <div class="flex justify-between items-end">
                     <div class="flex-1">
-                        <p class="text-[11px] font-black text-slate-400 mb-1 italic uppercase tracking-widest">Total Amount Before Discount / المبلغ الكلي قبل الخصم:</p>
-                        <p id="resTotalDisplay" class="text-5xl font-black text-slate-900 tracking-tighter italic font-mono mb-2">0.00 IQD</p>
+                        <p class="text-[11px] font-black text-slate-400 mb-1 italic uppercase tracking-widest">المبلغ الكلي قبل الخصم:</p>
+                        <p id="resTotalDisplay" class="text-4xl font-black text-slate-900 tracking-tighter italic font-mono mb-2">0.00 IQD</p>
                         
                         <p class="text-[11px] font-bold text-red-500 mb-6 italic">مبلغ الخصم المستقطع: <span id="resDiscAmount" class="font-mono">0.00 IQD</span></p>
                         
                         <div class="bg-indigo-50 border-r-4 border-indigo-600 p-4 rounded-2xl inline-block shadow-sm">
-                            <p class="text-[10px] font-black text-indigo-600 mb-1 italic uppercase">Final Net After Discount / الصافي بعد الخصم:</p>
-                            <p id="resFinal" class="text-4xl font-black text-indigo-800 tracking-tighter italic font-mono">0.00 IQD</p>
+                            <p class="text-[10px] font-black text-indigo-600 mb-1 italic uppercase">الصافي النهائي للمطابقة:</p>
+                            <p id="resFinal" class="text-3xl font-black text-indigo-800 tracking-tighter italic font-mono">0.00 IQD</p>
                         </div>
                         
                         <div class="block">
-                            <p id="tafgeet" class="text-[12px] font-black text-indigo-700 bg-indigo-50 px-6 py-3 rounded-2xl border-2 border-indigo-100 mt-6 inline-block italic">....</p>
+                            <p id="tafgeet" class="text-[11px] font-black text-indigo-700 bg-indigo-50 px-6 py-3 rounded-2xl border-2 border-indigo-100 mt-6 inline-block italic">....</p>
                         </div>
                     </div>
-                    <div class="flex gap-8 items-center no-print">
+                    
+                    <div class="flex gap-8 items-center">
                         <div class="text-center">
-                            <div class="w-36 h-24 border-2 border-dashed border-slate-300 rounded-[1.5rem] mb-2 mx-auto bg-slate-50/50"></div>
-                            <p class="text-[9px] font-black text-slate-500 italic uppercase">توقيع مسؤول المطابقة</p>
+                            <div class="w-32 h-20 border-2 border-dashed border-slate-300 rounded-[1.2rem] mb-2 mx-auto bg-slate-50/50"></div>
+                            <p class="text-[8px] font-black text-slate-500 italic uppercase">توقيع المحاسب</p>
                         </div>
                         <div class="text-center">
-                            <div class="w-36 h-24 border-2 border-dashed border-slate-300 rounded-[1.5rem] mb-2 mx-auto bg-slate-50/50"></div>
-                            <p class="text-[9px] font-black text-slate-500 italic uppercase">توقيع وختم العميل</p>
+                            <div class="w-32 h-20 border-2 border-dashed border-slate-300 rounded-[1.2rem] mb-2 mx-auto bg-slate-50/50"></div>
+                            <p class="text-[8px] font-black text-slate-500 italic uppercase">توقيع وختم العميل</p>
                         </div>
                     </div>
                 </div>
@@ -130,31 +130,66 @@
 
     <script>
         let db = [];
-        const iraqGeo = {"بغداد": ["الرصافة", "الكرخ"], "صلاح الدين": ["تكريت", "الشرقاط", "سامراء"]};
+        // قاعدة بيانات المحافظات والأقضية العراقية الشاملة
+        const iraqGeo = {
+            "بغداد": ["الرصافة", "الكرخ", "الأعظمية", "المنصور", "الكرادة", "الدورة", "مدينة الصدر", "الحسينية", "الكاظمية", "أبو غريب", "المحمودية"],
+            "صلاح الدين": ["تكريت", "سامراء", "بيجي", "الدور", "الشرقاط", "طوزخورماتو", "بلد", "الضلوعية"],
+            "نينوى": ["الموصل", "تلعفر", "تلكيف", "الحمدانية", "سنجار", "البعاج", "الحضر", "الشيخان"],
+            "البصرة": ["المركز", "الزبير", "القرنة", "الفاو", "شط العرب", "أبو الخصيب", "المدينة"],
+            "أربيل": ["المركز", "شقلاوة", "كوي سنجق", "سوران", "رواندز", "خبات"],
+            "النجف": ["المركز", "الكوفة", "المناذرة", "المشخاب"],
+            "كربلاء": ["المركز", "الهندية", "عين التمر"],
+            "ذي قار": ["الناصرية", "الشطرة", "الرفاعي", "سوق الشيوخ", "الجبايش"],
+            "بابل": ["الحلة", "المحاويل", "المسيب", "الهاشمية", "القاسم"],
+            "الأنبار": ["الرمادي", "الفلوجة", "هيت", "عنة", "راوة", "القائم", "الرطبة", "الخالدية"],
+            "ديالى": ["بعقوبة", "المقدادية", "خانقين", "الخالص", "بلدروز"],
+            "ميسان": ["العمارة", "المجر الكبير", "قلعة صالح", "الكحلاء", "الميمونة"],
+            "المثنى": ["السماوة", "الرميثة", "الخضر", "الوركاء"],
+            "كركوك": ["المركز", "الحويجة", "دقوق", "دبس"],
+            "واسط": ["الكوت", "الصويرة", "العزيزية", "النعمانية", "الحي"],
+            "دهوك": ["المركز", "سميل", "زاخو", "العمادية", "عقرة"],
+            "السليمانية": ["المركز", "جمجمال", "دوكان", "رانية", "قلعة دزة", "حلبجة"],
+            "القادسية": ["الديوانية", "عفك", "الشامية", "الحمزة"]
+        };
 
         function initApp() {
+            // تحميل قائمة المحافظات
             const pSel = document.getElementById('provInput');
-            pSel.innerHTML = '<option value="">المحافظة</option>';
+            pSel.innerHTML = '<option value="">اختر المحافظة</option>';
             Object.keys(iraqGeo).sort().forEach(p => pSel.innerHTML += `<option value="${p}">${p}</option>`);
+            
+            // تحميل النسب المئوية
             const discs = ['prevDiscInput', 'currDiscPerc'];
             discs.forEach(id => { for(let i=0; i<=15; i++) document.getElementById(id).innerHTML += `<option value="${i}">${i}%</option>`; });
-            document.getElementById('outDate').innerText = new Date().toLocaleDateString('en-GB');
+            
+            // التاريخ التلقائي لليوم
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('matchDateInput').value = today;
+            
+            // استرجاع الاسم المحفوظ
+            document.getElementById('myNameInput').value = localStorage.getItem('pure_pro_name') || '';
+            
             updateCities();
+            sync();
         }
 
         function updateCities() {
             const p = document.getElementById('provInput').value;
             const cSel = document.getElementById('cityInput');
-            cSel.innerHTML = '<option value="">القضاء</option>';
-            if(p && iraqGeo[p]) iraqGeo[p].forEach(c => cSel.innerHTML += `<option value="${c}">${c}</option>`);
+            cSel.innerHTML = '<option value="">اختر القضاء</option>';
+            if(p && iraqGeo[p]) iraqGeo[p].sort().forEach(c => cSel.innerHTML += `<option value="${c}">${c}</option>`);
+            sync();
         }
 
         function sync() {
             document.getElementById('outMyName').innerText = document.getElementById('myNameInput').value || '..';
             document.getElementById('outRep').innerText = document.getElementById('repInput').value || '..';
             document.getElementById('outPrevAmt').innerText = (document.getElementById('prevInput').value || '0') + " IQD";
-            document.getElementById('outPrevDisc').innerText = document.getElementById('prevDiscInput').value + "%";
-            document.getElementById('outLastMatch').innerText = document.getElementById('lastMatchDate').value || '..';
+            document.getElementById('outCurrDisc').innerText = document.getElementById('currDiscPerc').value + "%";
+            
+            const dateVal = document.getElementById('matchDateInput').value;
+            document.getElementById('outDate').innerText = dateVal ? dateVal.split('-').reverse().join('/') : '..';
+            
             document.getElementById('outLoc').innerText = (document.getElementById('provInput').value || '..') + " / " + (document.getElementById('cityInput').value || '..');
             calculate();
         }
@@ -172,7 +207,7 @@
                 const page = await pdf.getPage(i);
                 const text = await page.getTextContent();
                 const items = text.items.sort((a,b) => b.transform[5] - a.transform[5]);
-                let client = items.map(it => it.str).find(t => t.includes("مذخر")) || "";
+                let client = items.map(it => it.str).find(t => t.includes("مذخر") || t.includes("صيدلية")) || "";
                 if(client) document.getElementById('outClient').value = client;
 
                 items.forEach(item => {
@@ -225,29 +260,18 @@
 
             document.getElementById('officialMsg').innerHTML = excluded.length ? `تمت المطابقة بنجاح <span class="text-red-600 font-black underline">باستثناء الفواتير (#${excluded.join(', #')})</span>.` : "نود إعلامكم بأنه تمت مطابقة الحسابات بنجاح.";
             
-            const disc = parseFloat(document.getElementById('currDiscPerc').value) || 0;
-            
-            // إضافة بسيطة: حساب الخصم المستقطع
-            const discAmount = sumRem * (disc / 100); 
+            const discPerc = parseFloat(document.getElementById('currDiscPerc').value) || 0;
+            const discAmount = sumRem * (discPerc / 100); 
             const final = sumRem - discAmount;
             
             document.getElementById('outFullOrig').innerText = sumRem.toLocaleString(undefined, {minimumFractionDigits:2}) + " IQD";
             document.getElementById('resTotalDisplay').innerText = sumRem.toLocaleString(undefined, {minimumFractionDigits:2}) + " IQD";
-            
-            // إضافة بسيطة: عرض الخصم المستقطع
             document.getElementById('resDiscAmount').innerText = "- " + discAmount.toLocaleString(undefined, {minimumFractionDigits:2}) + " IQD";
             document.getElementById('resFinal').innerText = final.toLocaleString(undefined, {minimumFractionDigits:2}) + " IQD";
             document.getElementById('tafgeet').innerText = "فقط " + final.toLocaleString('ar-IQ', {minimumFractionDigits:2}) + " دينار عراقي لا غير";
         }
 
-        function updateNote(i, val) { 
-            db[i].note = val; 
-            const notesSum = document.getElementById('notesSummary');
-            notesSum.innerHTML = "";
-            db.forEach(b => { if(b.note.trim()) notesSum.innerHTML += `<p class="text-[11px] text-indigo-700 font-bold bg-white p-2 rounded-lg border border-indigo-100 italic">• فاتورة #${b.id}: ${b.note}</p>`; });
-            calculate(); 
-        }
-
+        function updateNote(i, val) { db[i].note = val; calculate(); }
         function toggleStatus(i) { db[i].status = (db[i].status === 'ok' ? 'none' : 'ok'); renderList(); }
         function showNote(i) { document.getElementById(`note-${i}`).classList.toggle('hidden'); }
     </script>
