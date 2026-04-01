@@ -13,8 +13,9 @@
         .not-active { border-right: 8px solid #ef4444; background-color: #fff1f2; opacity: 0.7; }
         .note-input { width: 100%; margin-top: 10px; border: 1px dashed #cbd5e1; border-radius: 10px; padding: 6px 12px; font-size: 11px; outline: none; background: #fefefe; }
         .note-input:focus { border-color: #6366f1; background: #fff; box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.1); }
-        .amount-sub { font-size: 10px; font-weight: 800; }
-        .paid-highlight { color: #0ea5e9; background: #f0f9ff; padding: 2px 6px; border-radius: 6px; }
+        /* تفاصيل شفافة للمبالغ الثانوية */
+        .amount-sub { font-size: 10px; font-weight: 700; opacity: 0.4; } 
+        .paid-highlight { color: #64748b; background: #f1f5f9; padding: 2px 6px; border-radius: 6px; opacity: 0.5; }
         @media print { .no-print { display: none !important; } .report-container { border: none !important; width: 100%; padding: 0; margin: 0; } }
     </style>
 </head>
@@ -22,26 +23,26 @@
 
     <div class="max-w-5xl mx-auto">
         <header class="no-print bg-[#1e293b] text-white p-8 rounded-[2.5rem] mb-8 shadow-2xl border-b-4 border-indigo-500">
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-6">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-6 text-right">
                 <div><label class="block text-[10px] mb-2 text-slate-400 font-black uppercase tracking-widest">المحاسب المسؤول</label>
-                    <input type="text" id="myNameInput" oninput="saveData(); sync();" class="w-full bg-slate-800 border-none rounded-xl p-3 text-xs focus:ring-2 focus:ring-indigo-500"></div>
+                    <input type="text" id="myNameInput" oninput="saveData(); sync();" class="w-full bg-slate-800 border-none rounded-xl p-3 text-xs focus:ring-2 focus:ring-indigo-500 text-right"></div>
                 <div><label class="block text-[10px] mb-2 text-indigo-400 font-black">المحافظة</label>
-                    <select id="provInput" onchange="updateCities(); sync();" class="w-full bg-slate-800 border-none rounded-xl p-3 text-xs font-bold"></select></div>
+                    <select id="provInput" onchange="updateCities(); sync();" class="w-full bg-slate-800 border-none rounded-xl p-3 text-xs font-bold text-right"></select></div>
                 <div><label class="block text-[10px] mb-2 text-indigo-400 font-black">القضاء / الناحية</label>
-                    <select id="cityInput" onchange="sync()" class="w-full bg-slate-800 border-none rounded-xl p-3 text-xs font-bold"></select></div>
-                <div><label class="block text-[10px] mb-2 text-slate-400 font-black uppercase tracking-widest">المندوب</label>
-                    <input type="text" id="repInput" oninput="sync()" class="w-full bg-slate-800 border-none rounded-xl p-3 text-xs focus:ring-2 focus:ring-indigo-500"></div>
+                    <select id="cityInput" onchange="sync()" class="w-full bg-slate-800 border-none rounded-xl p-3 text-xs font-bold text-right"></select></div>
+                <div><label class="block text-[10px] mb-2 text-slate-400 font-black uppercase tracking-widest text-right">المندوب</label>
+                    <input type="text" id="repInput" oninput="sync()" class="w-full bg-slate-800 border-none rounded-xl p-3 text-xs focus:ring-2 focus:ring-indigo-500 text-right"></div>
             </div>
 
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-6 border-t border-slate-700 pt-6 mb-6">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6 border-t border-slate-700 pt-6 mb-6 text-right">
                 <div><label class="block text-[10px] mb-2 text-orange-400 font-black italic">المبلغ السابق (IQD)</label>
-                    <input type="text" id="prevInput" oninput="sync()" class="w-full bg-slate-800 border-none rounded-xl p-3 text-xs font-mono"></div>
+                    <input type="text" id="prevInput" oninput="sync()" class="w-full bg-slate-800 border-none rounded-xl p-3 text-xs font-mono text-right"></div>
                 <div><label class="block text-[10px] mb-2 text-orange-400 font-black italic">النسبة السابقة</label>
-                    <select id="prevDiscInput" onchange="sync()" class="w-full bg-slate-800 border-none rounded-xl p-3 text-xs font-bold"></select></div>
+                    <select id="prevDiscInput" onchange="sync()" class="w-full bg-slate-800 border-none rounded-xl p-3 text-xs font-bold text-right"></select></div>
                 <div><label class="block text-[10px] mb-2 text-orange-400 font-black italic">آخر مطابقة</label>
-                    <input type="date" id="lastMatchDate" oninput="sync()" class="w-full bg-slate-800 border-none rounded-xl p-3 text-xs"></div>
+                    <input type="date" id="lastMatchDate" oninput="sync()" class="w-full bg-slate-800 border-none rounded-xl p-3 text-xs text-right"></div>
                 <div><label class="block text-[10px] mb-2 text-emerald-400 font-black uppercase">خصم المطابقة الحالية %</label>
-                    <select id="currDiscPerc" onchange="calculate()" class="w-full bg-slate-800 border-none rounded-xl p-3 text-xs font-bold text-emerald-400"></select></div>
+                    <select id="currDiscPerc" onchange="calculate()" class="w-full bg-slate-800 border-none rounded-xl p-3 text-xs font-bold text-emerald-400 text-right"></select></div>
             </div>
             
             <div class="flex gap-4">
@@ -52,55 +53,55 @@
             <input type="file" id="pdfFile" class="hidden" accept=".pdf">
         </header>
 
-        <div class="bg-white p-12 rounded-[3.5rem] report-container min-h-[1200px] flex flex-col border border-slate-200 shadow-sm">
+        <div class="bg-white p-12 rounded-[3.5rem] report-container min-h-[1200px] flex flex-col border border-slate-200 shadow-sm text-right italic">
             
             <div class="flex justify-between items-start border-b-4 border-slate-900 pb-8 mb-10">
-                <div>
+                <div class="text-right">
                     <h1 class="text-4xl font-black text-slate-900 uppercase tracking-tighter">مكتب بيور العلمي</h1>
                     <p class="text-[10px] font-extrabold text-slate-400 uppercase italic tracking-[0.2em]">Pure Scientific Bureau for Trading</p>
                 </div>
-                <div class="text-left text-[11px] font-bold leading-relaxed space-y-1">
+                <div class="text-left text-[11px] font-bold leading-relaxed space-y-1 italic">
                     <p>الموقع: <span id="outLoc" class="text-indigo-600 uppercase font-black">..</span></p>
                     <p>التاريخ: <span id="outDate" class="font-mono">..</span></p>
                     <p class="text-orange-600">آخر مطابقة: <span id="outLastMatch" class="font-mono">..</span></p>
                 </div>
             </div>
 
-            <div class="grid grid-cols-5 gap-3 mb-8 text-center">
+            <div class="grid grid-cols-5 gap-3 mb-8 text-center italic">
                 <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100"><span class="block text-[8px] text-slate-400 font-black mb-1 uppercase">PREV AMOUNT</span><span id="outPrevAmt" class="text-xs font-black italic text-slate-700">0</span></div>
                 <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100"><span class="block text-[8px] text-slate-400 font-black mb-1 uppercase">PREV DISC</span><span id="outPrevDisc" class="text-xs font-black italic text-slate-700">0%</span></div>
-                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100"><span class="block text-[8px] text-slate-400 font-black mb-1 uppercase">ACCOUNTANT</span><span id="outMyName" class="text-xs font-black italic text-slate-700">..</span></div>
-                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100"><span class="block text-[8px] text-slate-400 font-black mb-1 uppercase">REPRESENTATIVE</span><span id="outRep" class="text-xs font-black italic text-slate-700">..</span></div>
+                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100"><span class="block text-[8px] text-slate-400 font-black mb-1 uppercase text-right">ACCOUNTANT</span><span id="outMyName" class="text-xs font-black italic text-slate-700 text-right">..</span></div>
+                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100"><span class="block text-[8px] text-slate-400 font-black mb-1 uppercase text-right">REPRESENTATIVE</span><span id="outRep" class="text-xs font-black italic text-slate-700 text-right">..</span></div>
                 <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100"><span class="block text-[8px] font-black mb-1 uppercase text-emerald-500">MATCH DISC</span><span id="outCurrDisc" class="text-xs font-black italic text-emerald-600">0%</span></div>
             </div>
 
-            <div class="mb-8 p-8 bg-slate-900 rounded-[2.5rem] text-white flex justify-between items-center shadow-xl relative overflow-hidden">
+            <div class="mb-8 p-8 bg-slate-900 rounded-[2.5rem] text-white flex justify-between items-center shadow-xl relative overflow-hidden text-right italic">
                 <div class="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 rounded-full -mr-16 -mt-16"></div>
                 <div class="flex-1 relative z-10">
-                    <p class="text-[10px] font-black text-indigo-400 mb-2 italic uppercase tracking-widest">اسم العميل / الصيدلية / المذخر</p>
-                    <input type="text" id="outClient" placeholder="يرجى إدخال اسم العميل هنا..." class="text-3xl font-black bg-transparent border-none outline-none w-full placeholder:text-slate-700">
+                    <p class="text-[10px] font-black text-indigo-400 mb-2 italic uppercase tracking-widest text-right">اسم العميل / الصيدلية / المذخر</p>
+                    <input type="text" id="outClient" placeholder="يرجى إدخال اسم العميل هنا..." class="text-3xl font-black bg-transparent border-none outline-none w-full placeholder:text-slate-700 text-right italic">
                 </div>
-                <div class="text-left border-r border-slate-700 pl-4 pr-8 relative z-10">
+                <div class="text-left border-r border-slate-700 pl-4 pr-8 relative z-10 italic">
                     <p class="text-[9px] font-black text-slate-500 mb-1 italic uppercase">Sub-Total:</p>
-                    <p id="outFullOrig" class="text-xl font-black text-slate-300 font-mono">0.00 IQD</p>
+                    <p id="outFullOrig" class="text-xl font-black text-slate-300 font-mono italic">0.00 IQD</p>
                 </div>
             </div>
 
-            <div id="matchingMsgBox" class="bg-slate-50 p-6 rounded-[2rem] border border-slate-200 mb-8 italic shadow-inner">
+            <div id="matchingMsgBox" class="bg-slate-50 p-6 rounded-[2rem] border border-slate-200 mb-8 italic shadow-inner text-right">
                 <div id="officialMsg" class="text-[12px] font-black text-slate-800 leading-relaxed text-center">نود إعلامكم بأنه تمت مطابقة الحسابات بنجاح.</div>
                 <div id="notesContainer" class="mt-4 space-y-2 border-t border-slate-200 pt-4"></div>
             </div>
 
             <div id="billsList" class="space-y-3 mb-12"></div>
 
-            <div class="border-t-4 border-slate-900 pt-10 mt-auto">
+            <div class="border-t-4 border-slate-900 pt-10 mt-auto text-right italic">
                 <div class="flex justify-between items-end">
                     <div class="flex-1">
                         <p class="text-[11px] font-black text-slate-400 mb-2 italic uppercase tracking-widest">Final Net Amount / الصافي النهائي للمطابقة:</p>
-                        <p id="resFinal" class="text-6xl font-black text-slate-900 tracking-tighter italic font-mono">0.00 IQD</p>
+                        <p id="resFinal" class="text-6xl font-black text-slate-900 tracking-tighter italic font-mono text-right">0.00 IQD</p>
                         <p id="tafgeet" class="text-[12px] font-black text-indigo-700 bg-indigo-50 px-6 py-3 rounded-2xl border-2 border-indigo-100 mt-6 inline-block italic shadow-sm">....</p>
                     </div>
-                    <div class="flex gap-8 items-center">
+                    <div class="flex gap-8 items-center text-center">
                         <div class="text-center">
                             <div class="w-36 h-24 border-2 border-dashed border-slate-300 rounded-[1.5rem] mb-2 mx-auto bg-slate-50/50"></div>
                             <p class="text-[9px] font-black text-slate-500 italic uppercase">توقيع مسؤول المطابقة</p>
@@ -212,16 +213,16 @@
 
                 list.innerHTML += `
                     <div class="bill-card ${active ? 'is-active' : 'not-active'}">
-                        <div class="flex justify-between items-center">
+                        <div class="flex justify-between items-center text-right italic">
                             <div onclick="toggleStatus(${i})" class="flex-1 cursor-pointer">
-                                <span class="font-black text-slate-800 text-sm font-mono">${b.remain} IQD</span>
+                                <span class="font-black text-slate-900 text-lg font-mono italic">${b.remain} IQD</span>
                                 <div class="flex gap-3 mt-1">
-                                    <span class="amount-sub text-slate-400 italic font-mono">Total: ${b.total}</span>
-                                    <span class="amount-sub paid-highlight italic font-mono">Paid: ${b.paid}</span>
+                                    <span class="amount-sub italic font-mono">Total: ${b.total}</span>
+                                    <span class="amount-sub paid-highlight italic font-mono italic">Paid: ${b.paid}</span>
                                 </div>
                             </div>
-                            <div class="text-right flex items-center gap-3">
-                                <div><span class="text-[10px] font-black italic">#${b.id}</span><span class="block text-[8px] font-bold text-slate-400 uppercase font-mono">${b.date}</span></div>
+                            <div class="text-right flex items-center gap-3 italic">
+                                <div class="border-r border-slate-200 pr-3"><span class="text-xs font-black italic text-slate-900">#${b.id}</span><span class="block text-[8px] font-bold text-slate-400 uppercase font-mono italic">${b.date}</span></div>
                                 <div class="no-print cursor-pointer p-2 hover:bg-slate-100 rounded-full transition-colors" onclick="showNote(${i})">⚠️</div>
                             </div>
                         </div>
