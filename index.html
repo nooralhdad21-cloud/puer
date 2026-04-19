@@ -1,8 +1,57 @@
+<!--
+════════════════════════════════════════════════════════════════════════════════
+  PURE PHARMA - نظام المطابقة الآلي المتكامل
+  Automated Reconciliation ERP System
+════════════════════════════════════════════════════════════════════════════════
+ 
+  المطور: المهندس نورالدين صباح حسين
+  Developer: Eng. Nooraldein Sabah Hussein
+  
+  Instagram: @eng.nooraldein
+  Telegram: @rucno
+  
+  العميل: مكتب بيور العلمي - بغداد
+  Client: Pure Pharma Scientific Bureau - Baghdad
+  
+  التاريخ: April 2026
+  الإصدار: v8.0
+  
+════════════════════════════════════════════════════════════════════════════════
+  محتويات الملف / File Contents:
+════════════════════════════════════════════════════════════════════════════════
+  
+  [1] HTML Structure
+      - Sidebar Navigation
+      - Main Content Area
+      - Mobile Menu
+  
+  [2] CSS Styles  
+      - Root Variables (Colors)
+      - Component Styles
+      - Responsive Media Queries
+      - Print Styles
+  
+  [3] JavaScript Logic
+      - System Initialization
+      - PDF/Excel/Word Processing
+      - Database Management
+      - UI Rendering
+      - Print Functions
+      - Mobile Functions
+  
+════════════════════════════════════════════════════════════════════════════════
+-->
+ 
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- ═══ Mobile Optimization ═══ -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#3FA9D8">
 <title>نظام بيور العلمي - المتطور</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -86,16 +135,323 @@ select,input{font-family:'Cairo',sans-serif}
   /* إخفاء div الأقسام الفارغة */
   .inv-collapsed .bill-inner{display:none!important}
 }
+ 
+ 
+/* ════════════════════════════════════════════════════════════════════════
+   RESPONSIVE DESIGN - تصميم متجاوب
+   ════════════════════════════════════════════════════════════════════════ */
+ 
+/* ─── زر القائمة للموبايل ─── */
+#mobileMenuBtn {
+  display: none;
+  position: fixed;
+  top: 14px;
+  right: 14px;
+  z-index: 998;
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, #3FA9D8, #2a8ab8);
+  border: none;
+  border-radius: 12px;
+  color: white;
+  font-size: 22px;
+  cursor: pointer;
+  box-shadow: 0 6px 16px rgba(63,169,216,0.35);
+  transition: all 0.3s;
+}
+#mobileMenuBtn:active { transform: scale(0.95); }
+ 
+/* ─── تابلت (768px - 1024px) ─── */
+@media (max-width: 1024px) {
+  .sidebar { width: 220px !important; }
+  [style*="grid-template-columns:repeat(4,1fr)"] { grid-template-columns: repeat(2, 1fr) !important; }
+}
+ 
+/* ─── موبايل (أقل من 768px) ─── */
+@media (max-width: 768px) {
+  /* إظهار زر القائمة */
+  #mobileMenuBtn { display: flex !important; align-items: center; justify-content: center; }
+  
+  /* إخفاء السايدبار */
+  .sidebar {
+    position: fixed !important;
+    left: -280px !important;
+    top: 0 !important;
+    height: 100vh !important;
+    width: 260px !important;
+    transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    z-index: 999 !important;
+    box-shadow: 4px 0 24px rgba(0,0,0,0.2) !important;
+  }
+  
+  .sidebar.mobile-open { left: 0 !important; }
+  
+  /* overlay عند فتح القائمة */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+    z-index: 998;
+  }
+  
+  body.menu-open::before {
+    opacity: 1;
+    pointer-events: all;
+  }
+  
+  /* تعديل المحتوى الرئيسي */
+  .main-content {
+    width: 100% !important;
+    margin: 0 !important;
+  }
+  
+  /* تصغير padding */
+  #view-dashboard, #view-matching, #view-archive, #view-reports, #view-about {
+    padding: 20px 14px !important;
+  }
+  
+  /* Grid columns */
+  [style*="grid-template-columns:repeat(4,1fr)"],
+  [style*="grid-template-columns:repeat(3,1fr)"] {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 12px !important;
+  }
+  
+  [style*="grid-template-columns:1fr 1fr"] {
+    grid-template-columns: 1fr !important;
+  }
+  
+  /* Cards */
+  .stat-card {
+    padding: 18px !important;
+  }
+  
+  .stat-card h3 {
+    font-size: 26px !important;
+  }
+  
+  /* Filter bar */
+  .filter-bar {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+  
+  .filter-bar input,
+  .filter-bar select,
+  .filter-bar button {
+    width: 100% !important;
+    min-width: unset !important;
+  }
+  
+  /* Buttons */
+  .btn {
+    font-size: 13px !important;
+    padding: 10px 16px !important;
+  }
+  
+  /* Tables - scroll horizontal */
+  table {
+    font-size: 12px !important;
+  }
+  
+  table th,
+  table td {
+    padding: 10px 8px !important;
+  }
+}
+ 
+/* ─── موبايل صغير (أقل من 480px) ─── */
+@media (max-width: 480px) {
+  [style*="grid-template-columns:1fr 1fr"] {
+    grid-template-columns: 1fr !important;
+  }
+  
+  .stat-card {
+    padding: 14px !important;
+  }
+  
+  /* تصغير الخطوط */
+  h1 { font-size: 22px !important; }
+  h2 { font-size: 18px !important; }
+  h3 { font-size: 16px !important; }
+  
+  /* About page hero */
+  #view-about [style*="padding:52px"] {
+    padding: 32px 20px 28px !important;
+  }
+}
+ 
 </style>
 </head>
 <body style="display:flex;height:100vh;overflow:hidden;color:var(--s800)" onload="initSystem()">
+ 
+<!-- ═══════════════════════════════════════════════════════════
+     زر القائمة للموبايل / Mobile Menu Button
+     ═══════════════════════════════════════════════════════════ -->
+<button id="mobileMenuBtn" onclick="toggleMobileMenu()" aria-label="فتح القائمة">
+  <i class="fa-solid fa-bars"></i>
+</button>
  
 <!-- SIDEBAR -->
 <aside class="sidebar no-print" style="width:256px;background:#1a3d4d;color:#a7d4b8;display:flex;flex-direction:column;height:100%;flex-shrink:0;z-index:20;box-shadow:2px 0 20px rgba(0,0,0,.2)">
   <div style="padding:20px 18px 16px;border-bottom:1px solid rgba(255,255,255,.08);text-align:center">
     <!-- شعار بيور فارما الرسمي -->
     <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:10px">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">  <defs><style>.pp-b{fill:#3FA9D8}</style></defs>  <rect x="10" y="10" width="180" height="180" rx="30" fill="none" stroke="#3FA9D8" stroke-width="8"/>  <g transform="translate(35,45) scale(0.85)">    <rect x="0" y="0" width="35" height="110" class="pp-b"/>    <path d="M35 0 L80 0 Q115 0 115 27 Q115 54 80 54 L35 54 Z" class="pp-b"/>    <rect x="53" y="15" width="40" height="10" fill="white"/>    <rect x="68" y="5" width="10" height="30" fill="white"/>    <path d="M115 27 Q140 27 140 65 Q140 85 125 85" fill="none" stroke="#3FA9D8" stroke-width="18" stroke-linecap="round"/>  </g>  <text x="100" y="150" text-anchor="middle" font-family="Arial Black,Arial" font-weight="900" font-size="28" fill="#3FA9D8" letter-spacing="1">PURE</text>  <text x="100" y="175" text-anchor="middle" font-family="Arial Black,Arial" font-weight="900" font-size="20" fill="#3FA9D8" letter-spacing="1.5">PHARMA</text></svg>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">  <defs><style>.pp-b{fill:#3FA9D8}
+ 
+/* ════════════════════════════════════════════════════════════════════════
+   RESPONSIVE DESIGN - تصميم متجاوب
+   ════════════════════════════════════════════════════════════════════════ */
+ 
+/* ─── زر القائمة للموبايل ─── */
+#mobileMenuBtn {
+  display: none;
+  position: fixed;
+  top: 14px;
+  right: 14px;
+  z-index: 998;
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, #3FA9D8, #2a8ab8);
+  border: none;
+  border-radius: 12px;
+  color: white;
+  font-size: 22px;
+  cursor: pointer;
+  box-shadow: 0 6px 16px rgba(63,169,216,0.35);
+  transition: all 0.3s;
+}
+#mobileMenuBtn:active { transform: scale(0.95); }
+ 
+/* ─── تابلت (768px - 1024px) ─── */
+@media (max-width: 1024px) {
+  .sidebar { width: 220px !important; }
+  [style*="grid-template-columns:repeat(4,1fr)"] { grid-template-columns: repeat(2, 1fr) !important; }
+}
+ 
+/* ─── موبايل (أقل من 768px) ─── */
+@media (max-width: 768px) {
+  /* إظهار زر القائمة */
+  #mobileMenuBtn { display: flex !important; align-items: center; justify-content: center; }
+  
+  /* إخفاء السايدبار */
+  .sidebar {
+    position: fixed !important;
+    left: -280px !important;
+    top: 0 !important;
+    height: 100vh !important;
+    width: 260px !important;
+    transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    z-index: 999 !important;
+    box-shadow: 4px 0 24px rgba(0,0,0,0.2) !important;
+  }
+  
+  .sidebar.mobile-open { left: 0 !important; }
+  
+  /* overlay عند فتح القائمة */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+    z-index: 998;
+  }
+  
+  body.menu-open::before {
+    opacity: 1;
+    pointer-events: all;
+  }
+  
+  /* تعديل المحتوى الرئيسي */
+  .main-content {
+    width: 100% !important;
+    margin: 0 !important;
+  }
+  
+  /* تصغير padding */
+  #view-dashboard, #view-matching, #view-archive, #view-reports, #view-about {
+    padding: 20px 14px !important;
+  }
+  
+  /* Grid columns */
+  [style*="grid-template-columns:repeat(4,1fr)"],
+  [style*="grid-template-columns:repeat(3,1fr)"] {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 12px !important;
+  }
+  
+  [style*="grid-template-columns:1fr 1fr"] {
+    grid-template-columns: 1fr !important;
+  }
+  
+  /* Cards */
+  .stat-card {
+    padding: 18px !important;
+  }
+  
+  .stat-card h3 {
+    font-size: 26px !important;
+  }
+  
+  /* Filter bar */
+  .filter-bar {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+  
+  .filter-bar input,
+  .filter-bar select,
+  .filter-bar button {
+    width: 100% !important;
+    min-width: unset !important;
+  }
+  
+  /* Buttons */
+  .btn {
+    font-size: 13px !important;
+    padding: 10px 16px !important;
+  }
+  
+  /* Tables - scroll horizontal */
+  table {
+    font-size: 12px !important;
+  }
+  
+  table th,
+  table td {
+    padding: 10px 8px !important;
+  }
+}
+ 
+/* ─── موبايل صغير (أقل من 480px) ─── */
+@media (max-width: 480px) {
+  [style*="grid-template-columns:1fr 1fr"] {
+    grid-template-columns: 1fr !important;
+  }
+  
+  .stat-card {
+    padding: 14px !important;
+  }
+  
+  /* تصغير الخطوط */
+  h1 { font-size: 22px !important; }
+  h2 { font-size: 18px !important; }
+  h3 { font-size: 16px !important; }
+  
+  /* About page hero */
+  #view-about [style*="padding:52px"] {
+    padding: 32px 20px 28px !important;
+  }
+}
+ 
+</style></defs>  <rect x="10" y="10" width="180" height="180" rx="30" fill="none" stroke="#3FA9D8" stroke-width="8"/>  <g transform="translate(35,45) scale(0.85)">    <rect x="0" y="0" width="35" height="110" class="pp-b"/>    <path d="M35 0 L80 0 Q115 0 115 27 Q115 54 80 54 L35 54 Z" class="pp-b"/>    <rect x="53" y="15" width="40" height="10" fill="white"/>    <rect x="68" y="5" width="10" height="30" fill="white"/>    <path d="M115 27 Q140 27 140 65 Q140 85 125 85" fill="none" stroke="#3FA9D8" stroke-width="18" stroke-linecap="round"/>  </g>  <text x="100" y="150" text-anchor="middle" font-family="Arial Black,Arial" font-weight="900" font-size="28" fill="#3FA9D8" letter-spacing="1">PURE</text>  <text x="100" y="175" text-anchor="middle" font-family="Arial Black,Arial" font-weight="900" font-size="20" fill="#3FA9D8" letter-spacing="1.5">PHARMA</text></svg>
       <div style="text-align:right">
         <div style="font-size:17px;font-weight:900;color:white;letter-spacing:.3px;font-family:Georgia,serif">Pure Pharma</div>
         <div style="font-size:9px;color:#5CBCE6;letter-spacing:.12em;text-transform:uppercase;margin-top:1px">Scientific Bureau</div>
@@ -334,7 +690,157 @@ select,input{font-family:'Cairo',sans-serif}
       <div style="display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid #3FA9D8;padding-bottom:18px;margin-bottom:22px">
         <div style="display:flex;align-items:center;gap:16px">
           
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 150" width="500" height="150">  <defs><style>.pb{fill:#3FA9D8}.pt{font-family:'Arial Black',Arial;font-weight:900}</style></defs>  <rect x="5" y="5" width="140" height="140" rx="25" fill="none" stroke="#3FA9D8" stroke-width="6"/>  <g transform="translate(20,25) scale(0.6)">    <rect x="0" y="0" width="35" height="110" class="pb"/>    <path d="M35 0 L80 0 Q115 0 115 27 Q115 54 80 54 L35 54 Z" class="pb"/>    <rect x="53" y="15" width="40" height="10" fill="white"/>    <rect x="68" y="5" width="10" height="30" fill="white"/>    <path d="M115 27 Q140 27 140 65 Q140 85 125 85" fill="none" stroke="#3FA9D8" stroke-width="18" stroke-linecap="round"/>  </g>  <text x="160" y="75" class="pt pb" font-size="48" letter-spacing="2">PURE</text>  <text x="160" y="115" class="pt pb" font-size="36" letter-spacing="3">PHARMA</text>  <line x1="160" y1="125" x2="490" y2="125" stroke="#3FA9D8" stroke-width="2" opacity="0.3"/>  <text x="160" y="142" font-family="Arial" font-size="11" fill="#3FA9D8" letter-spacing="2" opacity="0.75">SCIENTIFIC BUREAU - BAGHDAD</text></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 150" width="500" height="150">  <defs><style>.pb{fill:#3FA9D8}.pt{font-family:'Arial Black',Arial;font-weight:900}
+ 
+/* ════════════════════════════════════════════════════════════════════════
+   RESPONSIVE DESIGN - تصميم متجاوب
+   ════════════════════════════════════════════════════════════════════════ */
+ 
+/* ─── زر القائمة للموبايل ─── */
+#mobileMenuBtn {
+  display: none;
+  position: fixed;
+  top: 14px;
+  right: 14px;
+  z-index: 998;
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, #3FA9D8, #2a8ab8);
+  border: none;
+  border-radius: 12px;
+  color: white;
+  font-size: 22px;
+  cursor: pointer;
+  box-shadow: 0 6px 16px rgba(63,169,216,0.35);
+  transition: all 0.3s;
+}
+#mobileMenuBtn:active { transform: scale(0.95); }
+ 
+/* ─── تابلت (768px - 1024px) ─── */
+@media (max-width: 1024px) {
+  .sidebar { width: 220px !important; }
+  [style*="grid-template-columns:repeat(4,1fr)"] { grid-template-columns: repeat(2, 1fr) !important; }
+}
+ 
+/* ─── موبايل (أقل من 768px) ─── */
+@media (max-width: 768px) {
+  /* إظهار زر القائمة */
+  #mobileMenuBtn { display: flex !important; align-items: center; justify-content: center; }
+  
+  /* إخفاء السايدبار */
+  .sidebar {
+    position: fixed !important;
+    left: -280px !important;
+    top: 0 !important;
+    height: 100vh !important;
+    width: 260px !important;
+    transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    z-index: 999 !important;
+    box-shadow: 4px 0 24px rgba(0,0,0,0.2) !important;
+  }
+  
+  .sidebar.mobile-open { left: 0 !important; }
+  
+  /* overlay عند فتح القائمة */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+    z-index: 998;
+  }
+  
+  body.menu-open::before {
+    opacity: 1;
+    pointer-events: all;
+  }
+  
+  /* تعديل المحتوى الرئيسي */
+  .main-content {
+    width: 100% !important;
+    margin: 0 !important;
+  }
+  
+  /* تصغير padding */
+  #view-dashboard, #view-matching, #view-archive, #view-reports, #view-about {
+    padding: 20px 14px !important;
+  }
+  
+  /* Grid columns */
+  [style*="grid-template-columns:repeat(4,1fr)"],
+  [style*="grid-template-columns:repeat(3,1fr)"] {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 12px !important;
+  }
+  
+  [style*="grid-template-columns:1fr 1fr"] {
+    grid-template-columns: 1fr !important;
+  }
+  
+  /* Cards */
+  .stat-card {
+    padding: 18px !important;
+  }
+  
+  .stat-card h3 {
+    font-size: 26px !important;
+  }
+  
+  /* Filter bar */
+  .filter-bar {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+  
+  .filter-bar input,
+  .filter-bar select,
+  .filter-bar button {
+    width: 100% !important;
+    min-width: unset !important;
+  }
+  
+  /* Buttons */
+  .btn {
+    font-size: 13px !important;
+    padding: 10px 16px !important;
+  }
+  
+  /* Tables - scroll horizontal */
+  table {
+    font-size: 12px !important;
+  }
+  
+  table th,
+  table td {
+    padding: 10px 8px !important;
+  }
+}
+ 
+/* ─── موبايل صغير (أقل من 480px) ─── */
+@media (max-width: 480px) {
+  [style*="grid-template-columns:1fr 1fr"] {
+    grid-template-columns: 1fr !important;
+  }
+  
+  .stat-card {
+    padding: 14px !important;
+  }
+  
+  /* تصغير الخطوط */
+  h1 { font-size: 22px !important; }
+  h2 { font-size: 18px !important; }
+  h3 { font-size: 16px !important; }
+  
+  /* About page hero */
+  #view-about [style*="padding:52px"] {
+    padding: 32px 20px 28px !important;
+  }
+}
+ 
+</style></defs>  <rect x="5" y="5" width="140" height="140" rx="25" fill="none" stroke="#3FA9D8" stroke-width="6"/>  <g transform="translate(20,25) scale(0.6)">    <rect x="0" y="0" width="35" height="110" class="pb"/>    <path d="M35 0 L80 0 Q115 0 115 27 Q115 54 80 54 L35 54 Z" class="pb"/>    <rect x="53" y="15" width="40" height="10" fill="white"/>    <rect x="68" y="5" width="10" height="30" fill="white"/>    <path d="M115 27 Q140 27 140 65 Q140 85 125 85" fill="none" stroke="#3FA9D8" stroke-width="18" stroke-linecap="round"/>  </g>  <text x="160" y="75" class="pt pb" font-size="48" letter-spacing="2">PURE</text>  <text x="160" y="115" class="pt pb" font-size="36" letter-spacing="3">PHARMA</text>  <line x1="160" y1="125" x2="490" y2="125" stroke="#3FA9D8" stroke-width="2" opacity="0.3"/>  <text x="160" y="142" font-family="Arial" font-size="11" fill="#3FA9D8" letter-spacing="2" opacity="0.75">SCIENTIFIC BUREAU - BAGHDAD</text></svg>
           </svg>
           <div style="border-right:2px solid #e2e8f0;padding-right:16px;margin-right:4px">
             <p style="font-size:10px;font-weight:700;color:#3FA9D8;letter-spacing:.1em;text-transform:uppercase">Trusted Partners in Health Solutions</p>
@@ -443,7 +949,157 @@ select,input{font-family:'Cairo',sans-serif}
     <div class="print-p2" style="background:white;border:1px solid var(--s200);border-radius:22px;padding:34px 38px;box-shadow:0 2px 8px rgba(0,0,0,.06)">
       <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid #3FA9D8;padding-bottom:14px;margin-bottom:18px">
         <div style="display:flex;align-items:center;gap:12px">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 90" width="320" height="90">  <defs><style>.b{fill:#3FA9D8}.t{font-family:'Arial Black',Arial;font-weight:900}</style></defs>  <rect x="3" y="3" width="84" height="84" rx="15" fill="none" stroke="#3FA9D8" stroke-width="4"/>  <g transform="translate(12,15) scale(0.45)">    <rect x="0" y="0" width="35" height="110" class="b"/>    <path d="M35 0 L80 0 Q115 0 115 27 Q115 54 80 54 L35 54 Z" class="b"/>    <rect x="53" y="15" width="40" height="10" fill="white"/>    <rect x="68" y="5" width="10" height="30" fill="white"/>    <path d="M115 27 Q140 27 140 65 Q140 85 125 85" fill="none" stroke="#3FA9D8" stroke-width="18" stroke-linecap="round"/>  </g>  <text x="95" y="42" class="t b" font-size="30" letter-spacing="1.5">PURE PHARMA</text>  <line x1="95" y1="52" x2="315" y2="52" stroke="#3FA9D8" stroke-width="1.5" opacity="0.25"/>  <text x="95" y="65" font-family="Arial" font-size="9" fill="#3FA9D8" letter-spacing="1.5" opacity="0.7">SCIENTIFIC BUREAU</text>  <text x="95" y="80" font-family="Arial" font-size="8" fill="#666" letter-spacing="0.8">info@pure-pharma.com  •  +964 750 426 5555</text></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 90" width="320" height="90">  <defs><style>.b{fill:#3FA9D8}.t{font-family:'Arial Black',Arial;font-weight:900}
+ 
+/* ════════════════════════════════════════════════════════════════════════
+   RESPONSIVE DESIGN - تصميم متجاوب
+   ════════════════════════════════════════════════════════════════════════ */
+ 
+/* ─── زر القائمة للموبايل ─── */
+#mobileMenuBtn {
+  display: none;
+  position: fixed;
+  top: 14px;
+  right: 14px;
+  z-index: 998;
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, #3FA9D8, #2a8ab8);
+  border: none;
+  border-radius: 12px;
+  color: white;
+  font-size: 22px;
+  cursor: pointer;
+  box-shadow: 0 6px 16px rgba(63,169,216,0.35);
+  transition: all 0.3s;
+}
+#mobileMenuBtn:active { transform: scale(0.95); }
+ 
+/* ─── تابلت (768px - 1024px) ─── */
+@media (max-width: 1024px) {
+  .sidebar { width: 220px !important; }
+  [style*="grid-template-columns:repeat(4,1fr)"] { grid-template-columns: repeat(2, 1fr) !important; }
+}
+ 
+/* ─── موبايل (أقل من 768px) ─── */
+@media (max-width: 768px) {
+  /* إظهار زر القائمة */
+  #mobileMenuBtn { display: flex !important; align-items: center; justify-content: center; }
+  
+  /* إخفاء السايدبار */
+  .sidebar {
+    position: fixed !important;
+    left: -280px !important;
+    top: 0 !important;
+    height: 100vh !important;
+    width: 260px !important;
+    transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    z-index: 999 !important;
+    box-shadow: 4px 0 24px rgba(0,0,0,0.2) !important;
+  }
+  
+  .sidebar.mobile-open { left: 0 !important; }
+  
+  /* overlay عند فتح القائمة */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+    z-index: 998;
+  }
+  
+  body.menu-open::before {
+    opacity: 1;
+    pointer-events: all;
+  }
+  
+  /* تعديل المحتوى الرئيسي */
+  .main-content {
+    width: 100% !important;
+    margin: 0 !important;
+  }
+  
+  /* تصغير padding */
+  #view-dashboard, #view-matching, #view-archive, #view-reports, #view-about {
+    padding: 20px 14px !important;
+  }
+  
+  /* Grid columns */
+  [style*="grid-template-columns:repeat(4,1fr)"],
+  [style*="grid-template-columns:repeat(3,1fr)"] {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 12px !important;
+  }
+  
+  [style*="grid-template-columns:1fr 1fr"] {
+    grid-template-columns: 1fr !important;
+  }
+  
+  /* Cards */
+  .stat-card {
+    padding: 18px !important;
+  }
+  
+  .stat-card h3 {
+    font-size: 26px !important;
+  }
+  
+  /* Filter bar */
+  .filter-bar {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+  
+  .filter-bar input,
+  .filter-bar select,
+  .filter-bar button {
+    width: 100% !important;
+    min-width: unset !important;
+  }
+  
+  /* Buttons */
+  .btn {
+    font-size: 13px !important;
+    padding: 10px 16px !important;
+  }
+  
+  /* Tables - scroll horizontal */
+  table {
+    font-size: 12px !important;
+  }
+  
+  table th,
+  table td {
+    padding: 10px 8px !important;
+  }
+}
+ 
+/* ─── موبايل صغير (أقل من 480px) ─── */
+@media (max-width: 480px) {
+  [style*="grid-template-columns:1fr 1fr"] {
+    grid-template-columns: 1fr !important;
+  }
+  
+  .stat-card {
+    padding: 14px !important;
+  }
+  
+  /* تصغير الخطوط */
+  h1 { font-size: 22px !important; }
+  h2 { font-size: 18px !important; }
+  h3 { font-size: 16px !important; }
+  
+  /* About page hero */
+  #view-about [style*="padding:52px"] {
+    padding: 32px 20px 28px !important;
+  }
+}
+ 
+</style></defs>  <rect x="3" y="3" width="84" height="84" rx="15" fill="none" stroke="#3FA9D8" stroke-width="4"/>  <g transform="translate(12,15) scale(0.45)">    <rect x="0" y="0" width="35" height="110" class="b"/>    <path d="M35 0 L80 0 Q115 0 115 27 Q115 54 80 54 L35 54 Z" class="b"/>    <rect x="53" y="15" width="40" height="10" fill="white"/>    <rect x="68" y="5" width="10" height="30" fill="white"/>    <path d="M115 27 Q140 27 140 65 Q140 85 125 85" fill="none" stroke="#3FA9D8" stroke-width="18" stroke-linecap="round"/>  </g>  <text x="95" y="42" class="t b" font-size="30" letter-spacing="1.5">PURE PHARMA</text>  <line x1="95" y1="52" x2="315" y2="52" stroke="#3FA9D8" stroke-width="1.5" opacity="0.25"/>  <text x="95" y="65" font-family="Arial" font-size="9" fill="#3FA9D8" letter-spacing="1.5" opacity="0.7">SCIENTIFIC BUREAU</text>  <text x="95" y="80" font-family="Arial" font-size="8" fill="#666" letter-spacing="0.8">info@pure-pharma.com  •  +964 750 426 5555</text></svg>
           </svg>
           <div style="border-right:1px solid var(--s200);padding-right:12px">
             <p style="font-size:9px;color:var(--s500);text-transform:uppercase;letter-spacing:.07em">تفاصيل الفواتير — Invoices Detail</p>
@@ -933,6 +1589,59 @@ const iraqGeo={
   "ديالى":["بعقوبة","المقدادية","الخالص","خانقين","بلدروز","جلولاء"]
 };
  
+/* ════════════════════════════════════════════════════════════════════════
+   MOBILE MENU FUNCTIONS - دوال قائمة الموبايل
+   ════════════════════════════════════════════════════════════════════════ */
+ 
+function toggleMobileMenu() {
+  const sidebar = document.querySelector('.sidebar');
+  const body = document.body;
+  
+  if (sidebar.classList.contains('mobile-open')) {
+    // إغلاق القائمة
+    sidebar.classList.remove('mobile-open');
+    body.classList.remove('menu-open');
+  } else {
+    // فتح القائمة
+    sidebar.classList.add('mobile-open');
+    body.classList.add('menu-open');
+  }
+}
+ 
+// إغلاق القائمة عند الضغط على overlay
+document.addEventListener('click', function(e) {
+  const sidebar = document.querySelector('.sidebar');
+  const btn = document.getElementById('mobileMenuBtn');
+  const body = document.body;
+  
+  if (body.classList.contains('menu-open') && 
+      !sidebar.contains(e.target) && 
+      e.target !== btn && 
+      !btn.contains(e.target)) {
+    sidebar.classList.remove('mobile-open');
+    body.classList.remove('menu-open');
+  }
+});
+ 
+// إغلاق القائمة عند اختيار عنصر من القائمة
+document.addEventListener('DOMContentLoaded', function() {
+  const navItems = document.querySelectorAll('.nav-item');
+  navItems.forEach(item => {
+    item.addEventListener('click', function() {
+      if (window.innerWidth <= 768) {
+        const sidebar = document.querySelector('.sidebar');
+        const body = document.body;
+        sidebar.classList.remove('mobile-open');
+        body.classList.remove('menu-open');
+      }
+    });
+  });
+});
+ 
+/* ════════════════════════════════════════════════════════════════════════
+   SYSTEM INITIALIZATION - تهيئة النظام
+   ════════════════════════════════════════════════════════════════════════ */
+ 
 function initSystem(){
   const p=document.getElementById('provInput');
   p.innerHTML='<option value="">اختر المحافظة...</option>';
@@ -1011,7 +1720,8 @@ async function handleFiles(files){
 }
  
 // === معالجة PDF بدون تجمد ===
-async function processPDF(file,pb,pt,pd){
+async /* ─── معالجة PDF بدون تجميد ─── */
+function processPDF(file,pb,pt,pd){
   const pdfJS=window['pdfjs-dist/build/pdf'];
   pdfJS.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
   const buf=await file.arrayBuffer();
@@ -1132,6 +1842,7 @@ function sync(){
   calculate();
 }
  
+/* ─── حساب المبالغ ─── */
 function calculate(){
   let tot=0;
   db.forEach(item=>{if(item.status==='ok')tot+=parseFloat(String(item.remain).replace(/,/g,''))||0;});
@@ -1156,6 +1867,7 @@ function setFilter(f){
   renderList();
 }
  
+/* ─── عرض قائمة الفواتير ─── */
 function renderList(){
   const list=document.getElementById('billsList');
   document.getElementById('billsCountDisplay').innerText=db.length;
@@ -1299,6 +2011,7 @@ function toggleCollapse(idx){
 }
  
 // === الأرشيف ===
+/* ─── حفظ في الأرشيف ─── */
 function saveToArchive(){
   const client=document.getElementById('outClient').value.trim();
   if(!client)return alert('يرجى كتابة اسم العميل أولاً.');
@@ -1332,6 +2045,7 @@ function saveToArchive(){
   alert('✓ تم الحفظ في الأرشيف.');updateDash();
 }
  
+/* ─── تحديث لوحة القيادة ─── */
 function updateDash(){
   const arch=gS('pure_archive');
   document.getElementById('dash-total-matches').innerText=arch.length;
@@ -1504,6 +2218,7 @@ function clearArchFilters(){
   renderArchiveTable();
 }
  
+/* ─── عرض جدول الأرشيف ─── */
 function renderArchiveTable(){
   initArchFilterSelects();
   const search=(document.getElementById('archiveSearch').value||'').toLowerCase();
