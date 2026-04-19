@@ -1,57 +1,9 @@
-<!--
-════════════════════════════════════════════════════════════════════════════════
-  PURE PHARMA - نظام المطابقة الآلي المتكامل
-  Automated Reconciliation ERP System
-════════════════════════════════════════════════════════════════════════════════
- 
-  المطور: المهندس نورالدين صباح حسين
-  Developer: Eng. Nooraldein Sabah Hussein
-  
-  Instagram: @eng.nooraldein
-  Telegram: @rucno
-  
-  العميل: مكتب بيور العلمي - بغداد
-  Client: Pure Pharma Scientific Bureau - Baghdad
-  
-  التاريخ: April 2026
-  الإصدار: v8.0
-  
-════════════════════════════════════════════════════════════════════════════════
-  محتويات الملف / File Contents:
-════════════════════════════════════════════════════════════════════════════════
-  
-  [1] HTML Structure
-      - Sidebar Navigation
-      - Main Content Area
-      - Mobile Menu
-  
-  [2] CSS Styles  
-      - Root Variables (Colors)
-      - Component Styles
-      - Responsive Media Queries
-      - Print Styles
-  
-  [3] JavaScript Logic
-      - System Initialization
-      - PDF/Excel/Word Processing
-      - Database Management
-      - UI Rendering
-      - Print Functions
-      - Mobile Functions
-  
-════════════════════════════════════════════════════════════════════════════════
--->
- 
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<!-- ═══ Mobile Optimization ═══ -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#3FA9D8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#3FA9D8">
 <title>نظام بيور العلمي - المتطور</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -59,6 +11,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
+/* التنسيقات الأصلية */
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Cairo',sans-serif;background:#f8fafc;overflow-x:hidden}
 :root{
@@ -115,6 +68,7 @@ select,input{font-family:'Cairo',sans-serif}
 ::-webkit-scrollbar{width:5px;height:5px}
 ::-webkit-scrollbar-track{background:var(--s100)}
 ::-webkit-scrollbar-thumb{background:var(--s300);border-radius:4px}
+
 @media print{
   @page{size:A4 portrait;margin:10mm 12mm}
   *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
@@ -125,342 +79,174 @@ select,input{font-family:'Cairo',sans-serif}
   .view-section:not(#view-matching){display:none!important}
   .report-container{border:none!important;box-shadow:none!important;padding:0!important;margin:0!important;border-radius:0!important}
   .print-p2{border:none!important;box-shadow:none!important;padding:0!important;margin:0!important;border-radius:0!important}
-  /* الورقة الأولى فقط */
   body.print-p1-only .print-p2{display:none!important}
-  /* الورقة الثانية فقط */
   body.print-p2-only .report-container{display:none!important}
   body.print-p2-only .print-p2{display:block!important;page-break-before:avoid!important}
-  /* الاثنتان معاً */
   body.print-both .print-p2{display:block!important;page-break-before:always!important}
-  /* إخفاء div الأقسام الفارغة */
   .inv-collapsed .bill-inner{display:none!important}
 }
- 
- 
+
 /* ════════════════════════════════════════════════════════════════════════
-   RESPONSIVE DESIGN - تصميم متجاوب
+   RESPONSIVE DESIGN & MOBILE MENU
    ════════════════════════════════════════════════════════════════════════ */
- 
-/* ─── زر القائمة للموبايل ─── */
 #mobileMenuBtn {
-  display: none;
-  position: fixed;
-  top: 14px;
-  right: 14px;
-  z-index: 998;
-  width: 48px;
-  height: 48px;
-  background: linear-gradient(135deg, #3FA9D8, #2a8ab8);
-  border: none;
-  border-radius: 12px;
-  color: white;
-  font-size: 22px;
-  cursor: pointer;
-  box-shadow: 0 6px 16px rgba(63,169,216,0.35);
-  transition: all 0.3s;
+  display: none; position: fixed; top: 14px; right: 14px; z-index: 998;
+  width: 48px; height: 48px; background: linear-gradient(135deg, #3FA9D8, #2a8ab8);
+  border: none; border-radius: 12px; color: white; font-size: 22px; cursor: pointer;
+  box-shadow: 0 6px 16px rgba(63,169,216,0.35); transition: all 0.3s;
 }
 #mobileMenuBtn:active { transform: scale(0.95); }
- 
-/* ─── تابلت (768px - 1024px) ─── */
+
 @media (max-width: 1024px) {
   .sidebar { width: 220px !important; }
   [style*="grid-template-columns:repeat(4,1fr)"] { grid-template-columns: repeat(2, 1fr) !important; }
 }
- 
-/* ─── موبايل (أقل من 768px) ─── */
+
 @media (max-width: 768px) {
-  /* إظهار زر القائمة */
   #mobileMenuBtn { display: flex !important; align-items: center; justify-content: center; }
-  
-  /* إخفاء السايدبار */
   .sidebar {
-    position: fixed !important;
-    left: -280px !important;
-    top: 0 !important;
-    height: 100vh !important;
-    width: 260px !important;
+    position: fixed !important; left: -280px !important; top: 0 !important;
+    height: 100vh !important; width: 260px !important;
     transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-    z-index: 999 !important;
-    box-shadow: 4px 0 24px rgba(0,0,0,0.2) !important;
+    z-index: 999 !important; box-shadow: 4px 0 24px rgba(0,0,0,0.2) !important;
   }
-  
   .sidebar.mobile-open { left: 0 !important; }
-  
-  /* overlay عند فتح القائمة */
   body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.5);
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s;
-    z-index: 998;
+    content: ''; position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+    opacity: 0; pointer-events: none; transition: opacity 0.3s; z-index: 998;
   }
-  
-  body.menu-open::before {
-    opacity: 1;
-    pointer-events: all;
+  body.menu-open::before { opacity: 1; pointer-events: all; }
+  .main-content { width: 100% !important; margin: 0 !important; }
+  #view-dashboard, #view-matching, #view-archive, #view-reports, #view-about { padding: 20px 14px !important; }
+  [style*="grid-template-columns:repeat(4,1fr)"], [style*="grid-template-columns:repeat(3,1fr)"] {
+    grid-template-columns: 1fr 1fr !important; gap: 12px !important;
   }
-  
-  /* تعديل المحتوى الرئيسي */
-  .main-content {
-    width: 100% !important;
-    margin: 0 !important;
-  }
-  
-  /* تصغير padding */
-  #view-dashboard, #view-matching, #view-archive, #view-reports, #view-about {
-    padding: 20px 14px !important;
-  }
-  
-  /* Grid columns */
-  [style*="grid-template-columns:repeat(4,1fr)"],
-  [style*="grid-template-columns:repeat(3,1fr)"] {
-    grid-template-columns: 1fr 1fr !important;
-    gap: 12px !important;
-  }
-  
-  [style*="grid-template-columns:1fr 1fr"] {
-    grid-template-columns: 1fr !important;
-  }
-  
-  /* Cards */
-  .stat-card {
-    padding: 18px !important;
-  }
-  
-  .stat-card h3 {
-    font-size: 26px !important;
-  }
-  
-  /* Filter bar */
-  .filter-bar {
-    flex-direction: column !important;
-    align-items: stretch !important;
-  }
-  
-  .filter-bar input,
-  .filter-bar select,
-  .filter-bar button {
-    width: 100% !important;
-    min-width: unset !important;
-  }
-  
-  /* Buttons */
-  .btn {
-    font-size: 13px !important;
-    padding: 10px 16px !important;
-  }
-  
-  /* Tables - scroll horizontal */
-  table {
-    font-size: 12px !important;
-  }
-  
-  table th,
-  table td {
-    padding: 10px 8px !important;
-  }
+  [style*="grid-template-columns:1fr 1fr"] { grid-template-columns: 1fr !important; }
+  .stat-card { padding: 18px !important; }
+  .stat-card h3 { font-size: 26px !important; }
+  .filter-bar { flex-direction: column !important; align-items: stretch !important; }
+  .filter-bar input, .filter-bar select, .filter-bar button { width: 100% !important; min-width: unset !important; }
+  .btn { font-size: 13px !important; padding: 10px 16px !important; }
+  table { font-size: 12px !important; }
+  table th, table td { padding: 10px 8px !important; }
 }
- 
-/* ─── موبايل صغير (أقل من 480px) ─── */
+
 @media (max-width: 480px) {
-  [style*="grid-template-columns:1fr 1fr"] {
-    grid-template-columns: 1fr !important;
-  }
-  
-  .stat-card {
-    padding: 14px !important;
-  }
-  
-  /* تصغير الخطوط */
-  h1 { font-size: 22px !important; }
-  h2 { font-size: 18px !important; }
-  h3 { font-size: 16px !important; }
-  
-  /* About page hero */
-  #view-about [style*="padding:52px"] {
-    padding: 32px 20px 28px !important;
-  }
+  [style*="grid-template-columns:1fr 1fr"] { grid-template-columns: 1fr !important; }
+  .stat-card { padding: 14px !important; }
+  h1 { font-size: 22px !important; } h2 { font-size: 18px !important; } h3 { font-size: 16px !important; }
+  #view-about [style*="padding:52px"] { padding: 32px 20px 28px !important; }
 }
- 
+
+/* ════════════════════════════════════════════════════════════════════════
+   LOGIN & PERMISSIONS MODALS (New CSS)
+   ════════════════════════════════════════════════════════════════════════ */
+#loginGate {
+  position: fixed; inset: 0; background: var(--s900); z-index: 100000;
+  display: flex; align-items: center; justify-content: center; font-family: 'Cairo', sans-serif;
+}
+.login-box {
+  background: white; padding: 40px 30px; border-radius: 20px; width: 90%; max-width: 380px;
+  text-align: center; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+}
+.login-input {
+  width: 100%; padding: 14px; margin-bottom: 15px; border: 1px solid var(--s200);
+  border-radius: 10px; outline: none; font-family: 'Cairo', sans-serif; text-align: center;
+}
+.login-input:focus { border-color: var(--bl); }
+.login-btn {
+  width: 100%; padding: 14px; background: #3FA9D8; color: white; border: none;
+  border-radius: 10px; cursor: pointer; font-weight: 900; font-size: 16px; font-family: 'Cairo';
+}
+#loginError { color: var(--rd); margin-top: 15px; display: none; font-size: 13px; font-weight: 700; }
+
+#permModalOverlay {
+  display:none; position:fixed; inset:0; background:rgba(15,23,42,.65); backdrop-filter:blur(4px);
+  z-index:99999; align-items:center; justify-content:center; padding:16px;
+}
+.perm-box {
+  background:white; border-radius:22px; width:100%; max-width:350px; overflow:hidden;
+}
+.perm-header {
+  background:#3FA9D8; padding:18px 22px; color:white; display:flex; justify-content:space-between; align-items:center;
+}
+.perm-row {
+  display:flex; justify-content:space-between; padding:12px; border-bottom:1px solid var(--s100);
+  font-size:14px; font-weight:700; color:var(--s700);
+}
+/* Toggle Switch */
+.switch { position: relative; display: inline-block; width: 44px; height: 24px; }
+.switch input { opacity: 0; width: 0; height: 0; }
+.slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 24px; }
+.slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+input:checked + .slider { background-color: #3FA9D8; }
+input:checked + .slider:before { transform: translateX(20px); }
 </style>
 </head>
 <body style="display:flex;height:100vh;overflow:hidden;color:var(--s800)" onload="initSystem()">
- 
-<!-- ═══════════════════════════════════════════════════════════
-     زر القائمة للموبايل / Mobile Menu Button
-     ═══════════════════════════════════════════════════════════ -->
+
+<div id="loginGate">
+  <div class="login-box">
+    <i class="fa-solid fa-shield-halved" style="font-size: 50px; color: #3FA9D8; margin-bottom: 20px;"></i>
+    <h2 style="margin-bottom: 24px; color: var(--s900); font-weight: 900;">بيور فارما - تسجيل الدخول</h2>
+    <input type="text" id="loginUser" class="login-input" placeholder="اسم المستخدم">
+    <input type="password" id="loginPass" class="login-input" placeholder="الرمز السري">
+    <button onclick="attemptLogin()" class="login-btn">تسجيل الدخول</button>
+    <p id="loginError">خطأ في اسم المستخدم أو الرمز السري!</p>
+  </div>
+</div>
+
+<div id="permModalOverlay">
+  <div class="perm-box">
+    <div class="perm-header">
+      <h3 style="font-size:16px;font-weight:900"><i class="fa-solid fa-lock"></i> إدارة الصلاحيات</h3>
+      <button onclick="closePermModal()" style="background:none;border:none;color:white;font-size:20px;cursor:pointer">✕</button>
+    </div>
+    <div style="padding:15px; background:var(--s50);">
+      <div class="perm-row">
+        <span>لوحة القيادة</span>
+        <label class="switch"><input type="checkbox" id="chk_dashboard" onchange="toggleSectionPerm('dashboard', this.checked)"><span class="slider"></span></label>
+      </div>
+      <div class="perm-row">
+        <span>إنشاء مطابقة آلية</span>
+        <label class="switch"><input type="checkbox" id="chk_matching" onchange="toggleSectionPerm('matching', this.checked)"><span class="slider"></span></label>
+      </div>
+      <div class="perm-row">
+        <span>قاعدة البيانات</span>
+        <label class="switch"><input type="checkbox" id="chk_archive" onchange="toggleSectionPerm('archive', this.checked)"><span class="slider"></span></label>
+      </div>
+      <div class="perm-row" style="border-bottom:none;">
+        <span>الإدارة والمندوبين</span>
+        <label class="switch"><input type="checkbox" id="chk_reports" onchange="toggleSectionPerm('reports', this.checked)"><span class="slider"></span></label>
+      </div>
+    </div>
+  </div>
+</div>
+
 <button id="mobileMenuBtn" onclick="toggleMobileMenu()" aria-label="فتح القائمة">
   <i class="fa-solid fa-bars"></i>
 </button>
- 
-<!-- SIDEBAR -->
+
 <aside class="sidebar no-print" style="width:256px;background:#1a3d4d;color:#a7d4b8;display:flex;flex-direction:column;height:100%;flex-shrink:0;z-index:20;box-shadow:2px 0 20px rgba(0,0,0,.2)">
   <div style="padding:20px 18px 16px;border-bottom:1px solid rgba(255,255,255,.08);text-align:center">
-    <!-- شعار بيور فارما الرسمي -->
-    <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:10px">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">  <defs><style>.pp-b{fill:#3FA9D8}
- 
-/* ════════════════════════════════════════════════════════════════════════
-   RESPONSIVE DESIGN - تصميم متجاوب
-   ════════════════════════════════════════════════════════════════════════ */
- 
-/* ─── زر القائمة للموبايل ─── */
-#mobileMenuBtn {
-  display: none;
-  position: fixed;
-  top: 14px;
-  right: 14px;
-  z-index: 998;
-  width: 48px;
-  height: 48px;
-  background: linear-gradient(135deg, #3FA9D8, #2a8ab8);
-  border: none;
-  border-radius: 12px;
-  color: white;
-  font-size: 22px;
-  cursor: pointer;
-  box-shadow: 0 6px 16px rgba(63,169,216,0.35);
-  transition: all 0.3s;
-}
-#mobileMenuBtn:active { transform: scale(0.95); }
- 
-/* ─── تابلت (768px - 1024px) ─── */
-@media (max-width: 1024px) {
-  .sidebar { width: 220px !important; }
-  [style*="grid-template-columns:repeat(4,1fr)"] { grid-template-columns: repeat(2, 1fr) !important; }
-}
- 
-/* ─── موبايل (أقل من 768px) ─── */
-@media (max-width: 768px) {
-  /* إظهار زر القائمة */
-  #mobileMenuBtn { display: flex !important; align-items: center; justify-content: center; }
-  
-  /* إخفاء السايدبار */
-  .sidebar {
-    position: fixed !important;
-    left: -280px !important;
-    top: 0 !important;
-    height: 100vh !important;
-    width: 260px !important;
-    transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-    z-index: 999 !important;
-    box-shadow: 4px 0 24px rgba(0,0,0,0.2) !important;
-  }
-  
-  .sidebar.mobile-open { left: 0 !important; }
-  
-  /* overlay عند فتح القائمة */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.5);
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s;
-    z-index: 998;
-  }
-  
-  body.menu-open::before {
-    opacity: 1;
-    pointer-events: all;
-  }
-  
-  /* تعديل المحتوى الرئيسي */
-  .main-content {
-    width: 100% !important;
-    margin: 0 !important;
-  }
-  
-  /* تصغير padding */
-  #view-dashboard, #view-matching, #view-archive, #view-reports, #view-about {
-    padding: 20px 14px !important;
-  }
-  
-  /* Grid columns */
-  [style*="grid-template-columns:repeat(4,1fr)"],
-  [style*="grid-template-columns:repeat(3,1fr)"] {
-    grid-template-columns: 1fr 1fr !important;
-    gap: 12px !important;
-  }
-  
-  [style*="grid-template-columns:1fr 1fr"] {
-    grid-template-columns: 1fr !important;
-  }
-  
-  /* Cards */
-  .stat-card {
-    padding: 18px !important;
-  }
-  
-  .stat-card h3 {
-    font-size: 26px !important;
-  }
-  
-  /* Filter bar */
-  .filter-bar {
-    flex-direction: column !important;
-    align-items: stretch !important;
-  }
-  
-  .filter-bar input,
-  .filter-bar select,
-  .filter-bar button {
-    width: 100% !important;
-    min-width: unset !important;
-  }
-  
-  /* Buttons */
-  .btn {
-    font-size: 13px !important;
-    padding: 10px 16px !important;
-  }
-  
-  /* Tables - scroll horizontal */
-  table {
-    font-size: 12px !important;
-  }
-  
-  table th,
-  table td {
-    padding: 10px 8px !important;
-  }
-}
- 
-/* ─── موبايل صغير (أقل من 480px) ─── */
-@media (max-width: 480px) {
-  [style*="grid-template-columns:1fr 1fr"] {
-    grid-template-columns: 1fr !important;
-  }
-  
-  .stat-card {
-    padding: 14px !important;
-  }
-  
-  /* تصغير الخطوط */
-  h1 { font-size: 22px !important; }
-  h2 { font-size: 18px !important; }
-  h3 { font-size: 16px !important; }
-  
-  /* About page hero */
-  #view-about [style*="padding:52px"] {
-    padding: 32px 20px 28px !important;
-  }
-}
- 
-</style></defs>  <rect x="10" y="10" width="180" height="180" rx="30" fill="none" stroke="#3FA9D8" stroke-width="8"/>  <g transform="translate(35,45) scale(0.85)">    <rect x="0" y="0" width="35" height="110" class="pp-b"/>    <path d="M35 0 L80 0 Q115 0 115 27 Q115 54 80 54 L35 54 Z" class="pp-b"/>    <rect x="53" y="15" width="40" height="10" fill="white"/>    <rect x="68" y="5" width="10" height="30" fill="white"/>    <path d="M115 27 Q140 27 140 65 Q140 85 125 85" fill="none" stroke="#3FA9D8" stroke-width="18" stroke-linecap="round"/>  </g>  <text x="100" y="150" text-anchor="middle" font-family="Arial Black,Arial" font-weight="900" font-size="28" fill="#3FA9D8" letter-spacing="1">PURE</text>  <text x="100" y="175" text-anchor="middle" font-family="Arial Black,Arial" font-weight="900" font-size="20" fill="#3FA9D8" letter-spacing="1.5">PHARMA</text></svg>
-      <div style="text-align:right">
-        <div style="font-size:17px;font-weight:900;color:white;letter-spacing:.3px;font-family:Georgia,serif">Pure Pharma</div>
-        <div style="font-size:9px;color:#5CBCE6;letter-spacing:.12em;text-transform:uppercase;margin-top:1px">Scientific Bureau</div>
-      </div>
-    </div>
-    <div style="display:inline-block;background:rgba(45,134,83,.25);border:1px solid rgba(45,134,83,.4);border-radius:20px;padding:3px 12px">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="150" height="150" style="display:block; margin:0 auto;">
+      <defs><style>.pp-blue{fill:#3FA9D8}</style></defs>
+      <rect x="10" y="10" width="180" height="180" rx="30" fill="none" stroke="#3FA9D8" stroke-width="8"/>
+      <g transform="translate(45,25) scale(0.75)">
+        <rect x="0" y="0" width="35" height="110" class="pp-blue"/>
+        <path d="M35 0 L80 0 Q115 0 115 27 Q115 54 80 54 L35 54 Z" class="pp-blue"/>
+        <rect x="53" y="15" width="40" height="10" fill="white"/>
+        <rect x="68" y="5" width="10" height="30" fill="white"/>
+        <path d="M115 27 Q140 27 140 65 Q140 85 125 85" fill="none" stroke="#3FA9D8" stroke-width="16" stroke-linecap="round"/>
+      </g>
+      <text x="100" y="145" text-anchor="middle" font-family="'Arial Black', Arial, sans-serif" font-weight="900" font-size="28" fill="#3FA9D8" letter-spacing="2">PURE</text>
+      <text x="100" y="172" text-anchor="middle" font-family="'Arial Black', Arial, sans-serif" font-weight="900" font-size="16" fill="#3FA9D8" letter-spacing="1.5">PHARMA</text>
+    </svg>
+    <div style="display:inline-block;background:rgba(45,134,83,.25);border:1px solid rgba(45,134,83,.4);border-radius:20px;padding:3px 12px; margin-top:10px;">
       <p style="font-size:9px;color:#5CBCE6;letter-spacing:.1em;text-transform:uppercase;font-weight:700">Smart ERP System</p>
     </div>
   </div>
+  
   <nav style="flex:1;padding:18px 14px;display:flex;flex-direction:column;gap:6px;overflow-y:auto">
     <div onclick="switchView('dashboard')" id="nav-dashboard" class="nav-item active" style="color:white">
       <i class="fa-solid fa-chart-pie" style="width:20px;text-align:center"></i> لوحة القيادة
@@ -474,12 +260,16 @@ select,input{font-family:'Cairo',sans-serif}
     <div onclick="switchView('reports')" id="nav-reports" class="nav-item">
       <i class="fa-solid fa-users-gear" style="width:20px;text-align:center"></i> الإدارة والمندوبين
     </div>
-    <!-- فاصل -->
     <div style="height:1px;background:rgba(255,255,255,.07);margin:8px 0"></div>
     <div onclick="switchView('about')" id="nav-about" class="nav-item">
       <i class="fa-solid fa-building-columns" style="width:20px;text-align:center"></i> عن بيور فارما
     </div>
+    
+    <div onclick="openPermModal()" id="nav-settings-btn" class="nav-item" style="margin-top:auto; background:rgba(0,0,0,0.2); color:#5CBCE6;">
+      <i class="fa-solid fa-user-lock" style="width:20px;text-align:center"></i> الصلاحيات
+    </div>
   </nav>
+  
   <div style="padding:14px;border-top:1px solid #1e293b;background:#0f172a">
     <div style="display:flex;align-items:center;gap:12px">
       <div style="width:38px;height:38px;background:linear-gradient(135deg,#10b981,#059669);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:15px">
@@ -494,11 +284,9 @@ select,input{font-family:'Cairo',sans-serif}
     </div>
   </div>
 </aside>
- 
-<!-- MAIN -->
+
 <main class="main-content" style="flex:1;height:100%;overflow-y:auto;background:var(--s50)">
- 
-<!-- DASHBOARD -->
+
 <div id="view-dashboard" class="view-section active" style="padding:36px">
   <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:28px">
     <div>
@@ -529,20 +317,19 @@ select,input{font-family:'Cairo',sans-serif}
       <h3 style="font-size:15px;font-weight:900;color:white;font-family:monospace" id="dash-top-match">0 IQD</h3>
     </div>
   </div>
-  <!-- بطاقات المناطق -->
+  
   <div style="margin-bottom:20px">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
       <h3 style="font-size:15px;font-weight:900;display:flex;align-items:center;gap:8px">
         <i class="fa-solid fa-map-location-dot" style="color:var(--bl)"></i> نشاط المناطق
       </h3>
-      <button onclick="clearDashRegionFilter()" id="dashRegionClearBtn" style="display:none;padding:5px 12px;border:1px solid var(--s200);border-radius:8px;font-size:11px;font-family:'Cairo',sans-serif;font-weight:700;cursor:pointer;background:var(--rd-l);color:var(--rd);transition:.2s">
+      <button onclick="clearDashRegionFilter()" id="dashRegionClearBtn" style="display:none;padding:5px 12px;border:1px solid var(--s200);border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;background:var(--rd-l);color:var(--rd);transition:.2s">
         <i class="fa-solid fa-xmark"></i> إلغاء فلتر المنطقة
       </button>
     </div>
     <div id="regionCards" style="display:flex;gap:10px;flex-wrap:wrap"></div>
   </div>
- 
-  <!-- جدول العملاء -->
+
   <div style="background:white;border:1px solid var(--s200);border-radius:20px;padding:22px;box-shadow:0 1px 3px rgba(0,0,0,.07)">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--s100);flex-wrap:wrap;gap:10px">
       <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
@@ -552,8 +339,7 @@ select,input{font-family:'Cairo',sans-serif}
         <span id="dashFilterTag" style="display:none;background:var(--bl-l);color:var(--bl);padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;border:1px solid #bfdbfe"></span>
       </div>
       <div style="display:flex;gap:8px;align-items:center">
-        <!-- فلتر المندوب في الداش -->
-        <select id="dashRepFilter" onchange="renderClientStats()" style="padding:7px 10px;border:1px solid var(--s200);border-radius:10px;font-size:12px;font-family:'Cairo',sans-serif;font-weight:700;outline:none;background:white">
+        <select id="dashRepFilter" onchange="renderClientStats()" style="padding:7px 10px;border:1px solid var(--s200);border-radius:10px;font-size:12px;font-weight:700;outline:none;background:white">
           <option value="">كل المندوبين</option>
         </select>
         <div style="position:relative;width:220px">
@@ -580,12 +366,10 @@ select,input{font-family:'Cairo',sans-serif}
     </div>
   </div>
 </div>
- 
-<!-- MATCHING -->
+
 <div id="view-matching" class="view-section" style="padding:22px 30px">
   <div style="max-width:1100px;margin:0 auto">
- 
-    <!-- إعدادات -->
+
     <div class="no-print" style="background:white;border:1px solid var(--s200);border-radius:22px;padding:22px;margin-bottom:18px;box-shadow:0 1px 3px rgba(0,0,0,.07)">
       <h2 style="font-size:17px;font-weight:900;margin-bottom:18px;display:flex;align-items:center;gap:8px">
         <i class="fa-solid fa-gears" style="color:var(--bl)"></i> إعدادات المطابقة الآلية
@@ -612,8 +396,7 @@ select,input{font-family:'Cairo',sans-serif}
           <select id="cityInput" onchange="sync()" style="width:100%;background:var(--s50);border:1px solid var(--s200);border-radius:10px;padding:8px 10px;font-size:12px;font-weight:700;outline:none"></select>
         </div>
       </div>
- 
-      <!-- منطقة رفع الملفات -->
+
       <div id="dropZone" class="drop-zone" style="margin-bottom:18px">
         <input type="file" id="sysFile" style="display:none" accept=".pdf,.xlsx,.xls,.docx" multiple>
         <div id="uploadUi">
@@ -621,7 +404,7 @@ select,input{font-family:'Cairo',sans-serif}
             <i class="fa-solid fa-cloud-arrow-up" style="font-size:26px;color:var(--bl)"></i>
           </div>
           <p style="font-size:14px;font-weight:900;color:var(--bl);margin-bottom:4px">اسحب ملف PDF هنا أو اضغط للرفع</p>
-          <p style="font-size:11px;color:var(--s500);font-weight:700">يدعم: PDF, Excel, Word — معالجة ذكية بدون تجمد للملفات الكبيرة</p>
+          <p style="font-size:11px;color:var(--s500);font-weight:700">يدعم: PDF, Excel, Word</p>
         </div>
         <div id="progressCont" style="margin-top:14px;max-width:380px;margin-inline:auto">
           <div id="pTrack"><div id="pBar"></div></div>
@@ -629,8 +412,7 @@ select,input{font-family:'Cairo',sans-serif}
           <p id="pDet" style="font-size:10px;color:var(--s500);margin-top:3px;text-align:center"></p>
         </div>
       </div>
- 
-      <!-- حقول سفلية -->
+
       <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:10px;background:var(--s50);margin:-22px -22px -22px;padding:18px 22px;border-top:1px solid var(--s100);border-radius:0 0 22px 22px;align-items:end">
         <div>
           <label style="display:block;font-size:10px;margin-bottom:4px;color:#ea580c;font-weight:700;text-transform:uppercase">الرصيد السابق</label>
@@ -657,11 +439,9 @@ select,input{font-family:'Cairo',sans-serif}
         </div>
       </div>
     </div>
- 
-    <!-- أزرار -->
+
     <div class="no-print" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px">
       <button onclick="saveToArchive()" class="btn btn-dk"><i class="fa-solid fa-cloud-arrow-up"></i> حفظ في الأرشيف</button>
-      <!-- زر طباعة مع dropdown -->
       <div style="position:relative;display:inline-block" id="printDropWrap">
         <button onclick="togglePrintMenu()" class="btn btn-bl" style="gap:10px">
           <i class="fa-solid fa-print"></i> طباعة
@@ -683,164 +463,24 @@ select,input{font-family:'Cairo',sans-serif}
       <button onclick="showManualInvoiceModal()" class="btn btn-am"><i class="fa-solid fa-plus"></i> إضافة فاتورة يدوياً</button>
       <button onclick="location.reload()" class="btn btn-rg" title="إعادة ضبط"><i class="fa-solid fa-rotate-right"></i></button>
     </div>
- 
-    <!-- ورقة الطباعة الأولى -->
+
     <div class="report-container" style="background:white;border:1px solid var(--s200);border-radius:22px;padding:34px 38px;box-shadow:0 2px 8px rgba(0,0,0,.06);margin-bottom:18px">
-      <!-- رأس -->
       <div style="display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid #3FA9D8;padding-bottom:18px;margin-bottom:22px">
         <div style="display:flex;align-items:center;gap:16px">
-          
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 150" width="500" height="150">  <defs><style>.pb{fill:#3FA9D8}.pt{font-family:'Arial Black',Arial;font-weight:900}
- 
-/* ════════════════════════════════════════════════════════════════════════
-   RESPONSIVE DESIGN - تصميم متجاوب
-   ════════════════════════════════════════════════════════════════════════ */
- 
-/* ─── زر القائمة للموبايل ─── */
-#mobileMenuBtn {
-  display: none;
-  position: fixed;
-  top: 14px;
-  right: 14px;
-  z-index: 998;
-  width: 48px;
-  height: 48px;
-  background: linear-gradient(135deg, #3FA9D8, #2a8ab8);
-  border: none;
-  border-radius: 12px;
-  color: white;
-  font-size: 22px;
-  cursor: pointer;
-  box-shadow: 0 6px 16px rgba(63,169,216,0.35);
-  transition: all 0.3s;
-}
-#mobileMenuBtn:active { transform: scale(0.95); }
- 
-/* ─── تابلت (768px - 1024px) ─── */
-@media (max-width: 1024px) {
-  .sidebar { width: 220px !important; }
-  [style*="grid-template-columns:repeat(4,1fr)"] { grid-template-columns: repeat(2, 1fr) !important; }
-}
- 
-/* ─── موبايل (أقل من 768px) ─── */
-@media (max-width: 768px) {
-  /* إظهار زر القائمة */
-  #mobileMenuBtn { display: flex !important; align-items: center; justify-content: center; }
-  
-  /* إخفاء السايدبار */
-  .sidebar {
-    position: fixed !important;
-    left: -280px !important;
-    top: 0 !important;
-    height: 100vh !important;
-    width: 260px !important;
-    transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-    z-index: 999 !important;
-    box-shadow: 4px 0 24px rgba(0,0,0,0.2) !important;
-  }
-  
-  .sidebar.mobile-open { left: 0 !important; }
-  
-  /* overlay عند فتح القائمة */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.5);
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s;
-    z-index: 998;
-  }
-  
-  body.menu-open::before {
-    opacity: 1;
-    pointer-events: all;
-  }
-  
-  /* تعديل المحتوى الرئيسي */
-  .main-content {
-    width: 100% !important;
-    margin: 0 !important;
-  }
-  
-  /* تصغير padding */
-  #view-dashboard, #view-matching, #view-archive, #view-reports, #view-about {
-    padding: 20px 14px !important;
-  }
-  
-  /* Grid columns */
-  [style*="grid-template-columns:repeat(4,1fr)"],
-  [style*="grid-template-columns:repeat(3,1fr)"] {
-    grid-template-columns: 1fr 1fr !important;
-    gap: 12px !important;
-  }
-  
-  [style*="grid-template-columns:1fr 1fr"] {
-    grid-template-columns: 1fr !important;
-  }
-  
-  /* Cards */
-  .stat-card {
-    padding: 18px !important;
-  }
-  
-  .stat-card h3 {
-    font-size: 26px !important;
-  }
-  
-  /* Filter bar */
-  .filter-bar {
-    flex-direction: column !important;
-    align-items: stretch !important;
-  }
-  
-  .filter-bar input,
-  .filter-bar select,
-  .filter-bar button {
-    width: 100% !important;
-    min-width: unset !important;
-  }
-  
-  /* Buttons */
-  .btn {
-    font-size: 13px !important;
-    padding: 10px 16px !important;
-  }
-  
-  /* Tables - scroll horizontal */
-  table {
-    font-size: 12px !important;
-  }
-  
-  table th,
-  table td {
-    padding: 10px 8px !important;
-  }
-}
- 
-/* ─── موبايل صغير (أقل من 480px) ─── */
-@media (max-width: 480px) {
-  [style*="grid-template-columns:1fr 1fr"] {
-    grid-template-columns: 1fr !important;
-  }
-  
-  .stat-card {
-    padding: 14px !important;
-  }
-  
-  /* تصغير الخطوط */
-  h1 { font-size: 22px !important; }
-  h2 { font-size: 18px !important; }
-  h3 { font-size: 16px !important; }
-  
-  /* About page hero */
-  #view-about [style*="padding:52px"] {
-    padding: 32px 20px 28px !important;
-  }
-}
- 
-</style></defs>  <rect x="5" y="5" width="140" height="140" rx="25" fill="none" stroke="#3FA9D8" stroke-width="6"/>  <g transform="translate(20,25) scale(0.6)">    <rect x="0" y="0" width="35" height="110" class="pb"/>    <path d="M35 0 L80 0 Q115 0 115 27 Q115 54 80 54 L35 54 Z" class="pb"/>    <rect x="53" y="15" width="40" height="10" fill="white"/>    <rect x="68" y="5" width="10" height="30" fill="white"/>    <path d="M115 27 Q140 27 140 65 Q140 85 125 85" fill="none" stroke="#3FA9D8" stroke-width="18" stroke-linecap="round"/>  </g>  <text x="160" y="75" class="pt pb" font-size="48" letter-spacing="2">PURE</text>  <text x="160" y="115" class="pt pb" font-size="36" letter-spacing="3">PHARMA</text>  <line x1="160" y1="125" x2="490" y2="125" stroke="#3FA9D8" stroke-width="2" opacity="0.3"/>  <text x="160" y="142" font-family="Arial" font-size="11" fill="#3FA9D8" letter-spacing="2" opacity="0.75">SCIENTIFIC BUREAU - BAGHDAD</text></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 150" width="400" height="120" style="max-width:100%;">
+            <defs><style>.pb{fill:#3FA9D8}.pt{font-family:'Arial Black', Arial, sans-serif; font-weight:900}</style></defs>
+            <rect x="5" y="5" width="140" height="140" rx="25" fill="none" stroke="#3FA9D8" stroke-width="7"/>
+            <g transform="translate(25,25) scale(0.8)">
+              <rect x="0" y="0" width="35" height="110" class="pb"/>
+              <path d="M35 0 L80 0 Q115 0 115 27 Q115 54 80 54 L35 54 Z" class="pb"/>
+              <rect x="53" y="15" width="40" height="10" fill="white"/>
+              <rect x="68" y="5" width="10" height="30" fill="white"/>
+              <path d="M115 27 Q140 27 140 65 Q140 85 125 85" fill="none" stroke="#3FA9D8" stroke-width="16" stroke-linecap="round"/>
+            </g>
+            <text x="170" y="72" class="pt pb" font-size="52" letter-spacing="2">PURE</text>
+            <text x="170" y="112" class="pt pb" font-size="34" letter-spacing="3">PHARMA</text>
+            <line x1="170" y1="125" x2="490" y2="125" stroke="#3FA9D8" stroke-width="2" opacity="0.4"/>
+            <text x="170" y="142" font-family="Arial" font-size="12" fill="#3FA9D8" letter-spacing="2" opacity="0.8">SCIENTIFIC BUREAU - BAGHDAD</text>
           </svg>
           <div style="border-right:2px solid #e2e8f0;padding-right:16px;margin-right:4px">
             <p style="font-size:10px;font-weight:700;color:#3FA9D8;letter-spacing:.1em;text-transform:uppercase">Trusted Partners in Health Solutions</p>
@@ -853,8 +493,7 @@ select,input{font-family:'Cairo',sans-serif}
           <p style="color:var(--rd);background:var(--rd-l);padding:3px 8px;border-radius:6px;margin-top:5px">آخر مطابقة: <span id="outLastMatch" style="font-family:monospace">غير محدد</span></p>
         </div>
       </div>
- 
-      <!-- بيانات -->
+
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px;text-align:center">
         <div style="background:var(--am-l);padding:11px;border-radius:11px;border:1px solid #fde68a">
           <span style="display:block;font-size:9px;color:#92400e;font-weight:900;text-transform:uppercase;margin-bottom:3px">الرصيد السابق</span>
@@ -873,8 +512,7 @@ select,input{font-family:'Cairo',sans-serif}
           <span id="outCurrDisc" style="font-size:14px;font-weight:900;font-family:monospace;color:#065f46">0%</span>
         </div>
       </div>
- 
-      <!-- اسم العميل -->
+
       <div style="margin-bottom:18px;padding:18px 22px;background:linear-gradient(135deg,var(--s900),var(--s800));border-radius:18px;color:white;position:relative;overflow:hidden">
         <label style="font-size:10px;font-weight:900;color:#a5b4fc;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;display:block">كشف حساب العميل / الصيدلية</label>
         <input type="text" id="outClient" placeholder="اكتب الاسم الرسمي للعميل هنا..." style="font-size:22px;font-weight:900;background:transparent;border:none;border-bottom:2px solid #475569;color:white;width:70%;outline:none;padding-bottom:6px;font-family:'Cairo',sans-serif">
@@ -884,8 +522,7 @@ select,input{font-family:'Cairo',sans-serif}
           <p id="outFullOrig" style="font-size:20px;font-weight:900;color:#34d399;font-family:monospace">0 IQD</p>
         </div>
       </div>
- 
-      <!-- رسالة -->
+
       <div style="background:#eff6ff;padding:14px 18px;border-radius:12px;border:1px solid #bfdbfe;margin-bottom:18px;display:flex;gap:10px">
         <i class="fa-solid fa-circle-info" style="color:var(--bl);font-size:17px;margin-top:2px;flex-shrink:0"></i>
         <div>
@@ -893,23 +530,21 @@ select,input{font-family:'Cairo',sans-serif}
           <div id="notesSummary" style="margin-top:8px"></div>
         </div>
       </div>
- 
-      <!-- فلترة الفواتير (شاشة فقط) -->
+
       <div class="no-print">
         <div class="filter-bar">
           <span style="font-size:13px;font-weight:900;color:var(--s700);white-space:nowrap">
             الفواتير <span class="inv-badge" id="billsCountDisplay">0</span>
           </span>
-          <input type="text" id="filterSearch" oninput="renderList()" placeholder="🔍 بحث برقم الفاتورة أو التاريخ أو المبلغ...">
+          <input type="text" id="filterSearch" oninput="renderList()" placeholder="🔍 بحث برقم الفاتورة أو التاريخ...">
           <button class="fbtn af" id="fAll" onclick="setFilter('all')">الكل</button>
           <button class="fbtn" id="fOk" onclick="setFilter('ok')">✔ نشطة</button>
           <button class="fbtn" id="fEx" onclick="setFilter('error')">✖ مستبعدة</button>
-          <button onclick="clearBills()" style="padding:7px 14px;border-radius:10px;border:1px solid #fecaca;background:var(--rd-l);color:var(--rd);font-size:11px;font-family:'Cairo',sans-serif;cursor:pointer;font-weight:700">مسح الكل</button>
+          <button onclick="clearBills()" style="padding:7px 14px;border-radius:10px;border:1px solid #fecaca;background:var(--rd-l);color:var(--rd);font-size:11px;font-weight:700;cursor:pointer">مسح الكل</button>
         </div>
         <div id="billsList" style="max-height:450px;overflow-y:auto;padding-right:3px"></div>
       </div>
- 
-      <!-- الأرقام النهائية -->
+
       <div style="border-top:4px solid var(--s900);padding-top:22px;margin-top:18px;display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap">
         <div style="flex:1;min-width:270px">
           <div style="background:var(--s50);padding:15px 18px;border-radius:14px;border:1px solid var(--s200);margin-bottom:14px">
@@ -944,162 +579,24 @@ select,input{font-family:'Cairo',sans-serif}
         </div>
       </div>
     </div>
- 
-    <!-- ورقة الطباعة الثانية: جدول الفواتير -->
+
     <div class="print-p2" style="background:white;border:1px solid var(--s200);border-radius:22px;padding:34px 38px;box-shadow:0 2px 8px rgba(0,0,0,.06)">
       <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid #3FA9D8;padding-bottom:14px;margin-bottom:18px">
         <div style="display:flex;align-items:center;gap:12px">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 90" width="320" height="90">  <defs><style>.b{fill:#3FA9D8}.t{font-family:'Arial Black',Arial;font-weight:900}
- 
-/* ════════════════════════════════════════════════════════════════════════
-   RESPONSIVE DESIGN - تصميم متجاوب
-   ════════════════════════════════════════════════════════════════════════ */
- 
-/* ─── زر القائمة للموبايل ─── */
-#mobileMenuBtn {
-  display: none;
-  position: fixed;
-  top: 14px;
-  right: 14px;
-  z-index: 998;
-  width: 48px;
-  height: 48px;
-  background: linear-gradient(135deg, #3FA9D8, #2a8ab8);
-  border: none;
-  border-radius: 12px;
-  color: white;
-  font-size: 22px;
-  cursor: pointer;
-  box-shadow: 0 6px 16px rgba(63,169,216,0.35);
-  transition: all 0.3s;
-}
-#mobileMenuBtn:active { transform: scale(0.95); }
- 
-/* ─── تابلت (768px - 1024px) ─── */
-@media (max-width: 1024px) {
-  .sidebar { width: 220px !important; }
-  [style*="grid-template-columns:repeat(4,1fr)"] { grid-template-columns: repeat(2, 1fr) !important; }
-}
- 
-/* ─── موبايل (أقل من 768px) ─── */
-@media (max-width: 768px) {
-  /* إظهار زر القائمة */
-  #mobileMenuBtn { display: flex !important; align-items: center; justify-content: center; }
-  
-  /* إخفاء السايدبار */
-  .sidebar {
-    position: fixed !important;
-    left: -280px !important;
-    top: 0 !important;
-    height: 100vh !important;
-    width: 260px !important;
-    transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-    z-index: 999 !important;
-    box-shadow: 4px 0 24px rgba(0,0,0,0.2) !important;
-  }
-  
-  .sidebar.mobile-open { left: 0 !important; }
-  
-  /* overlay عند فتح القائمة */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.5);
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s;
-    z-index: 998;
-  }
-  
-  body.menu-open::before {
-    opacity: 1;
-    pointer-events: all;
-  }
-  
-  /* تعديل المحتوى الرئيسي */
-  .main-content {
-    width: 100% !important;
-    margin: 0 !important;
-  }
-  
-  /* تصغير padding */
-  #view-dashboard, #view-matching, #view-archive, #view-reports, #view-about {
-    padding: 20px 14px !important;
-  }
-  
-  /* Grid columns */
-  [style*="grid-template-columns:repeat(4,1fr)"],
-  [style*="grid-template-columns:repeat(3,1fr)"] {
-    grid-template-columns: 1fr 1fr !important;
-    gap: 12px !important;
-  }
-  
-  [style*="grid-template-columns:1fr 1fr"] {
-    grid-template-columns: 1fr !important;
-  }
-  
-  /* Cards */
-  .stat-card {
-    padding: 18px !important;
-  }
-  
-  .stat-card h3 {
-    font-size: 26px !important;
-  }
-  
-  /* Filter bar */
-  .filter-bar {
-    flex-direction: column !important;
-    align-items: stretch !important;
-  }
-  
-  .filter-bar input,
-  .filter-bar select,
-  .filter-bar button {
-    width: 100% !important;
-    min-width: unset !important;
-  }
-  
-  /* Buttons */
-  .btn {
-    font-size: 13px !important;
-    padding: 10px 16px !important;
-  }
-  
-  /* Tables - scroll horizontal */
-  table {
-    font-size: 12px !important;
-  }
-  
-  table th,
-  table td {
-    padding: 10px 8px !important;
-  }
-}
- 
-/* ─── موبايل صغير (أقل من 480px) ─── */
-@media (max-width: 480px) {
-  [style*="grid-template-columns:1fr 1fr"] {
-    grid-template-columns: 1fr !important;
-  }
-  
-  .stat-card {
-    padding: 14px !important;
-  }
-  
-  /* تصغير الخطوط */
-  h1 { font-size: 22px !important; }
-  h2 { font-size: 18px !important; }
-  h3 { font-size: 16px !important; }
-  
-  /* About page hero */
-  #view-about [style*="padding:52px"] {
-    padding: 32px 20px 28px !important;
-  }
-}
- 
-</style></defs>  <rect x="3" y="3" width="84" height="84" rx="15" fill="none" stroke="#3FA9D8" stroke-width="4"/>  <g transform="translate(12,15) scale(0.45)">    <rect x="0" y="0" width="35" height="110" class="b"/>    <path d="M35 0 L80 0 Q115 0 115 27 Q115 54 80 54 L35 54 Z" class="b"/>    <rect x="53" y="15" width="40" height="10" fill="white"/>    <rect x="68" y="5" width="10" height="30" fill="white"/>    <path d="M115 27 Q140 27 140 65 Q140 85 125 85" fill="none" stroke="#3FA9D8" stroke-width="18" stroke-linecap="round"/>  </g>  <text x="95" y="42" class="t b" font-size="30" letter-spacing="1.5">PURE PHARMA</text>  <line x1="95" y1="52" x2="315" y2="52" stroke="#3FA9D8" stroke-width="1.5" opacity="0.25"/>  <text x="95" y="65" font-family="Arial" font-size="9" fill="#3FA9D8" letter-spacing="1.5" opacity="0.7">SCIENTIFIC BUREAU</text>  <text x="95" y="80" font-family="Arial" font-size="8" fill="#666" letter-spacing="0.8">info@pure-pharma.com  •  +964 750 426 5555</text></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 90" width="320" height="90">
+            <defs><style>.b{fill:#3FA9D8}.t{font-family:'Arial Black',Arial;font-weight:900}</style></defs>
+            <rect x="3" y="3" width="84" height="84" rx="15" fill="none" stroke="#3FA9D8" stroke-width="4"/>
+            <g transform="translate(12,15) scale(0.45)">
+              <rect x="0" y="0" width="35" height="110" class="b"/>
+              <path d="M35 0 L80 0 Q115 0 115 27 Q115 54 80 54 L35 54 Z" class="b"/>
+              <rect x="53" y="15" width="40" height="10" fill="white"/>
+              <rect x="68" y="5" width="10" height="30" fill="white"/>
+              <path d="M115 27 Q140 27 140 65 Q140 85 125 85" fill="none" stroke="#3FA9D8" stroke-width="18" stroke-linecap="round"/>
+            </g>
+            <text x="100" y="42" class="t b" font-size="24" letter-spacing="1.5">PURE PHARMA</text>
+            <line x1="95" y1="52" x2="315" y2="52" stroke="#3FA9D8" stroke-width="1.5" opacity="0.25"/>
+            <text x="100" y="65" font-family="Arial" font-size="9" fill="#3FA9D8" letter-spacing="1.5" opacity="0.7">SCIENTIFIC BUREAU</text>
+            <text x="100" y="80" font-family="Arial" font-size="8" fill="#666" letter-spacing="0.8">info@pure-pharma.com  •  +964 750 426 5555</text>
           </svg>
           <div style="border-right:1px solid var(--s200);padding-right:12px">
             <p style="font-size:9px;color:var(--s500);text-transform:uppercase;letter-spacing:.07em">تفاصيل الفواتير — Invoices Detail</p>
@@ -1150,11 +647,9 @@ select,input{font-family:'Cairo',sans-serif}
         </div>
       </div>
     </div>
- 
   </div>
 </div>
- 
-<!-- ARCHIVE -->
+
 <div id="view-archive" class="view-section" style="padding:36px">
   <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:22px;gap:14px;flex-wrap:wrap">
     <div>
@@ -1169,39 +664,31 @@ select,input{font-family:'Cairo',sans-serif}
       </div>
     </div>
   </div>
-  <!-- شريط الفلاتر -->
   <div style="background:white;border:1px solid var(--s200);border-radius:16px;padding:16px 20px;margin-bottom:14px;box-shadow:0 1px 3px rgba(0,0,0,.07)">
     <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
       <span style="font-size:12px;font-weight:900;color:var(--s500);white-space:nowrap;display:flex;align-items:center;gap:6px">
         <i class="fa-solid fa-filter" style="color:var(--bl)"></i> فلترة:
       </span>
-      <!-- فلتر المحافظة -->
       <select id="archFilterProv" onchange="onArchFilterProv()" style="padding:7px 12px;border:1px solid var(--s200);border-radius:10px;font-size:12px;font-family:'Cairo',sans-serif;font-weight:700;outline:none;background:white;min-width:130px">
         <option value="">كل المحافظات</option>
       </select>
-      <!-- فلتر القضاء -->
       <select id="archFilterCity" onchange="renderArchiveTable()" style="padding:7px 12px;border:1px solid var(--s200);border-radius:10px;font-size:12px;font-family:'Cairo',sans-serif;font-weight:700;outline:none;background:white;min-width:130px">
         <option value="">كل الأقضية</option>
       </select>
-      <!-- فلتر المندوب -->
       <select id="archFilterRep" onchange="renderArchiveTable()" style="padding:7px 12px;border:1px solid var(--s200);border-radius:10px;font-size:12px;font-family:'Cairo',sans-serif;font-weight:700;outline:none;background:white;min-width:130px">
         <option value="">كل المندوبين</option>
       </select>
-      <!-- فلتر التاريخ من/إلى -->
       <div style="display:flex;align-items:center;gap:6px">
         <input type="date" id="archDateFrom" onchange="renderArchiveTable()" style="padding:7px 10px;border:1px solid var(--s200);border-radius:10px;font-size:12px;font-family:'Cairo',sans-serif;outline:none">
         <span style="font-size:11px;color:var(--s400);font-weight:700">—</span>
         <input type="date" id="archDateTo" onchange="renderArchiveTable()" style="padding:7px 10px;border:1px solid var(--s200);border-radius:10px;font-size:12px;font-family:'Cairo',sans-serif;outline:none">
       </div>
-      <!-- زر مسح الفلاتر -->
       <button onclick="clearArchFilters()" style="padding:7px 14px;border:1px solid var(--s200);border-radius:10px;font-size:11px;font-family:'Cairo',sans-serif;font-weight:700;cursor:pointer;background:var(--s50);color:var(--s500);transition:.2s" onmouseover="this.style.background='var(--rd-l)';this.style.color='var(--rd)'" onmouseout="this.style.background='var(--s50)';this.style.color='var(--s500)'">
         <i class="fa-solid fa-xmark"></i> مسح الفلاتر
       </button>
-      <!-- عداد النتائج -->
       <span id="archResultCount" style="margin-right:auto;font-size:12px;font-weight:700;color:var(--s500);background:var(--s100);padding:4px 12px;border-radius:20px"></span>
     </div>
   </div>
- 
   <div style="background:white;border:1px solid var(--s200);border-radius:20px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.07)">
     <div style="overflow-x:auto">
       <table style="width:100%;text-align:right;border-collapse:collapse;white-space:nowrap">
@@ -1221,8 +708,7 @@ select,input{font-family:'Cairo',sans-serif}
     </div>
   </div>
 </div>
- 
-<!-- REPORTS -->
+
 <div id="view-reports" class="view-section" style="padding:36px">
   <div style="margin-bottom:28px">
     <h1 style="font-size:28px;font-weight:900">إدارة النظام وإعدادات الأفراد</h1>
@@ -1249,8 +735,7 @@ select,input{font-family:'Cairo',sans-serif}
     </div>
   </div>
 </div>
- 
-<!-- Modal -->
+
 <div id="manModal" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.65);backdrop-filter:blur(4px);z-index:50;align-items:center;justify-content:center;padding:16px">
   <div style="background:white;border-radius:22px;width:100%;max-width:400px;overflow:hidden;box-shadow:0 25px 50px -12px rgba(0,0,0,.3)">
     <div style="background:var(--bl);padding:18px 22px;color:white;display:flex;justify-content:space-between;align-items:center">
@@ -1269,14 +754,9 @@ select,input{font-family:'Cairo',sans-serif}
     </div>
   </div>
 </div>
- 
- 
-<!-- ABOUT PAGE -->
+
 <div id="view-about" class="view-section" style="padding:0;overflow:hidden">
- 
-  <!-- Hero Banner — بنفس ألوان الموقع الرسمي -->
   <div style="background:linear-gradient(135deg,#1a3d4d 0%,#3FA9D8 50%,#0e3d24 100%);padding:52px 48px 44px;position:relative;overflow:hidden">
-    <!-- خلفية زخرفية -->
     <div style="position:absolute;top:-60px;left:-60px;width:300px;height:300px;border-radius:50%;background:rgba(64,185,118,.08);pointer-events:none"></div>
     <div style="position:absolute;bottom:-80px;right:10%;width:400px;height:400px;border-radius:50%;background:rgba(45,134,83,.06);pointer-events:none"></div>
     <div style="position:absolute;top:20px;right:48px;opacity:.06">
@@ -1289,7 +769,6 @@ select,input{font-family:'Cairo',sans-serif}
       </svg>
     </div>
     <div style="position:relative;z-index:2;max-width:700px">
-      <!-- شعار كبير -->
       <div style="display:flex;align-items:center;gap:16px;margin-bottom:24px">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
           <defs><linearGradient id="hg" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#3FA9D8"/><stop offset="100%" style="stop-color:#5CBCE6"/></linearGradient></defs>
@@ -1311,263 +790,22 @@ select,input{font-family:'Cairo',sans-serif}
       <p style="font-size:14px;color:rgba(255,255,255,.75);line-height:1.8;max-width:600px">
         Bringing Experience and Innovation From International Manufacturers to Iraq's Pharmaceutical Industry
       </p>
-      <!-- أزرار الموقع -->
       <div style="display:flex;gap:12px;margin-top:24px;flex-wrap:wrap">
         <a href="https://pure-pharma.com" target="_blank"
           style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:#5CBCE6;color:white;border-radius:10px;font-size:13px;font-weight:700;text-decoration:none;font-family:'Cairo',sans-serif;transition:.2s"
           onmouseover="this.style.background='#3FA9D8'" onmouseout="this.style.background='#5CBCE6'">
           <i class="fa-solid fa-globe"></i> pure-pharma.com
         </a>
-        <a href="mailto:info@pure-pharma.com"
-          style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:rgba(255,255,255,.12);color:white;border:1px solid rgba(255,255,255,.25);border-radius:10px;font-size:13px;font-weight:700;text-decoration:none;font-family:'Cairo',sans-serif;transition:.2s"
-          onmouseover="this.style.background='rgba(255,255,255,.2)'" onmouseout="this.style.background='rgba(255,255,255,.12)'">
-          <i class="fa-solid fa-envelope"></i> info@pure-pharma.com
-        </a>
-        <a href="tel:+9647504265555"
-          style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:rgba(255,255,255,.12);color:white;border:1px solid rgba(255,255,255,.25);border-radius:10px;font-size:13px;font-weight:700;text-decoration:none;font-family:'Cairo',sans-serif;transition:.2s"
-          onmouseover="this.style.background='rgba(255,255,255,.2)'" onmouseout="this.style.background='rgba(255,255,255,.12)'">
-          <i class="fa-solid fa-phone"></i> +964 750 426 5555
-        </a>
       </div>
     </div>
-  </div>
- 
-  <div style="padding:36px 48px;max-width:1100px">
- 
-    <!-- بطاقات الأرقام -->
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:36px">
-      <div style="background:white;border:1px solid #e2e8f0;border-radius:16px;padding:20px;text-align:center;border-top:3px solid #3FA9D8">
-        <div style="font-size:32px;font-weight:900;color:#3FA9D8;font-family:Georgia,serif">2017</div>
-        <div style="font-size:12px;font-weight:700;color:#64748b;margin-top:4px">سنة التأسيس</div>
-        <div style="font-size:10px;color:#94a3b8;margin-top:2px">Year of Establishment</div>
-      </div>
-      <div style="background:white;border:1px solid #e2e8f0;border-radius:16px;padding:20px;text-align:center;border-top:3px solid #3FA9D8">
-        <div style="font-size:32px;font-weight:900;color:#3FA9D8;font-family:Georgia,serif">10+</div>
-        <div style="font-size:12px;font-weight:700;color:#64748b;margin-top:4px">سنوات خبرة</div>
-        <div style="font-size:10px;color:#94a3b8;margin-top:2px">Years of Experience</div>
-      </div>
-      <div style="background:white;border:1px solid #e2e8f0;border-radius:16px;padding:20px;text-align:center;border-top:3px solid #5CBCE6">
-        <div style="font-size:32px;font-weight:900;color:#5CBCE6;font-family:Georgia,serif">2</div>
-        <div style="font-size:12px;font-weight:700;color:#64748b;margin-top:4px">مستودع رئيسي</div>
-        <div style="font-size:10px;color:#94a3b8;margin-top:2px">Main Warehouses</div>
-      </div>
-      <div style="background:white;border:1px solid #e2e8f0;border-radius:16px;padding:20px;text-align:center;border-top:3px solid #1a3d4d">
-        <div style="font-size:32px;font-weight:900;color:#1a3d4d;font-family:Georgia,serif">2000</div>
-        <div style="font-size:12px;font-weight:700;color:#64748b;margin-top:4px">متر مربع</div>
-        <div style="font-size:10px;color:#94a3b8;margin-top:2px">Total Storage m²</div>
-      </div>
-    </div>
- 
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:28px">
- 
-      <!-- نبذة عن الشركة -->
-      <div style="background:white;border:1px solid #e2e8f0;border-radius:18px;padding:28px">
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;padding-bottom:14px;border-bottom:2px solid #e6f4f9">
-          <div style="width:36px;height:36px;background:#e6f4f9;border-radius:10px;display:flex;align-items:center;justify-content:center">
-            <i class="fa-solid fa-building" style="color:#3FA9D8;font-size:16px"></i>
-          </div>
-          <div>
-            <h3 style="font-size:16px;font-weight:900;color:#0f172a">عن الشركة</h3>
-            <p style="font-size:10px;color:#3FA9D8;text-transform:uppercase;letter-spacing:.08em">About Pure Pharma</p>
-          </div>
-        </div>
-        <p style="font-size:13px;color:#475569;line-height:1.85;margin-bottom:14px">
-          تأسست شركة <strong style="color:#3FA9D8">بيور فارما</strong> عام 2017 على يد فريق من المتخصصين ذوي خبرة تتجاوز عقداً في المجال الصيدلاني. تعمل الشركة كمكتب علمي متخصص في استيراد وتوزيع المستحضرات الصيدلانية في السوق العراقي.
-        </p>
-        <p style="font-size:13px;color:#475569;line-height:1.85">
-          يضم المكتب مقراً رئيسياً في <strong>أربيل</strong> ومكتباً علمياً في <strong>بغداد</strong>، مع مستودعين بمساحة إجمالية 2000م² وفق معايير وزارة الصحة العراقية.
-        </p>
-        <div style="margin-top:18px;padding:12px 16px;background:#f0f9fc;border-radius:10px;border-right:3px solid #3FA9D8">
-          <p style="font-size:11px;font-style:italic;color:#3FA9D8;font-weight:600">
-            "Pure Pharma was established in 2017 by a team of professionals with more than a decade of experience in the pharmaceutical field."
-          </p>
-        </div>
-      </div>
- 
-      <!-- الرسالة والرؤية -->
-      <div style="display:flex;flex-direction:column;gap:16px">
-        <div style="background:linear-gradient(135deg,#3FA9D8,#3FA9D8);border-radius:18px;padding:24px;color:white">
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
-            <div style="width:34px;height:34px;background:rgba(255,255,255,.15);border-radius:9px;display:flex;align-items:center;justify-content:center">
-              <i class="fa-solid fa-bullseye" style="font-size:15px"></i>
-            </div>
-            <div>
-              <h4 style="font-size:14px;font-weight:900">رسالتنا</h4>
-              <p style="font-size:9px;opacity:.7;text-transform:uppercase;letter-spacing:.08em">Mission</p>
-            </div>
-          </div>
-          <p style="font-size:12px;line-height:1.8;opacity:.9">
-            خدمة الناس بمنتجات عالية الجودة والمساهمة في تطوير القطاع الصحي في العراق.
-          </p>
-          <p style="font-size:11px;opacity:.65;margin-top:6px;font-style:italic">
-            Serving people with good quality products and be a part of country health sector development.
-          </p>
-        </div>
-        <div style="background:white;border:1px solid #e2e8f0;border-radius:18px;padding:24px">
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
-            <div style="width:34px;height:34px;background:#e6f4f9;border-radius:9px;display:flex;align-items:center;justify-content:center">
-              <i class="fa-solid fa-eye" style="color:#3FA9D8;font-size:15px"></i>
-            </div>
-            <div>
-              <h4 style="font-size:14px;font-weight:900;color:#0f172a">رؤيتنا</h4>
-              <p style="font-size:9px;color:#3FA9D8;text-transform:uppercase;letter-spacing:.08em">Vision</p>
-            </div>
-          </div>
-          <p style="font-size:12px;line-height:1.8;color:#475569">
-            أن نكون من بين الشركات المعروفة في المنطقة بأفضل الخدمات والجودة.
-          </p>
-          <p style="font-size:11px;color:#94a3b8;margin-top:6px;font-style:italic">
-            To be one of well known companies in the region with best services and qualities.
-          </p>
-        </div>
-      </div>
-    </div>
- 
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:28px">
- 
-      <!-- المنتجات البارزة -->
-      <div style="background:white;border:1px solid #e2e8f0;border-radius:18px;padding:28px">
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;padding-bottom:14px;border-bottom:2px solid #e6f4f9">
-          <div style="width:36px;height:36px;background:#e6f4f9;border-radius:10px;display:flex;align-items:center;justify-content:center">
-            <i class="fa-solid fa-pills" style="color:#3FA9D8;font-size:16px"></i>
-          </div>
-          <div>
-            <h3 style="font-size:16px;font-weight:900;color:#0f172a">المنتجات البارزة</h3>
-            <p style="font-size:10px;color:#3FA9D8;text-transform:uppercase;letter-spacing:.08em">Featured Products</p>
-          </div>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:10px">
-          <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:#f8fafc;border-radius:10px;border:1px solid #e2e8f0">
-            <div style="width:8px;height:8px;border-radius:50%;background:#3FA9D8;flex-shrink:0"></div>
-            <div>
-              <p style="font-size:13px;font-weight:700;color:#0f172a">Nutra Acne</p>
-              <p style="font-size:11px;color:#64748b">مستحضر علاج حب الشباب</p>
-            </div>
-          </div>
-          <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:#f8fafc;border-radius:10px;border:1px solid #e2e8f0">
-            <div style="width:8px;height:8px;border-radius:50%;background:#3FA9D8;flex-shrink:0"></div>
-            <div>
-              <p style="font-size:13px;font-weight:700;color:#0f172a">Deep Sleep</p>
-              <p style="font-size:11px;color:#64748b">مستحضر تحسين النوم</p>
-            </div>
-          </div>
-          <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:#f8fafc;border-radius:10px;border:1px solid #e2e8f0">
-            <div style="width:8px;height:8px;border-radius:50%;background:#5CBCE6;flex-shrink:0"></div>
-            <div>
-              <p style="font-size:13px;font-weight:700;color:#0f172a">NutraBiotec</p>
-              <p style="font-size:11px;color:#64748b">مستحضر صحة الجهاز الهضمي</p>
-            </div>
-          </div>
-          <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:#f8fafc;border-radius:10px;border:1px solid #e2e8f0">
-            <div style="width:8px;height:8px;border-radius:50%;background:#1a3d4d;flex-shrink:0"></div>
-            <div>
-              <p style="font-size:13px;font-weight:700;color:#0f172a">TAFAROM</p>
-              <p style="font-size:11px;color:#64748b">Prostaglandin — علاج الجلوكوما</p>
-            </div>
-          </div>
-        </div>
-        <a href="https://pure-pharma.com/contact-us-copy" target="_blank"
-          style="display:inline-flex;align-items:center;gap:6px;margin-top:16px;padding:8px 16px;background:#e6f4f9;color:#3FA9D8;border-radius:8px;font-size:12px;font-weight:700;text-decoration:none;font-family:'Cairo',sans-serif;transition:.2s"
-          onmouseover="this.style.background='#3FA9D8';this.style.color='white'" onmouseout="this.style.background='#e6f4f9';this.style.color='#3FA9D8'">
-          <i class="fa-solid fa-arrow-left"></i> استعراض كل المنتجات
-        </a>
-      </div>
- 
-      <!-- الشركاء الدوليون -->
-      <div style="background:white;border:1px solid #e2e8f0;border-radius:18px;padding:28px">
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;padding-bottom:14px;border-bottom:2px solid #e6f4f9">
-          <div style="width:36px;height:36px;background:#e6f4f9;border-radius:10px;display:flex;align-items:center;justify-content:center">
-            <i class="fa-solid fa-handshake" style="color:#3FA9D8;font-size:16px"></i>
-          </div>
-          <div>
-            <h3 style="font-size:16px;font-weight:900;color:#0f172a">الشركاء الدوليون</h3>
-            <p style="font-size:10px;color:#3FA9D8;text-transform:uppercase;letter-spacing:.08em">International Partners</p>
-          </div>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-          <div style="padding:14px;background:#f8fafc;border-radius:12px;border:1px solid #e2e8f0;text-align:center">
-            <i class="fa-solid fa-flask" style="color:#3FA9D8;font-size:20px;margin-bottom:6px;display:block"></i>
-            <p style="font-size:12px;font-weight:900;color:#0f172a">Darnytsia</p>
-            <p style="font-size:10px;color:#64748b">أوكرانيا</p>
-          </div>
-          <div style="padding:14px;background:#f8fafc;border-radius:12px;border:1px solid #e2e8f0;text-align:center">
-            <i class="fa-solid fa-leaf" style="color:#3FA9D8;font-size:20px;margin-bottom:6px;display:block"></i>
-            <p style="font-size:12px;font-weight:900;color:#0f172a">Nutralic</p>
-            <p style="font-size:10px;color:#64748b">مستحضرات طبيعية</p>
-          </div>
-          <div style="padding:14px;background:#f8fafc;border-radius:12px;border:1px solid #e2e8f0;text-align:center">
-            <i class="fa-solid fa-capsules" style="color:#3FA9D8;font-size:20px;margin-bottom:6px;display:block"></i>
-            <p style="font-size:12px;font-weight:900;color:#0f172a">Novax Pharma</p>
-            <p style="font-size:10px;color:#64748b">أدوية متخصصة</p>
-          </div>
-          <div style="padding:14px;background:#f8fafc;border-radius:12px;border:1px solid #e2e8f0;text-align:center">
-            <i class="fa-solid fa-eye" style="color:#3FA9D8;font-size:20px;margin-bottom:6px;display:block"></i>
-            <p style="font-size:12px;font-weight:900;color:#0f172a">Rompharm</p>
-            <p style="font-size:10px;color:#64748b">طب العيون</p>
-          </div>
-        </div>
-      </div>
-    </div>
- 
-    <!-- معلومات الاتصال والمواقع -->
-    <div style="background:linear-gradient(135deg,#1a3d4d,#3FA9D8);border-radius:18px;padding:28px;color:white">
-      <h3 style="font-size:16px;font-weight:900;margin-bottom:20px;display:flex;align-items:center;gap:8px">
-        <i class="fa-solid fa-location-dot" style="color:#5CBCE6"></i> مواقعنا ومعلومات التواصل
-      </h3>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px">
-        <div style="background:rgba(255,255,255,.07);border-radius:12px;padding:18px;border:1px solid rgba(255,255,255,.1)">
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
-            <i class="fa-solid fa-building" style="color:#5CBCE6;font-size:16px"></i>
-            <p style="font-size:13px;font-weight:900">المقر الرئيسي</p>
-          </div>
-          <p style="font-size:12px;opacity:.85;margin-bottom:4px">أربيل — كردستان العراق</p>
-          <p style="font-size:11px;opacity:.6">Khanzad St., Next to Kok Supermarket</p>
-          <p style="font-size:11px;opacity:.6;margin-top:4px">Erbil, Kurdistan Region</p>
-          <div style="margin-top:10px;padding:6px 10px;background:rgba(64,185,118,.15);border-radius:6px;font-size:10px;color:#5CBCE6">
-            🏭 مستودع 1000م²
-          </div>
-        </div>
-        <div style="background:rgba(255,255,255,.07);border-radius:12px;padding:18px;border:1px solid rgba(255,255,255,.1)">
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
-            <i class="fa-solid fa-city" style="color:#5CBCE6;font-size:16px"></i>
-            <p style="font-size:13px;font-weight:900">المكتب العلمي</p>
-          </div>
-          <p style="font-size:12px;opacity:.85;margin-bottom:4px">بغداد — العراق</p>
-          <p style="font-size:11px;opacity:.6">Baghdad, Al-Nasir Square</p>
-          <p style="font-size:11px;opacity:.6;margin-top:4px">Pure Scientific Bureau</p>
-          <div style="margin-top:10px;padding:6px 10px;background:rgba(64,185,118,.15);border-radius:6px;font-size:10px;color:#5CBCE6">
-            🏭 مستودع 1000م²
-          </div>
-        </div>
-        <div style="background:rgba(255,255,255,.07);border-radius:12px;padding:18px;border:1px solid rgba(255,255,255,.1)">
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
-            <i class="fa-solid fa-address-card" style="color:#5CBCE6;font-size:16px"></i>
-            <p style="font-size:13px;font-weight:900">تواصل معنا</p>
-          </div>
-          <a href="mailto:info@pure-pharma.com" style="display:flex;align-items:center;gap:7px;margin-bottom:8px;text-decoration:none;color:white;opacity:.85;font-size:12px">
-            <i class="fa-solid fa-envelope" style="color:#5CBCE6;width:14px"></i> info@pure-pharma.com
-          </a>
-          <a href="tel:+9647504265555" style="display:flex;align-items:center;gap:7px;margin-bottom:8px;text-decoration:none;color:white;opacity:.85;font-size:12px">
-            <i class="fa-solid fa-phone" style="color:#5CBCE6;width:14px"></i> +964 750 426 5555
-          </a>
-          <a href="https://pure-pharma.com" target="_blank" style="display:flex;align-items:center;gap:7px;text-decoration:none;color:white;opacity:.85;font-size:12px">
-            <i class="fa-solid fa-globe" style="color:#5CBCE6;width:14px"></i> pure-pharma.com
-          </a>
-          <div style="margin-top:10px;padding:6px 10px;background:rgba(64,185,118,.15);border-radius:6px;font-size:10px;color:#5CBCE6">
-            © 2025 Pure Pharma
-          </div>
-        </div>
-      </div>
-    </div>
- 
   </div>
 </div>
 </main>
- 
+
 <script>
 let db=[];
 let currentFilter='all';
- 
+
 const iraqGeo={
   "بغداد":["الرصافة","الكرخ","الأعظمية","المنصور","الكرادة","مدينة الصدر","الكاظمية","المحمودية","أبو غريب","الطارمية"],
   "البصرة":["المركز","الزبير","القرنة","أبو الخصيب","شط العرب","الفاو","المدينة","سفوان"],
@@ -1588,61 +826,82 @@ const iraqGeo={
   "المثنى":["السماوة","الرميثة","الخضر","الوركاء"],
   "ديالى":["بعقوبة","المقدادية","الخالص","خانقين","بلدروز","جلولاء"]
 };
- 
-/* ════════════════════════════════════════════════════════════════════════
-   MOBILE MENU FUNCTIONS - دوال قائمة الموبايل
-   ════════════════════════════════════════════════════════════════════════ */
- 
+
+// ─── LOGIN AND PERMISSIONS LOGIC ───
+function attemptLogin() {
+  const u = document.getElementById('loginUser').value;
+  const p = document.getElementById('loginPass').value;
+  if (u === 'admin' && p === 'admin') {
+    document.getElementById('loginGate').style.display = 'none';
+    localStorage.setItem('pure_admin_logged', 'true');
+  } else {
+    document.getElementById('loginError').style.display = 'block';
+  }
+}
+
+function openPermModal() { document.getElementById('permModalOverlay').style.display = 'flex'; }
+function closePermModal() { document.getElementById('permModalOverlay').style.display = 'none'; }
+
+function toggleSectionPerm(sectionId, isChecked) {
+  const navItem = document.getElementById('nav-' + sectionId);
+  if (navItem) { navItem.style.display = isChecked ? 'flex' : 'none'; }
+  localStorage.setItem('pure_perm_' + sectionId, isChecked);
+}
+
+function applyPermissions() {
+  ['dashboard', 'matching', 'archive', 'reports'].forEach(id => {
+    let state = localStorage.getItem('pure_perm_' + id);
+    if (state === null) state = 'true';
+    const isChecked = state === 'true';
+    const chk = document.getElementById('chk_' + id);
+    if (chk) chk.checked = isChecked;
+    const navItem = document.getElementById('nav-' + id);
+    if (navItem) navItem.style.display = isChecked ? 'flex' : 'none';
+  });
+}
+
+// ─── MOBILE MENU LOGIC ───
 function toggleMobileMenu() {
   const sidebar = document.querySelector('.sidebar');
   const body = document.body;
-  
   if (sidebar.classList.contains('mobile-open')) {
-    // إغلاق القائمة
     sidebar.classList.remove('mobile-open');
     body.classList.remove('menu-open');
   } else {
-    // فتح القائمة
     sidebar.classList.add('mobile-open');
     body.classList.add('menu-open');
   }
 }
- 
-// إغلاق القائمة عند الضغط على overlay
+
 document.addEventListener('click', function(e) {
   const sidebar = document.querySelector('.sidebar');
   const btn = document.getElementById('mobileMenuBtn');
   const body = document.body;
-  
-  if (body.classList.contains('menu-open') && 
-      !sidebar.contains(e.target) && 
-      e.target !== btn && 
-      !btn.contains(e.target)) {
+  if (body.classList.contains('menu-open') && !sidebar.contains(e.target) && e.target !== btn && !btn.contains(e.target)) {
     sidebar.classList.remove('mobile-open');
     body.classList.remove('menu-open');
   }
 });
- 
-// إغلاق القائمة عند اختيار عنصر من القائمة
+
 document.addEventListener('DOMContentLoaded', function() {
   const navItems = document.querySelectorAll('.nav-item');
   navItems.forEach(item => {
     item.addEventListener('click', function() {
       if (window.innerWidth <= 768) {
-        const sidebar = document.querySelector('.sidebar');
-        const body = document.body;
-        sidebar.classList.remove('mobile-open');
-        body.classList.remove('menu-open');
+        document.querySelector('.sidebar').classList.remove('mobile-open');
+        document.body.classList.remove('menu-open');
       }
     });
   });
 });
- 
-/* ════════════════════════════════════════════════════════════════════════
-   SYSTEM INITIALIZATION - تهيئة النظام
-   ════════════════════════════════════════════════════════════════════════ */
- 
+
+// ─── CORE SYSTEM INITIALIZATION ───
 function initSystem(){
+  if(localStorage.getItem('pure_admin_logged') === 'true') {
+    document.getElementById('loginGate').style.display = 'none';
+  }
+  applyPermissions();
+  
   const p=document.getElementById('provInput');
   p.innerHTML='<option value="">اختر المحافظة...</option>';
   Object.keys(iraqGeo).sort().forEach(x=>p.innerHTML+=`<option value="${x}">${x}</option>`);
@@ -1652,7 +911,7 @@ function initSystem(){
   document.getElementById('dash-date').innerText=new Date().toLocaleDateString('ar-IQ',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
   loadSettings();updateCities();initDrag();updateDash();sync();
 }
- 
+
 function switchView(v){
   document.querySelectorAll('.nav-item').forEach(el=>el.classList.remove('active'));
   const navEl=document.getElementById('nav-'+v);
@@ -1664,10 +923,10 @@ function switchView(v){
   if(v==='archive')renderArchiveTable();
   if(v==='reports')renderSettingsLists();
 }
- 
+
 function gS(k){try{return JSON.parse(localStorage.getItem(k)||'[]')}catch(e){return[]}}
 function sS(k,d){try{localStorage.setItem(k,JSON.stringify(d))}catch(e){}}
- 
+
 function loadSettings(){
   if(!gS('pure_accountants').length)sS('pure_accountants',['مدير النظام','محاسب 1']);
   if(!gS('pure_reps').length)sS('pure_reps',['الإدارة العامة','مندوب بغداد','مندوب المحافظات']);
@@ -1676,7 +935,7 @@ function loadSettings(){
   renderSettingsLists();
 }
 function popSel(id,arr,def){const el=document.getElementById(id);el.innerHTML=`<option value="">${def}</option>`;arr.forEach(i=>el.innerHTML+=`<option value="${i}">${i}</option>`);}
- 
+
 function addPerson(type,inputId){
   const inp=document.getElementById(inputId);const val=inp.value.trim();if(!val)return;
   const k=type==='accountants'?'pure_accountants':'pure_reps';
@@ -1688,7 +947,7 @@ function renderSettingsLists(){
   document.getElementById('accountantsList').innerHTML=render(gS('pure_accountants'),'accountants');
   document.getElementById('repsList').innerHTML=render(gS('pure_reps'),'reps');
 }
- 
+
 function initDrag(){
   const zone=document.getElementById('dropZone');const inp=document.getElementById('sysFile');
   zone.onclick=(e)=>{if(e.target!==inp)inp.click();};
@@ -1697,7 +956,7 @@ function initDrag(){
   zone.ondrop=(e)=>{e.preventDefault();zone.classList.remove('dragover');handleFiles(e.dataTransfer.files);};
   inp.onchange=(e)=>handleFiles(e.target.files);
 }
- 
+
 async function handleFiles(files){
   if(!files.length)return;
   const pc=document.getElementById('progressCont');
@@ -1718,10 +977,8 @@ async function handleFiles(files){
   pt.innerText=`✓ تم — تم استخراج ${db.length} فاتورة`;pd.innerText='';
   setTimeout(()=>{pc.classList.remove('show');pb.style.width='0';},2500);
 }
- 
-// === معالجة PDF بدون تجمد ===
-async /* ─── معالجة PDF بدون تجميد ─── */
-function processPDF(file,pb,pt,pd){
+
+async function processPDF(file,pb,pt,pd){
   const pdfJS=window['pdfjs-dist/build/pdf'];
   pdfJS.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
   const buf=await file.arrayBuffer();
@@ -1730,13 +987,12 @@ function processPDF(file,pb,pt,pd){
   pt.innerText=`جاري قراءة ${total} صفحة...`;
   const CHUNK=5;
   for(let start=1;start<=total;start+=CHUNK){
-    await new Promise(r=>setTimeout(r,0));// yield للمتصفح
+    await new Promise(r=>setTimeout(r,0));
     const end=Math.min(start+CHUNK-1,total);
     for(let i=start;i<=end;i++){
       try{
         const page=await pdf.getPage(i);
         const tc=await page.getTextContent();
-        // محاولة اكتشاف اسم العميل من أول صفحة
         if(i===1&&!document.getElementById('outClient').value){
           const cand=tc.items.map(x=>x.str).find(t=>t.includes('صيدلية')||t.includes('مذخر')||t.includes('مستشفى')||t.includes('شركة')||t.includes('مكتب'));
           if(cand){document.getElementById('outClient').value=cand.trim();document.getElementById('p2Client').innerText=cand.trim();}
@@ -1748,9 +1004,8 @@ function processPDF(file,pb,pt,pd){
     pd.innerText=`الصفحة ${end} من ${total} — الفواتير: ${db.length}`;
   }
 }
- 
+
 function parsePage(items){
-  // تجميع العناصر في صفوف حسب إحداثي Y
   const rows=[];
   items.forEach(item=>{
     if(!item.str.trim())return;
@@ -1772,7 +1027,7 @@ function parsePage(items){
     addToDb(id,dm[0],amt);
   });
 }
- 
+
 function processExcel(file){
   return new Promise((res,rej)=>{
     const r=new FileReader();
@@ -1797,7 +1052,7 @@ function processExcel(file){
     r.readAsArrayBuffer(file);
   });
 }
- 
+
 function processWord(file){
   return new Promise((res,rej)=>{
     const r=new FileReader();
@@ -1814,17 +1069,17 @@ function processWord(file){
     r.readAsArrayBuffer(file);
   });
 }
- 
+
 function addToDb(id,date,amount){
   if(!db.some(b=>b.id===id))db.push({id,date,total:amount,remain:amount,status:'ok',note:''});
 }
- 
+
 function updateCities(){
   const p=document.getElementById('provInput').value;const c=document.getElementById('cityInput');
   c.innerHTML='<option value="">القضاء...</option>';
   if(p&&iraqGeo[p])iraqGeo[p].sort().forEach(x=>c.innerHTML+=`<option value="${x}">${x}</option>`);
 }
- 
+
 function sync(){
   const rep=document.getElementById('repInput').value||'..';document.getElementById('outRep').innerText=rep;
   const acc=document.getElementById('myNameInput').value||'..';document.getElementById('outMyName').innerText=acc;
@@ -1841,8 +1096,7 @@ function sync(){
   document.getElementById('outLoc').innerText=(prov||city)?`${prov}${city?' - '+city:''}`:'..'  ;
   calculate();
 }
- 
-/* ─── حساب المبالغ ─── */
+
 function calculate(){
   let tot=0;
   db.forEach(item=>{if(item.status==='ok')tot+=parseFloat(String(item.remain).replace(/,/g,''))||0;});
@@ -1858,7 +1112,7 @@ function calculate(){
   document.getElementById('tafgeet').innerText=`المبلغ النهائي: ${fin.toLocaleString()} دينار عراقي فقط لا غير.`;
   updateNotesSummary();updatePage2();
 }
- 
+
 function setFilter(f){
   currentFilter=f;
   ['all','ok','error'].forEach(x=>{const el=document.getElementById(x==='all'?'fAll':x==='ok'?'fOk':'fEx');if(el)el.classList.remove('af');});
@@ -1866,8 +1120,7 @@ function setFilter(f){
   const el=document.getElementById(target);if(el)el.classList.add('af');
   renderList();
 }
- 
-/* ─── عرض قائمة الفواتير ─── */
+
 function renderList(){
   const list=document.getElementById('billsList');
   document.getElementById('billsCountDisplay').innerText=db.length;
@@ -1915,11 +1168,11 @@ function renderList(){
     }).join('');
   calculate();
 }
- 
+
 function toggleStatus(idx){db[idx].status=db[idx].status==='ok'?'error':'ok';renderList();}
 function updateNote(idx,val){db[idx].note=val;calculate();}
 function clearBills(){if(confirm('مسح جميع الفواتير؟')){db=[];renderList();}}
- 
+
 function updateNotesSummary(){
   const s=document.getElementById('notesSummary');let html='';let has=false;
   db.forEach(item=>{
@@ -1930,7 +1183,7 @@ function updateNotesSummary(){
   });
   s.innerHTML=has?html:'<p style="font-size:10px;color:var(--s500);font-style:italic"><i class="fa-solid fa-check" style="color:var(--gn);margin-left:5px"></i>لا توجد ملاحظات.</p>';
 }
- 
+
 function updatePage2(){
   document.getElementById('p2Client').innerText=document.getElementById('outClient').value||'—';
   document.getElementById('p2Count').innerText=db.length;
@@ -1946,30 +1199,23 @@ function updatePage2(){
   document.getElementById('p2TOrig').innerText=so.toLocaleString()+' IQD';
   document.getElementById('p2TRem').innerText=sr.toLocaleString()+' IQD';
 }
- 
-// === الطباعة المحسّنة ===
+
 let printMenuOpen=false;
 function togglePrintMenu(){
   printMenuOpen=!printMenuOpen;
   document.getElementById('printMenu').style.display=printMenuOpen?'block':'none';
   document.getElementById('printChevron').style.transform=printMenuOpen?'rotate(180deg)':'rotate(0)';
 }
-document.addEventListener('click',function(e){
-  const wrap=document.getElementById('printDropWrap');
-  if(wrap&&!wrap.contains(e.target)){printMenuOpen=false;document.getElementById('printMenu').style.display='none';document.getElementById('printChevron').style.transform='rotate(0)';}
-});
- 
+
 function doPrint(mode){
-  // إغلاق القائمة
   printMenuOpen=false;
   document.getElementById('printMenu').style.display='none';
   document.getElementById('printChevron').style.transform='rotate(0)';
- 
+
   const p2=document.querySelector('.print-p2');
   const body=document.body;
-  // إزالة كلاسات الطباعة القديمة
   body.classList.remove('print-p1-only','print-p2-only','print-both');
- 
+
   if(mode==='p1'){
     body.classList.add('print-p1-only');
     p2.style.display='none';
@@ -1980,7 +1226,7 @@ function doPrint(mode){
     body.classList.add('print-both');
     p2.style.display='block';
   }
- 
+
   setTimeout(()=>{
     window.print();
     setTimeout(()=>{
@@ -1989,8 +1235,7 @@ function doPrint(mode){
     },500);
   },100);
 }
- 
-// === إضافة يدوية ===
+
 function showManualInvoiceModal(){const m=document.getElementById('manModal');m.style.display='flex';}
 function hideManModal(){document.getElementById('manModal').style.display='none';}
 function addManualInvoice(){
@@ -2003,21 +1248,17 @@ function addManualInvoice(){
   document.getElementById('manId').value='';document.getElementById('manAmt').value='';document.getElementById('manNote').value='';
   hideManModal();renderList();
 }
- 
-// === إخفاء/إظهار تفاصيل الفاتورة ===
+
 function toggleCollapse(idx){
   db[idx].collapsed=!db[idx].collapsed;
   renderList();
 }
- 
-// === الأرشيف ===
-/* ─── حفظ في الأرشيف ─── */
+
 function saveToArchive(){
   const client=document.getElementById('outClient').value.trim();
   if(!client)return alert('يرجى كتابة اسم العميل أولاً.');
   const matchDate=document.getElementById('matchDateInput').value;
   const arch=gS('pure_archive');
-  // منع التكرار: نفس العميل + نفس التاريخ
   const duplicate=arch.find(i=>i.client===client&&i.date===matchDate);
   if(duplicate){
     const confirm_dup=confirm(`تحذير: يوجد سجل لهذا العميل بنفس تاريخ المطابقة (${matchDate}).\n\nهل تريد حفظ سجل جديد على أي حال؟`);
@@ -2044,47 +1285,42 @@ function saveToArchive(){
   arch.push(data);sS('pure_archive',arch);
   alert('✓ تم الحفظ في الأرشيف.');updateDash();
 }
- 
-/* ─── تحديث لوحة القيادة ─── */
+
 function updateDash(){
   const arch=gS('pure_archive');
   document.getElementById('dash-total-matches').innerText=arch.length;
   let tot=0,max=0,cm={},regionMap={};
- 
+
   arch.forEach(item=>{
     tot+=item.totalNum;
     if(item.totalNum>max)max=item.totalNum;
-    // تجميع العملاء
     if(!cm[item.client])cm[item.client]={count:0,total:0,lastDate:item.date,prov:item.prov||'',city:item.city||'',rep:item.rep||'',ids:[]};
     cm[item.client].count++;
     cm[item.client].total+=item.totalNum;
     cm[item.client].ids.push(item.id);
     if(new Date(item.date)>new Date(cm[item.client].lastDate))cm[item.client].lastDate=item.date;
-    // تجميع المناطق
     const rKey=item.prov||'غير محدد';
     if(!regionMap[rKey])regionMap[rKey]={count:0,total:0,cities:new Set()};
     regionMap[rKey].count++;
     regionMap[rKey].total+=item.totalNum;
     if(item.city)regionMap[rKey].cities.add(item.city);
   });
- 
+
   document.getElementById('dash-total-money').innerText=tot.toLocaleString()+' IQD';
   document.getElementById('dash-top-match').innerText=max.toLocaleString()+' IQD';
   document.getElementById('dash-active-clients').innerText=Object.keys(cm).length;
   window.cCM=cm;
   window.cRM=regionMap;
- 
-  // تعبئة فلتر المندوبين في الداش
+
   const reps=[...new Set(arch.map(i=>i.rep).filter(Boolean))].sort();
   const dRep=document.getElementById('dashRepFilter');
   const curRep=dRep?dRep.value:'';
   if(dRep){dRep.innerHTML='<option value="">كل المندوبين</option>';reps.forEach(r=>dRep.innerHTML+=`<option value="${r}">${r}</option>`);if(curRep)dRep.value=curRep;}
- 
+
   renderRegionCards();
   renderClientStats();
 }
- 
-// بطاقات المناطق
+
 let activeRegion='';
 function renderRegionCards(){
   const rm=window.cRM||{};
@@ -2092,7 +1328,7 @@ function renderRegionCards(){
   if(!container)return;
   const colors=['var(--bl)','var(--gn)','var(--pu)','var(--am)','#06b6d4','#ec4899','#f97316','#14b8a6'];
   const lightColors=['var(--bl-l)','var(--gn-l)','var(--pu-l)','var(--am-l)','#ecfeff','#fdf2f8','#fff7ed','#f0fdfa'];
- 
+
   const sorted=Object.keys(rm).sort((a,b)=>rm[b].count-rm[a].count);
   container.innerHTML=sorted.map((prov,idx)=>{
     const c=colors[idx%colors.length];const lc=lightColors[idx%lightColors.length];
@@ -2108,40 +1344,38 @@ function renderRegionCards(){
     </div>`;
   }).join('');
 }
- 
+
 function filterDashByRegion(prov){
   if(activeRegion===prov){activeRegion='';document.getElementById('dashRegionClearBtn').style.display='none';}
   else{activeRegion=prov;document.getElementById('dashRegionClearBtn').style.display='';}
   renderRegionCards();
   renderClientStats();
 }
- 
+
 function clearDashRegionFilter(){
   activeRegion='';
   document.getElementById('dashRegionClearBtn').style.display='none';
   renderRegionCards();
   renderClientStats();
 }
- 
+
 function renderClientStats(){
   const search=(document.getElementById('dashClientSearch').value||'').toLowerCase();
   const repF=(document.getElementById('dashRepFilter')?document.getElementById('dashRepFilter').value:'');
   const cm=window.cCM||{};
- 
-  // تحديث شارة الفلتر
+
   const tag=document.getElementById('dashFilterTag');
   if(tag){
     if(activeRegion){tag.style.display='';tag.innerText='📍 '+activeRegion;}
     else tag.style.display='none';
   }
- 
+
   let arr=Object.keys(cm).map(n=>({name:n,...cm[n]})).sort((a,b)=>b.total-a.total);
- 
-  // تطبيق الفلاتر
+
   if(activeRegion)arr=arr.filter(c=>c.prov===activeRegion);
   if(repF)arr=arr.filter(c=>c.rep===repF);
   if(search)arr=arr.filter(c=>c.name.toLowerCase().includes(search)||(c.prov&&c.prov.includes(search))||(c.city&&c.city.includes(search)));
- 
+
   document.getElementById('dash-clients-table').innerHTML=arr.map(c=>`
     <tr onmouseover="this.style.background='#eff6ff'" onmouseout="this.style.background=''">
       <td style="padding:12px 13px;font-weight:900;color:var(--bl)">${c.name}</td>
@@ -2163,8 +1397,7 @@ function renderClientStats(){
       </td>
     </tr>`).join('')||`<tr><td colspan="7" style="padding:18px;text-align:center;color:var(--s400);font-style:italic">لا توجد بيانات مطابقة.</td></tr>`;
 }
- 
-// وصول سريع من لوحة القيادة إلى الأرشيف مع تطبيق الفلتر
+
 function quickGoArchive(prov, rep){
   switchView('archive');
   setTimeout(()=>{
@@ -2176,17 +1409,15 @@ function quickGoArchive(prov, rep){
     renderArchiveTable();
   },100);
 }
- 
+
 function initArchFilterSelects(){
   const arch=gS('pure_archive');
-  // تعبئة فلتر المحافظات من البيانات الفعلية
   const provs=[...new Set(arch.map(i=>i.prov).filter(Boolean))].sort();
   const pSel=document.getElementById('archFilterProv');
   const curProv=pSel.value;
   pSel.innerHTML='<option value="">كل المحافظات</option>';
   provs.forEach(p=>pSel.innerHTML+=`<option value="${p}">${p}</option>`);
   if(curProv)pSel.value=curProv;
-  // تعبئة فلتر المندوبين
   const reps=[...new Set(arch.map(i=>i.rep).filter(Boolean))].sort();
   const rSel=document.getElementById('archFilterRep');
   const curRep=rSel.value;
@@ -2194,9 +1425,8 @@ function initArchFilterSelects(){
   reps.forEach(r=>rSel.innerHTML+=`<option value="${r}">${r}</option>`);
   if(curRep)rSel.value=curRep;
 }
- 
+
 function onArchFilterProv(){
-  // تحديث فلتر الأقضية بناءً على المحافظة المختارة
   const prov=document.getElementById('archFilterProv').value;
   const arch=gS('pure_archive');
   const citySel=document.getElementById('archFilterCity');
@@ -2207,7 +1437,7 @@ function onArchFilterProv(){
   }
   renderArchiveTable();
 }
- 
+
 function clearArchFilters(){
   document.getElementById('archiveSearch').value='';
   document.getElementById('archFilterProv').value='';
@@ -2217,8 +1447,7 @@ function clearArchFilters(){
   document.getElementById('archDateTo').value='';
   renderArchiveTable();
 }
- 
-/* ─── عرض جدول الأرشيف ─── */
+
 function renderArchiveTable(){
   initArchFilterSelects();
   const search=(document.getElementById('archiveSearch').value||'').toLowerCase();
@@ -2228,7 +1457,7 @@ function renderArchiveTable(){
   const fFrom=document.getElementById('archDateFrom').value;
   const fTo=document.getElementById('archDateTo').value;
   const arch=[...gS('pure_archive')].reverse();
- 
+
   const filtered=arch.filter(i=>{
     if(search&&!(i.client.toLowerCase().includes(search)||i.ref.toLowerCase().includes(search)||i.date.includes(search)))return false;
     if(fProv&&i.prov!==fProv)return false;
@@ -2238,11 +1467,10 @@ function renderArchiveTable(){
     if(fTo&&i.date>fTo)return false;
     return true;
   });
- 
-  // عداد النتائج
+
   const rc=document.getElementById('archResultCount');
   if(rc)rc.innerText=`${filtered.length} سجل`;
- 
+
   document.getElementById('archiveTableBody').innerHTML=filtered.map(i=>`<tr onmouseover="this.style.background='var(--s50)'" onmouseout="this.style.background=''">
     <td style="padding:11px 13px;font-family:monospace;font-size:11px;color:var(--s400)">${i.ref}</td>
     <td style="padding:11px 13px;font-family:monospace;color:var(--s600);font-size:12px">${i.date}</td>
@@ -2269,62 +1497,52 @@ function renderArchiveTable(){
     </td>
   </tr>`).join('')||`<tr><td colspan="9" style="padding:22px;text-align:center;color:var(--s400);font-style:italic">لا توجد سجلات مطابقة.</td></tr>`;
 }
- 
+
 function restoreRecord(id){
   const arch=gS('pure_archive');
   const rec=arch.find(i=>i.id===id);
   if(!rec){alert('السجل غير موجود.');return;}
- 
-  // الانتقال لصفحة المطابقة
+
   switchView('matching');
- 
-  // تعبئة كل الحقول
+
   setTimeout(()=>{
-    // اسم العميل
     document.getElementById('outClient').value=rec.client||'';
     document.getElementById('p2Client').innerText=rec.client||'—';
- 
-    // المحافظة والقضاء
+
     if(rec.prov){
       const pSel=document.getElementById('provInput');
       pSel.value=rec.prov;
       updateCities();
       setTimeout(()=>{if(rec.city)document.getElementById('cityInput').value=rec.city;},50);
     }
- 
-    // باقي الحقول
+
     if(rec.clientContact)document.getElementById('clientContactInput').value=rec.clientContact;
     if(rec.prevAmt)document.getElementById('prevInput').value=rec.prevAmt;
     if(rec.date)document.getElementById('matchDateInput').value=rec.date;
     if(rec.lastMatch)document.getElementById('lastMatchInput').value=rec.lastMatch;
     if(rec.discPerc)document.getElementById('currDiscPerc').value=rec.discPerc;
     if(rec.fieldMatch)document.getElementById('fieldMatchInput').value=rec.fieldMatch;
- 
-    // المحاسب والمندوب
+
     const accSel=document.getElementById('myNameInput');
     const repSel=document.getElementById('repInput');
     if(rec.accountant&&accSel.querySelector(`option[value="${rec.accountant}"]`))accSel.value=rec.accountant;
     if(rec.rep&&repSel.querySelector(`option[value="${rec.rep}"]`))repSel.value=rec.rep;
- 
-    // استعادة الفواتير
+
     if(rec.invoices&&rec.invoices.length){
       db=JSON.parse(JSON.stringify(rec.invoices));
       renderList();
     }
- 
     sync();
- 
-    // إشعار بنجاح الاستعادة
     showToast(`✓ تم استعادة سجل ${rec.client} — ${rec.date}`);
   },200);
 }
- 
+
 function deleteArchiveItem(id){
   if(!confirm('حذف نهائي؟'))return;
   sS('pure_archive',gS('pure_archive').filter(i=>i.id!==id));
   renderArchiveTable();updateDash();
 }
- 
+
 function exportArchiveToExcel(){
   const arch=gS('pure_archive');if(!arch.length)return alert('قاعدة البيانات فارغة.');
   const data=[['المعرف','التاريخ','العميل','المندوب','المحاسب','الصافي']];
@@ -2332,7 +1550,7 @@ function exportArchiveToExcel(){
   const ws=XLSX.utils.aoa_to_sheet(data);const wb=XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb,ws,'Archive');XLSX.writeFile(wb,'Pure_Archive.xlsx');
 }
- 
+
 function showToast(msg){
   let t=document.getElementById('sysToast');
   if(!t){
@@ -2347,7 +1565,7 @@ function showToast(msg){
   clearTimeout(t._timer);
   t._timer=setTimeout(()=>{t.style.opacity='0';t.style.transform='translateX(-50%) translateY(80px)';},3000);
 }
- 
+
 function shareWhatsApp(){
   const c=document.getElementById('outClient').value||'عميل محترم';
   const f=document.getElementById('resFinal').innerText;
