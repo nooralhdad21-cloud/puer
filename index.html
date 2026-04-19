@@ -23,7 +23,7 @@ body{font-family:'Cairo',sans-serif;background:#f8fafc;overflow-x:hidden}
   --s800:#1e293b;--s900:#0f172a
 }
 .nav-item{transition:all .3s;cursor:pointer;display:flex;align-items:center;gap:12px;padding:12px;border-radius:12px;font-weight:700;font-size:14px}
-.nav-item.active{background:#1a5c3a;color:white;box-shadow:0 4px 15px rgba(26,92,58,.4)}
+.nav-item.active{background:#3FA9D8;color:white;box-shadow:0 4px 15px rgba(26,92,58,.4)}
 .view-section{display:none}
 .view-section.active{display:block}
 .bill-card{padding:14px;background:white;border-radius:14px;border:1px solid var(--s200);margin-bottom:8px;transition:.25s}
@@ -91,18 +91,18 @@ select,input{font-family:'Cairo',sans-serif}
 <body style="display:flex;height:100vh;overflow:hidden;color:var(--s800)" onload="initSystem()">
  
 <!-- SIDEBAR -->
-<aside class="sidebar no-print" style="width:256px;background:#0f2419;color:#a7d4b8;display:flex;flex-direction:column;height:100%;flex-shrink:0;z-index:20;box-shadow:2px 0 20px rgba(0,0,0,.2)">
+<aside class="sidebar no-print" style="width:256px;background:#1a3d4d;color:#a7d4b8;display:flex;flex-direction:column;height:100%;flex-shrink:0;z-index:20;box-shadow:2px 0 20px rgba(0,0,0,.2)">
   <div style="padding:20px 18px 16px;border-bottom:1px solid rgba(255,255,255,.08);text-align:center">
     <!-- شعار بيور فارما الرسمي -->
     <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:10px">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52" width="52" height="52">  <defs>    <linearGradient id="lg2" x1="0%" y1="0%" x2="100%" y2="100%">      <stop offset="0%" style="stop-color:#2d8653"/>      <stop offset="100%" style="stop-color:#40b976"/>    </linearGradient>  </defs>  <rect x="2" y="2" width="48" height="48" rx="12" fill="url(#lg2)"/>  <rect x="12" y="13" width="28" height="3.5" rx="1.75" fill="rgba(255,255,255,0.95)"/>  <rect x="12" y="21" width="20" height="3.5" rx="1.75" fill="rgba(255,255,255,0.65)"/>  <rect x="12" y="29" width="24" height="3.5" rx="1.75" fill="rgba(255,255,255,0.65)"/>  <rect x="31" y="31" width="12" height="3" rx="1.5" fill="white"/>  <rect x="36" y="26" width="3" height="13" rx="1.5" fill="white"/></svg>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">  <defs><style>.pp-b{fill:#3FA9D8}</style></defs>  <rect x="10" y="10" width="180" height="180" rx="30" fill="none" stroke="#3FA9D8" stroke-width="8"/>  <g transform="translate(35,45) scale(0.85)">    <rect x="0" y="0" width="35" height="110" class="pp-b"/>    <path d="M35 0 L80 0 Q115 0 115 27 Q115 54 80 54 L35 54 Z" class="pp-b"/>    <rect x="53" y="15" width="40" height="10" fill="white"/>    <rect x="68" y="5" width="10" height="30" fill="white"/>    <path d="M115 27 Q140 27 140 65 Q140 85 125 85" fill="none" stroke="#3FA9D8" stroke-width="18" stroke-linecap="round"/>  </g>  <text x="100" y="150" text-anchor="middle" font-family="Arial Black,Arial" font-weight="900" font-size="28" fill="#3FA9D8" letter-spacing="1">PURE</text>  <text x="100" y="175" text-anchor="middle" font-family="Arial Black,Arial" font-weight="900" font-size="20" fill="#3FA9D8" letter-spacing="1.5">PHARMA</text></svg>
       <div style="text-align:right">
         <div style="font-size:17px;font-weight:900;color:white;letter-spacing:.3px;font-family:Georgia,serif">Pure Pharma</div>
-        <div style="font-size:9px;color:#40b976;letter-spacing:.12em;text-transform:uppercase;margin-top:1px">Scientific Bureau</div>
+        <div style="font-size:9px;color:#5CBCE6;letter-spacing:.12em;text-transform:uppercase;margin-top:1px">Scientific Bureau</div>
       </div>
     </div>
     <div style="display:inline-block;background:rgba(45,134,83,.25);border:1px solid rgba(45,134,83,.4);border-radius:20px;padding:3px 12px">
-      <p style="font-size:9px;color:#40b976;letter-spacing:.1em;text-transform:uppercase;font-weight:700">Smart ERP System</p>
+      <p style="font-size:9px;color:#5CBCE6;letter-spacing:.1em;text-transform:uppercase;font-weight:700">Smart ERP System</p>
     </div>
   </div>
   <nav style="flex:1;padding:18px 14px;display:flex;flex-direction:column;gap:6px;overflow-y:auto">
@@ -331,12 +331,13 @@ select,input{font-family:'Cairo',sans-serif}
     <!-- ورقة الطباعة الأولى -->
     <div class="report-container" style="background:white;border:1px solid var(--s200);border-radius:22px;padding:34px 38px;box-shadow:0 2px 8px rgba(0,0,0,.06);margin-bottom:18px">
       <!-- رأس -->
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid #1a5c3a;padding-bottom:18px;margin-bottom:22px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid #3FA9D8;padding-bottom:18px;margin-bottom:22px">
         <div style="display:flex;align-items:center;gap:16px">
-          <!-- شعار رسمي SVG -->
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 52" width="180" height="52">  <defs>    <linearGradient id="lg1" x1="0%" y1="0%" x2="100%" y2="100%">      <stop offset="0%" style="stop-color:#1a5c3a"/>      <stop offset="100%" style="stop-color:#2d8653"/>    </linearGradient>  </defs>  <!-- أيقونة قارورة/دواء -->  <rect x="2" y="2" width="38" height="48" rx="8" fill="url(#lg1)"/>  <!-- خطوط داخل الأيقونة -->  <rect x="10" y="14" width="22" height="3" rx="1.5" fill="rgba(255,255,255,0.9)"/>  <rect x="10" y="21" width="16" height="3" rx="1.5" fill="rgba(255,255,255,0.6)"/>  <rect x="10" y="28" width="19" height="3" rx="1.5" fill="rgba(255,255,255,0.6)"/>  <rect x="10" y="35" width="12" height="3" rx="1.5" fill="rgba(255,255,255,0.4)"/>  <!-- علامة + الصيدلانية -->  <rect x="25" y="30" width="10" height="3" rx="1.5" fill="white"/>  <rect x="29" y="26" width="3" height="11" rx="1.5" fill="white"/>  <!-- النص الرئيسي -->  <text x="48" y="22" font-family="Georgia,serif" font-size="18" font-weight="700" fill="#1a5c3a" letter-spacing="0.5">Pure</text>  <text x="48" y="38" font-family="Georgia,serif" font-size="18" font-weight="700" fill="#1a5c3a" letter-spacing="0.5">Pharma</text>  <!-- خط فاصل -->  <line x1="48" y1="41" x2="175" y2="41" stroke="#2d8653" stroke-width="1.5" opacity="0.3"/>  <!-- شعار فرعي -->  <text x="48" y="50" font-family="Arial,sans-serif" font-size="7.5" fill="#2d8653" letter-spacing="1.5" opacity="0.8">SCIENTIFIC BUREAU</text></svg>
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 150" width="500" height="150">  <defs><style>.pb{fill:#3FA9D8}.pt{font-family:'Arial Black',Arial;font-weight:900}</style></defs>  <rect x="5" y="5" width="140" height="140" rx="25" fill="none" stroke="#3FA9D8" stroke-width="6"/>  <g transform="translate(20,25) scale(0.6)">    <rect x="0" y="0" width="35" height="110" class="pb"/>    <path d="M35 0 L80 0 Q115 0 115 27 Q115 54 80 54 L35 54 Z" class="pb"/>    <rect x="53" y="15" width="40" height="10" fill="white"/>    <rect x="68" y="5" width="10" height="30" fill="white"/>    <path d="M115 27 Q140 27 140 65 Q140 85 125 85" fill="none" stroke="#3FA9D8" stroke-width="18" stroke-linecap="round"/>  </g>  <text x="160" y="75" class="pt pb" font-size="48" letter-spacing="2">PURE</text>  <text x="160" y="115" class="pt pb" font-size="36" letter-spacing="3">PHARMA</text>  <line x1="160" y1="125" x2="490" y2="125" stroke="#3FA9D8" stroke-width="2" opacity="0.3"/>  <text x="160" y="142" font-family="Arial" font-size="11" fill="#3FA9D8" letter-spacing="2" opacity="0.75">SCIENTIFIC BUREAU - BAGHDAD</text></svg>
+          </svg>
           <div style="border-right:2px solid #e2e8f0;padding-right:16px;margin-right:4px">
-            <p style="font-size:10px;font-weight:700;color:#2d8653;letter-spacing:.1em;text-transform:uppercase">Trusted Partners in Health Solutions</p>
+            <p style="font-size:10px;font-weight:700;color:#3FA9D8;letter-spacing:.1em;text-transform:uppercase">Trusted Partners in Health Solutions</p>
             <p style="font-size:10px;color:var(--s400);margin-top:2px">info@pure-pharma.com &nbsp;|&nbsp; +964 750 426 5555</p>
           </div>
         </div>
@@ -440,23 +441,13 @@ select,input{font-family:'Cairo',sans-serif}
  
     <!-- ورقة الطباعة الثانية: جدول الفواتير -->
     <div class="print-p2" style="background:white;border:1px solid var(--s200);border-radius:22px;padding:34px 38px;box-shadow:0 2px 8px rgba(0,0,0,.06)">
-      <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid #1a5c3a;padding-bottom:14px;margin-bottom:18px">
+      <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid #3FA9D8;padding-bottom:14px;margin-bottom:18px">
         <div style="display:flex;align-items:center;gap:12px">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 36" width="120" height="36">
-            <defs><linearGradient id="lg3" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#1a5c3a"/><stop offset="100%" style="stop-color:#2d8653"/></linearGradient></defs>
-            <rect x="1" y="1" width="28" height="34" rx="6" fill="url(#lg3)"/>
-            <rect x="7" y="9" width="16" height="2.5" rx="1.25" fill="rgba(255,255,255,0.9)"/>
-            <rect x="7" y="15" width="11" height="2.5" rx="1.25" fill="rgba(255,255,255,0.6)"/>
-            <rect x="7" y="21" width="13" height="2.5" rx="1.25" fill="rgba(255,255,255,0.6)"/>
-            <rect x="17" y="21" width="8" height="2.2" rx="1.1" fill="white"/>
-            <rect x="20" y="18" width="2.2" height="8" rx="1.1" fill="white"/>
-            <text x="36" y="16" font-family="Georgia,serif" font-size="13" font-weight="700" fill="#1a5c3a">Pure Pharma</text>
-            <text x="36" y="28" font-family="Arial,sans-serif" font-size="6.5" fill="#2d8653" letter-spacing="1.2" opacity="0.8">SCIENTIFIC BUREAU</text>
-            <line x1="36" y1="30" x2="118" y2="30" stroke="#2d8653" stroke-width="1" opacity="0.25"/>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 90" width="320" height="90">  <defs><style>.b{fill:#3FA9D8}.t{font-family:'Arial Black',Arial;font-weight:900}</style></defs>  <rect x="3" y="3" width="84" height="84" rx="15" fill="none" stroke="#3FA9D8" stroke-width="4"/>  <g transform="translate(12,15) scale(0.45)">    <rect x="0" y="0" width="35" height="110" class="b"/>    <path d="M35 0 L80 0 Q115 0 115 27 Q115 54 80 54 L35 54 Z" class="b"/>    <rect x="53" y="15" width="40" height="10" fill="white"/>    <rect x="68" y="5" width="10" height="30" fill="white"/>    <path d="M115 27 Q140 27 140 65 Q140 85 125 85" fill="none" stroke="#3FA9D8" stroke-width="18" stroke-linecap="round"/>  </g>  <text x="95" y="42" class="t b" font-size="30" letter-spacing="1.5">PURE PHARMA</text>  <line x1="95" y1="52" x2="315" y2="52" stroke="#3FA9D8" stroke-width="1.5" opacity="0.25"/>  <text x="95" y="65" font-family="Arial" font-size="9" fill="#3FA9D8" letter-spacing="1.5" opacity="0.7">SCIENTIFIC BUREAU</text>  <text x="95" y="80" font-family="Arial" font-size="8" fill="#666" letter-spacing="0.8">info@pure-pharma.com  •  +964 750 426 5555</text></svg>
           </svg>
           <div style="border-right:1px solid var(--s200);padding-right:12px">
             <p style="font-size:9px;color:var(--s500);text-transform:uppercase;letter-spacing:.07em">تفاصيل الفواتير — Invoices Detail</p>
-            <p style="font-size:9px;color:#2d8653;margin-top:2px">info@pure-pharma.com</p>
+            <p style="font-size:9px;color:#3FA9D8;margin-top:2px">info@pure-pharma.com</p>
           </div>
         </div>
         <div style="text-align:left;font-size:12px;font-weight:700">
@@ -487,9 +478,9 @@ select,input{font-family:'Cairo',sans-serif}
           </tr>
         </tfoot>
       </table>
-      <div style="text-align:center;margin-top:18px;padding-top:12px;border-top:2px solid #e8f5ee;display:flex;align-items:center;justify-content:center;gap:12px">
+      <div style="text-align:center;margin-top:18px;padding-top:12px;border-top:2px solid #e6f4f9;display:flex;align-items:center;justify-content:center;gap:12px">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
-          <defs><linearGradient id="lg5" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#1a5c3a"/><stop offset="100%" style="stop-color:#2d8653"/></linearGradient></defs>
+          <defs><linearGradient id="lg5" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#3FA9D8"/><stop offset="100%" style="stop-color:#3FA9D8"/></linearGradient></defs>
           <rect x="1" y="1" width="22" height="22" rx="5" fill="url(#lg5)"/>
           <rect x="5" y="6" width="14" height="2" rx="1" fill="rgba(255,255,255,0.9)"/>
           <rect x="5" y="10.5" width="9" height="2" rx="1" fill="rgba(255,255,255,0.6)"/>
@@ -498,8 +489,8 @@ select,input{font-family:'Cairo',sans-serif}
           <rect x="15.9" y="12.5" width="1.8" height="5.8" rx="0.9" fill="white"/>
         </svg>
         <div style="text-align:right">
-          <p style="font-size:9px;font-weight:900;color:#1a5c3a;text-transform:uppercase;letter-spacing:.08em">Pure Pharma — Scientific Bureau Baghdad</p>
-          <p style="font-size:8px;color:#2d8653;margin-top:1px">info@pure-pharma.com &nbsp;·&nbsp; +964 750 426 5555 &nbsp;·&nbsp; pure-pharma.com</p>
+          <p style="font-size:9px;font-weight:900;color:#3FA9D8;text-transform:uppercase;letter-spacing:.08em">Pure Pharma — Scientific Bureau Baghdad</p>
+          <p style="font-size:8px;color:#3FA9D8;margin-top:1px">info@pure-pharma.com &nbsp;·&nbsp; +964 750 426 5555 &nbsp;·&nbsp; pure-pharma.com</p>
         </div>
       </div>
     </div>
@@ -628,7 +619,7 @@ select,input{font-family:'Cairo',sans-serif}
 <div id="view-about" class="view-section" style="padding:0;overflow:hidden">
  
   <!-- Hero Banner — بنفس ألوان الموقع الرسمي -->
-  <div style="background:linear-gradient(135deg,#0a1f12 0%,#1a5c3a 50%,#0e3d24 100%);padding:52px 48px 44px;position:relative;overflow:hidden">
+  <div style="background:linear-gradient(135deg,#1a3d4d 0%,#3FA9D8 50%,#0e3d24 100%);padding:52px 48px 44px;position:relative;overflow:hidden">
     <!-- خلفية زخرفية -->
     <div style="position:absolute;top:-60px;left:-60px;width:300px;height:300px;border-radius:50%;background:rgba(64,185,118,.08);pointer-events:none"></div>
     <div style="position:absolute;bottom:-80px;right:10%;width:400px;height:400px;border-radius:50%;background:rgba(45,134,83,.06);pointer-events:none"></div>
@@ -645,7 +636,7 @@ select,input{font-family:'Cairo',sans-serif}
       <!-- شعار كبير -->
       <div style="display:flex;align-items:center;gap:16px;margin-bottom:24px">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
-          <defs><linearGradient id="hg" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#2d8653"/><stop offset="100%" style="stop-color:#40b976"/></linearGradient></defs>
+          <defs><linearGradient id="hg" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#3FA9D8"/><stop offset="100%" style="stop-color:#5CBCE6"/></linearGradient></defs>
           <rect x="2" y="2" width="60" height="60" rx="14" fill="url(#hg)"/>
           <rect x="14" y="16" width="36" height="5" rx="2.5" fill="rgba(255,255,255,0.95)"/>
           <rect x="14" y="26" width="26" height="5" rx="2.5" fill="rgba(255,255,255,0.65)"/>
@@ -655,7 +646,7 @@ select,input{font-family:'Cairo',sans-serif}
         </svg>
         <div>
           <div style="font-family:Georgia,serif;font-size:32px;font-weight:700;color:white;letter-spacing:1px">Pure Pharma</div>
-          <div style="font-size:11px;color:#40b976;letter-spacing:.18em;text-transform:uppercase;margin-top:3px">Scientific Bureau — Baghdad, Iraq</div>
+          <div style="font-size:11px;color:#5CBCE6;letter-spacing:.18em;text-transform:uppercase;margin-top:3px">Scientific Bureau — Baghdad, Iraq</div>
         </div>
       </div>
       <h1 style="font-family:Georgia,serif;font-size:26px;color:white;font-weight:400;line-height:1.5;margin-bottom:14px">
@@ -667,8 +658,8 @@ select,input{font-family:'Cairo',sans-serif}
       <!-- أزرار الموقع -->
       <div style="display:flex;gap:12px;margin-top:24px;flex-wrap:wrap">
         <a href="https://pure-pharma.com" target="_blank"
-          style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:#40b976;color:white;border-radius:10px;font-size:13px;font-weight:700;text-decoration:none;font-family:'Cairo',sans-serif;transition:.2s"
-          onmouseover="this.style.background='#2d8653'" onmouseout="this.style.background='#40b976'">
+          style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:#5CBCE6;color:white;border-radius:10px;font-size:13px;font-weight:700;text-decoration:none;font-family:'Cairo',sans-serif;transition:.2s"
+          onmouseover="this.style.background='#3FA9D8'" onmouseout="this.style.background='#5CBCE6'">
           <i class="fa-solid fa-globe"></i> pure-pharma.com
         </a>
         <a href="mailto:info@pure-pharma.com"
@@ -689,23 +680,23 @@ select,input{font-family:'Cairo',sans-serif}
  
     <!-- بطاقات الأرقام -->
     <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:36px">
-      <div style="background:white;border:1px solid #e2e8f0;border-radius:16px;padding:20px;text-align:center;border-top:3px solid #1a5c3a">
-        <div style="font-size:32px;font-weight:900;color:#1a5c3a;font-family:Georgia,serif">2017</div>
+      <div style="background:white;border:1px solid #e2e8f0;border-radius:16px;padding:20px;text-align:center;border-top:3px solid #3FA9D8">
+        <div style="font-size:32px;font-weight:900;color:#3FA9D8;font-family:Georgia,serif">2017</div>
         <div style="font-size:12px;font-weight:700;color:#64748b;margin-top:4px">سنة التأسيس</div>
         <div style="font-size:10px;color:#94a3b8;margin-top:2px">Year of Establishment</div>
       </div>
-      <div style="background:white;border:1px solid #e2e8f0;border-radius:16px;padding:20px;text-align:center;border-top:3px solid #2d8653">
-        <div style="font-size:32px;font-weight:900;color:#2d8653;font-family:Georgia,serif">10+</div>
+      <div style="background:white;border:1px solid #e2e8f0;border-radius:16px;padding:20px;text-align:center;border-top:3px solid #3FA9D8">
+        <div style="font-size:32px;font-weight:900;color:#3FA9D8;font-family:Georgia,serif">10+</div>
         <div style="font-size:12px;font-weight:700;color:#64748b;margin-top:4px">سنوات خبرة</div>
         <div style="font-size:10px;color:#94a3b8;margin-top:2px">Years of Experience</div>
       </div>
-      <div style="background:white;border:1px solid #e2e8f0;border-radius:16px;padding:20px;text-align:center;border-top:3px solid #40b976">
-        <div style="font-size:32px;font-weight:900;color:#40b976;font-family:Georgia,serif">2</div>
+      <div style="background:white;border:1px solid #e2e8f0;border-radius:16px;padding:20px;text-align:center;border-top:3px solid #5CBCE6">
+        <div style="font-size:32px;font-weight:900;color:#5CBCE6;font-family:Georgia,serif">2</div>
         <div style="font-size:12px;font-weight:700;color:#64748b;margin-top:4px">مستودع رئيسي</div>
         <div style="font-size:10px;color:#94a3b8;margin-top:2px">Main Warehouses</div>
       </div>
-      <div style="background:white;border:1px solid #e2e8f0;border-radius:16px;padding:20px;text-align:center;border-top:3px solid #0a1f12">
-        <div style="font-size:32px;font-weight:900;color:#0a1f12;font-family:Georgia,serif">2000</div>
+      <div style="background:white;border:1px solid #e2e8f0;border-radius:16px;padding:20px;text-align:center;border-top:3px solid #1a3d4d">
+        <div style="font-size:32px;font-weight:900;color:#1a3d4d;font-family:Georgia,serif">2000</div>
         <div style="font-size:12px;font-weight:700;color:#64748b;margin-top:4px">متر مربع</div>
         <div style="font-size:10px;color:#94a3b8;margin-top:2px">Total Storage m²</div>
       </div>
@@ -715,23 +706,23 @@ select,input{font-family:'Cairo',sans-serif}
  
       <!-- نبذة عن الشركة -->
       <div style="background:white;border:1px solid #e2e8f0;border-radius:18px;padding:28px">
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;padding-bottom:14px;border-bottom:2px solid #e8f5ee">
-          <div style="width:36px;height:36px;background:#e8f5ee;border-radius:10px;display:flex;align-items:center;justify-content:center">
-            <i class="fa-solid fa-building" style="color:#1a5c3a;font-size:16px"></i>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;padding-bottom:14px;border-bottom:2px solid #e6f4f9">
+          <div style="width:36px;height:36px;background:#e6f4f9;border-radius:10px;display:flex;align-items:center;justify-content:center">
+            <i class="fa-solid fa-building" style="color:#3FA9D8;font-size:16px"></i>
           </div>
           <div>
             <h3 style="font-size:16px;font-weight:900;color:#0f172a">عن الشركة</h3>
-            <p style="font-size:10px;color:#2d8653;text-transform:uppercase;letter-spacing:.08em">About Pure Pharma</p>
+            <p style="font-size:10px;color:#3FA9D8;text-transform:uppercase;letter-spacing:.08em">About Pure Pharma</p>
           </div>
         </div>
         <p style="font-size:13px;color:#475569;line-height:1.85;margin-bottom:14px">
-          تأسست شركة <strong style="color:#1a5c3a">بيور فارما</strong> عام 2017 على يد فريق من المتخصصين ذوي خبرة تتجاوز عقداً في المجال الصيدلاني. تعمل الشركة كمكتب علمي متخصص في استيراد وتوزيع المستحضرات الصيدلانية في السوق العراقي.
+          تأسست شركة <strong style="color:#3FA9D8">بيور فارما</strong> عام 2017 على يد فريق من المتخصصين ذوي خبرة تتجاوز عقداً في المجال الصيدلاني. تعمل الشركة كمكتب علمي متخصص في استيراد وتوزيع المستحضرات الصيدلانية في السوق العراقي.
         </p>
         <p style="font-size:13px;color:#475569;line-height:1.85">
           يضم المكتب مقراً رئيسياً في <strong>أربيل</strong> ومكتباً علمياً في <strong>بغداد</strong>، مع مستودعين بمساحة إجمالية 2000م² وفق معايير وزارة الصحة العراقية.
         </p>
-        <div style="margin-top:18px;padding:12px 16px;background:#f0faf5;border-radius:10px;border-right:3px solid #2d8653">
-          <p style="font-size:11px;font-style:italic;color:#1a5c3a;font-weight:600">
+        <div style="margin-top:18px;padding:12px 16px;background:#f0f9fc;border-radius:10px;border-right:3px solid #3FA9D8">
+          <p style="font-size:11px;font-style:italic;color:#3FA9D8;font-weight:600">
             "Pure Pharma was established in 2017 by a team of professionals with more than a decade of experience in the pharmaceutical field."
           </p>
         </div>
@@ -739,7 +730,7 @@ select,input{font-family:'Cairo',sans-serif}
  
       <!-- الرسالة والرؤية -->
       <div style="display:flex;flex-direction:column;gap:16px">
-        <div style="background:linear-gradient(135deg,#1a5c3a,#2d8653);border-radius:18px;padding:24px;color:white">
+        <div style="background:linear-gradient(135deg,#3FA9D8,#3FA9D8);border-radius:18px;padding:24px;color:white">
           <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
             <div style="width:34px;height:34px;background:rgba(255,255,255,.15);border-radius:9px;display:flex;align-items:center;justify-content:center">
               <i class="fa-solid fa-bullseye" style="font-size:15px"></i>
@@ -758,12 +749,12 @@ select,input{font-family:'Cairo',sans-serif}
         </div>
         <div style="background:white;border:1px solid #e2e8f0;border-radius:18px;padding:24px">
           <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
-            <div style="width:34px;height:34px;background:#e8f5ee;border-radius:9px;display:flex;align-items:center;justify-content:center">
-              <i class="fa-solid fa-eye" style="color:#1a5c3a;font-size:15px"></i>
+            <div style="width:34px;height:34px;background:#e6f4f9;border-radius:9px;display:flex;align-items:center;justify-content:center">
+              <i class="fa-solid fa-eye" style="color:#3FA9D8;font-size:15px"></i>
             </div>
             <div>
               <h4 style="font-size:14px;font-weight:900;color:#0f172a">رؤيتنا</h4>
-              <p style="font-size:9px;color:#2d8653;text-transform:uppercase;letter-spacing:.08em">Vision</p>
+              <p style="font-size:9px;color:#3FA9D8;text-transform:uppercase;letter-spacing:.08em">Vision</p>
             </div>
           </div>
           <p style="font-size:12px;line-height:1.8;color:#475569">
@@ -780,39 +771,39 @@ select,input{font-family:'Cairo',sans-serif}
  
       <!-- المنتجات البارزة -->
       <div style="background:white;border:1px solid #e2e8f0;border-radius:18px;padding:28px">
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;padding-bottom:14px;border-bottom:2px solid #e8f5ee">
-          <div style="width:36px;height:36px;background:#e8f5ee;border-radius:10px;display:flex;align-items:center;justify-content:center">
-            <i class="fa-solid fa-pills" style="color:#1a5c3a;font-size:16px"></i>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;padding-bottom:14px;border-bottom:2px solid #e6f4f9">
+          <div style="width:36px;height:36px;background:#e6f4f9;border-radius:10px;display:flex;align-items:center;justify-content:center">
+            <i class="fa-solid fa-pills" style="color:#3FA9D8;font-size:16px"></i>
           </div>
           <div>
             <h3 style="font-size:16px;font-weight:900;color:#0f172a">المنتجات البارزة</h3>
-            <p style="font-size:10px;color:#2d8653;text-transform:uppercase;letter-spacing:.08em">Featured Products</p>
+            <p style="font-size:10px;color:#3FA9D8;text-transform:uppercase;letter-spacing:.08em">Featured Products</p>
           </div>
         </div>
         <div style="display:flex;flex-direction:column;gap:10px">
           <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:#f8fafc;border-radius:10px;border:1px solid #e2e8f0">
-            <div style="width:8px;height:8px;border-radius:50%;background:#1a5c3a;flex-shrink:0"></div>
+            <div style="width:8px;height:8px;border-radius:50%;background:#3FA9D8;flex-shrink:0"></div>
             <div>
               <p style="font-size:13px;font-weight:700;color:#0f172a">Nutra Acne</p>
               <p style="font-size:11px;color:#64748b">مستحضر علاج حب الشباب</p>
             </div>
           </div>
           <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:#f8fafc;border-radius:10px;border:1px solid #e2e8f0">
-            <div style="width:8px;height:8px;border-radius:50%;background:#2d8653;flex-shrink:0"></div>
+            <div style="width:8px;height:8px;border-radius:50%;background:#3FA9D8;flex-shrink:0"></div>
             <div>
               <p style="font-size:13px;font-weight:700;color:#0f172a">Deep Sleep</p>
               <p style="font-size:11px;color:#64748b">مستحضر تحسين النوم</p>
             </div>
           </div>
           <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:#f8fafc;border-radius:10px;border:1px solid #e2e8f0">
-            <div style="width:8px;height:8px;border-radius:50%;background:#40b976;flex-shrink:0"></div>
+            <div style="width:8px;height:8px;border-radius:50%;background:#5CBCE6;flex-shrink:0"></div>
             <div>
               <p style="font-size:13px;font-weight:700;color:#0f172a">NutraBiotec</p>
               <p style="font-size:11px;color:#64748b">مستحضر صحة الجهاز الهضمي</p>
             </div>
           </div>
           <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:#f8fafc;border-radius:10px;border:1px solid #e2e8f0">
-            <div style="width:8px;height:8px;border-radius:50%;background:#0a1f12;flex-shrink:0"></div>
+            <div style="width:8px;height:8px;border-radius:50%;background:#1a3d4d;flex-shrink:0"></div>
             <div>
               <p style="font-size:13px;font-weight:700;color:#0f172a">TAFAROM</p>
               <p style="font-size:11px;color:#64748b">Prostaglandin — علاج الجلوكوما</p>
@@ -820,41 +811,41 @@ select,input{font-family:'Cairo',sans-serif}
           </div>
         </div>
         <a href="https://pure-pharma.com/contact-us-copy" target="_blank"
-          style="display:inline-flex;align-items:center;gap:6px;margin-top:16px;padding:8px 16px;background:#e8f5ee;color:#1a5c3a;border-radius:8px;font-size:12px;font-weight:700;text-decoration:none;font-family:'Cairo',sans-serif;transition:.2s"
-          onmouseover="this.style.background='#1a5c3a';this.style.color='white'" onmouseout="this.style.background='#e8f5ee';this.style.color='#1a5c3a'">
+          style="display:inline-flex;align-items:center;gap:6px;margin-top:16px;padding:8px 16px;background:#e6f4f9;color:#3FA9D8;border-radius:8px;font-size:12px;font-weight:700;text-decoration:none;font-family:'Cairo',sans-serif;transition:.2s"
+          onmouseover="this.style.background='#3FA9D8';this.style.color='white'" onmouseout="this.style.background='#e6f4f9';this.style.color='#3FA9D8'">
           <i class="fa-solid fa-arrow-left"></i> استعراض كل المنتجات
         </a>
       </div>
  
       <!-- الشركاء الدوليون -->
       <div style="background:white;border:1px solid #e2e8f0;border-radius:18px;padding:28px">
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;padding-bottom:14px;border-bottom:2px solid #e8f5ee">
-          <div style="width:36px;height:36px;background:#e8f5ee;border-radius:10px;display:flex;align-items:center;justify-content:center">
-            <i class="fa-solid fa-handshake" style="color:#1a5c3a;font-size:16px"></i>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;padding-bottom:14px;border-bottom:2px solid #e6f4f9">
+          <div style="width:36px;height:36px;background:#e6f4f9;border-radius:10px;display:flex;align-items:center;justify-content:center">
+            <i class="fa-solid fa-handshake" style="color:#3FA9D8;font-size:16px"></i>
           </div>
           <div>
             <h3 style="font-size:16px;font-weight:900;color:#0f172a">الشركاء الدوليون</h3>
-            <p style="font-size:10px;color:#2d8653;text-transform:uppercase;letter-spacing:.08em">International Partners</p>
+            <p style="font-size:10px;color:#3FA9D8;text-transform:uppercase;letter-spacing:.08em">International Partners</p>
           </div>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
           <div style="padding:14px;background:#f8fafc;border-radius:12px;border:1px solid #e2e8f0;text-align:center">
-            <i class="fa-solid fa-flask" style="color:#2d8653;font-size:20px;margin-bottom:6px;display:block"></i>
+            <i class="fa-solid fa-flask" style="color:#3FA9D8;font-size:20px;margin-bottom:6px;display:block"></i>
             <p style="font-size:12px;font-weight:900;color:#0f172a">Darnytsia</p>
             <p style="font-size:10px;color:#64748b">أوكرانيا</p>
           </div>
           <div style="padding:14px;background:#f8fafc;border-radius:12px;border:1px solid #e2e8f0;text-align:center">
-            <i class="fa-solid fa-leaf" style="color:#2d8653;font-size:20px;margin-bottom:6px;display:block"></i>
+            <i class="fa-solid fa-leaf" style="color:#3FA9D8;font-size:20px;margin-bottom:6px;display:block"></i>
             <p style="font-size:12px;font-weight:900;color:#0f172a">Nutralic</p>
             <p style="font-size:10px;color:#64748b">مستحضرات طبيعية</p>
           </div>
           <div style="padding:14px;background:#f8fafc;border-radius:12px;border:1px solid #e2e8f0;text-align:center">
-            <i class="fa-solid fa-capsules" style="color:#2d8653;font-size:20px;margin-bottom:6px;display:block"></i>
+            <i class="fa-solid fa-capsules" style="color:#3FA9D8;font-size:20px;margin-bottom:6px;display:block"></i>
             <p style="font-size:12px;font-weight:900;color:#0f172a">Novax Pharma</p>
             <p style="font-size:10px;color:#64748b">أدوية متخصصة</p>
           </div>
           <div style="padding:14px;background:#f8fafc;border-radius:12px;border:1px solid #e2e8f0;text-align:center">
-            <i class="fa-solid fa-eye" style="color:#2d8653;font-size:20px;margin-bottom:6px;display:block"></i>
+            <i class="fa-solid fa-eye" style="color:#3FA9D8;font-size:20px;margin-bottom:6px;display:block"></i>
             <p style="font-size:12px;font-weight:900;color:#0f172a">Rompharm</p>
             <p style="font-size:10px;color:#64748b">طب العيون</p>
           </div>
@@ -863,50 +854,50 @@ select,input{font-family:'Cairo',sans-serif}
     </div>
  
     <!-- معلومات الاتصال والمواقع -->
-    <div style="background:linear-gradient(135deg,#0a1f12,#1a5c3a);border-radius:18px;padding:28px;color:white">
+    <div style="background:linear-gradient(135deg,#1a3d4d,#3FA9D8);border-radius:18px;padding:28px;color:white">
       <h3 style="font-size:16px;font-weight:900;margin-bottom:20px;display:flex;align-items:center;gap:8px">
-        <i class="fa-solid fa-location-dot" style="color:#40b976"></i> مواقعنا ومعلومات التواصل
+        <i class="fa-solid fa-location-dot" style="color:#5CBCE6"></i> مواقعنا ومعلومات التواصل
       </h3>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px">
         <div style="background:rgba(255,255,255,.07);border-radius:12px;padding:18px;border:1px solid rgba(255,255,255,.1)">
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
-            <i class="fa-solid fa-building" style="color:#40b976;font-size:16px"></i>
+            <i class="fa-solid fa-building" style="color:#5CBCE6;font-size:16px"></i>
             <p style="font-size:13px;font-weight:900">المقر الرئيسي</p>
           </div>
           <p style="font-size:12px;opacity:.85;margin-bottom:4px">أربيل — كردستان العراق</p>
           <p style="font-size:11px;opacity:.6">Khanzad St., Next to Kok Supermarket</p>
           <p style="font-size:11px;opacity:.6;margin-top:4px">Erbil, Kurdistan Region</p>
-          <div style="margin-top:10px;padding:6px 10px;background:rgba(64,185,118,.15);border-radius:6px;font-size:10px;color:#40b976">
+          <div style="margin-top:10px;padding:6px 10px;background:rgba(64,185,118,.15);border-radius:6px;font-size:10px;color:#5CBCE6">
             🏭 مستودع 1000م²
           </div>
         </div>
         <div style="background:rgba(255,255,255,.07);border-radius:12px;padding:18px;border:1px solid rgba(255,255,255,.1)">
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
-            <i class="fa-solid fa-city" style="color:#40b976;font-size:16px"></i>
+            <i class="fa-solid fa-city" style="color:#5CBCE6;font-size:16px"></i>
             <p style="font-size:13px;font-weight:900">المكتب العلمي</p>
           </div>
           <p style="font-size:12px;opacity:.85;margin-bottom:4px">بغداد — العراق</p>
           <p style="font-size:11px;opacity:.6">Baghdad, Al-Nasir Square</p>
           <p style="font-size:11px;opacity:.6;margin-top:4px">Pure Scientific Bureau</p>
-          <div style="margin-top:10px;padding:6px 10px;background:rgba(64,185,118,.15);border-radius:6px;font-size:10px;color:#40b976">
+          <div style="margin-top:10px;padding:6px 10px;background:rgba(64,185,118,.15);border-radius:6px;font-size:10px;color:#5CBCE6">
             🏭 مستودع 1000م²
           </div>
         </div>
         <div style="background:rgba(255,255,255,.07);border-radius:12px;padding:18px;border:1px solid rgba(255,255,255,.1)">
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
-            <i class="fa-solid fa-address-card" style="color:#40b976;font-size:16px"></i>
+            <i class="fa-solid fa-address-card" style="color:#5CBCE6;font-size:16px"></i>
             <p style="font-size:13px;font-weight:900">تواصل معنا</p>
           </div>
           <a href="mailto:info@pure-pharma.com" style="display:flex;align-items:center;gap:7px;margin-bottom:8px;text-decoration:none;color:white;opacity:.85;font-size:12px">
-            <i class="fa-solid fa-envelope" style="color:#40b976;width:14px"></i> info@pure-pharma.com
+            <i class="fa-solid fa-envelope" style="color:#5CBCE6;width:14px"></i> info@pure-pharma.com
           </a>
           <a href="tel:+9647504265555" style="display:flex;align-items:center;gap:7px;margin-bottom:8px;text-decoration:none;color:white;opacity:.85;font-size:12px">
-            <i class="fa-solid fa-phone" style="color:#40b976;width:14px"></i> +964 750 426 5555
+            <i class="fa-solid fa-phone" style="color:#5CBCE6;width:14px"></i> +964 750 426 5555
           </a>
           <a href="https://pure-pharma.com" target="_blank" style="display:flex;align-items:center;gap:7px;text-decoration:none;color:white;opacity:.85;font-size:12px">
-            <i class="fa-solid fa-globe" style="color:#40b976;width:14px"></i> pure-pharma.com
+            <i class="fa-solid fa-globe" style="color:#5CBCE6;width:14px"></i> pure-pharma.com
           </a>
-          <div style="margin-top:10px;padding:6px 10px;background:rgba(64,185,118,.15);border-radius:6px;font-size:10px;color:#40b976">
+          <div style="margin-top:10px;padding:6px 10px;background:rgba(64,185,118,.15);border-radius:6px;font-size:10px;color:#5CBCE6">
             © 2025 Pure Pharma
           </div>
         </div>
